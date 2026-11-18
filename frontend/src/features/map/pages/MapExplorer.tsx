@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
 import { useNearbyVenues } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
+import { AvailabilityStatus } from '../components/AvailabilityStatus';
 import { MapFilters } from '../services/map.service';
 
 const DEFAULT_LAT = 10.7769;
@@ -63,9 +64,9 @@ export function MapExplorer() {
       {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => venues.refetch()}>Thử lại</button></p>}
       {venues.data?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
       {venues.data?.data.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => setSelectedId(venue.id)}>
-        <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.name}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><span>{venue.availability.freshness === 'FRESH' && venue.availability.tablesAvailable !== null ? `${venue.availability.tablesAvailable} bàn trống (dữ liệu demo)` : 'Chưa có dữ liệu chỗ ngồi mới'}</span>
+        <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.name}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
       </button>)}
       {venues.data?.meta.truncated && <p>Hãy thu nhỏ khu vực tìm kiếm để xem thêm địa điểm.</p>}
-    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} onCenterChange={onCenterChange} onSelect={setSelectedId} />{selected && <div className="map-selected"><strong>{selected.name}</strong><span>{selected.address}</span><button onClick={() => setSelectedId(null)}>Đóng</button></div>}</div></div>
+    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} onCenterChange={onCenterChange} onSelect={setSelectedId} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span><AvailabilityStatus availability={selected.availability} /></div>}</div></div>
   </main>;
 }

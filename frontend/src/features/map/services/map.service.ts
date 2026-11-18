@@ -8,7 +8,16 @@ export type VenueMapItem = {
   distanceM: number;
   priceTier: number;
   rating: number;
-  availability: { crowdLevel: string; tablesAvailable: number | null; freshness: 'FRESH' | 'STALE' | 'UNKNOWN' };
+  availability: {
+    crowdLevel: 'QUIET' | 'MODERATE' | 'BUSY' | 'FULL' | 'UNKNOWN';
+    tablesAvailable: number | null; tablesTotal: number | null;
+    seatsAvailable: number | null; seatsTotal: number | null;
+    estimatedWaitMinutes: number | null; acceptingGuests: boolean | null;
+    source: 'DEMO' | 'OPERATOR' | 'POS' | null;
+    confidence: number | null; version: number | null;
+    capturedAt: string | null; expiresAt: string | null;
+    freshness: 'FRESH' | 'STALE' | 'UNKNOWN';
+  };
 };
 
 export type MapFilters = {
