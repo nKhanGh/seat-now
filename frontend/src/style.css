@@ -1,0 +1,50 @@
+:root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #152520; background: #f4f8f4; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: #17654d; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.shell { max-width: 1080px; margin: 0 auto; padding: 28px; }
+header { display: flex; justify-content: space-between; align-items: center; }
+header strong, .brand { font-size: 1.35rem; font-weight: 800; text-decoration: none; color: #17654d; }
+nav { display: flex; align-items: center; gap: 20px; }
+nav button { border: 0; background: transparent; color: #17654d; }
+.hero { padding: 110px 0; max-width: 640px; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 1.06; margin: 10px 0 20px; }
+p { line-height: 1.55; }
+.eyebrow { color: #2b8e68; letter-spacing: .12em; text-transform: uppercase; font-size: .75rem; font-weight: 800; }
+.notice { background: #e3f6e8; padding: 14px 18px; border-radius: 12px; }
+.primary { display: inline-block; border: 0; background: #17654d; color: white; border-radius: 10px; padding: 13px 20px; text-decoration: none; font-weight: 700; }
+.primary:disabled { opacity: .6; cursor: wait; }
+.auth-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 24px; }
+.card { width: min(100%, 420px); padding: 32px; background: white; border: 1px solid #deebe1; border-radius: 20px; box-shadow: 0 15px 45px #173b2a12; }
+.card h1 { font-size: 2rem; }
+.card label { display: block; margin: 18px 0; font-weight: 650; }
+.card input { width: 100%; display: block; margin-top: 7px; padding: 12px; border: 1px solid #b8cfc2; border-radius: 9px; }
+.card input:focus { outline: 2px solid #2b8e68; }
+.card button { width: 100%; }
+.error { color: #a32929; background: #fff0ef; padding: 10px; border-radius: 8px; }
+.explorer { min-height: 100vh; display: flex; flex-direction: column; }
+.explorer-header { padding: 16px 24px; background: white; border-bottom: 1px solid #deebe1; }
+.filterbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: white; border-bottom: 1px solid #deebe1; }
+.filterbar select, .filterbar button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 9px 12px; color: #152520; }
+.filter-check { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+.location-message { margin: 0; padding: 6px 24px; background: #e3f6e8; }
+.explorer-body { display: grid; grid-template-columns: minmax(300px, 390px) 1fr; flex: 1; min-height: 640px; }
+.venue-list { background: #f7faf7; padding: 22px; overflow-y: auto; max-height: calc(100vh - 124px); }
+.venue-list h1 { font-size: 1.7rem; }
+.small { font-size: .84rem; color: #5b6a60; }
+.venue-card { display: flex; flex-direction: column; gap: 7px; text-align: left; width: 100%; padding: 18px; margin: 12px 0; background: white; border: 1px solid #dce8df; border-radius: 14px; color: inherit; }
+.venue-card.selected { border-color: #17654d; box-shadow: 0 0 0 2px #17654d29; }
+.venue-card strong { font-size: 1.04rem; }
+.venue-card span { font-size: .9rem; }
+.venue-card .venue-category { color: #17654d; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.map-pane { position: relative; min-height: 540px; }
+.venue-map { position: absolute; inset: 0; }
+.venue-pin { border: 2px solid #fff; background: #17654d; color: white; border-radius: 50%; width: 42px; height: 42px; box-shadow: 0 3px 10px #0004; font-size: 1.1rem; }
+.venue-pin.selected { background: #d35c31; width: 49px; height: 49px; }
+.map-selected { position: absolute; bottom: 18px; left: 18px; right: 18px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px 18px; background: white; border-radius: 12px; box-shadow: 0 5px 20px #0003; }
+.map-selected button { margin-left: auto; border: 0; background: transparent; color: #17654d; }
+.map-error { position: absolute; top: 16px; left: 16px; max-width: 340px; padding: 12px 14px; border-radius: 10px; background: #fff6e9; color: #713d00; box-shadow: 0 3px 12px #0002; z-index: 2; }
+.map-error small { display: block; margin-top: 4px; overflow-wrap: anywhere; }
+@media (max-width: 760px) { .explorer-body { display: flex; flex-direction: column-reverse; } .map-pane { min-height: 48vh; } .venue-list { max-height: none; padding: 16px; } .filterbar { padding: 10px; } .explorer-header { padding: 12px 16px; } }
