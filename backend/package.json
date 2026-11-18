@@ -9,7 +9,7 @@
     "seed:demo": "node dist/create-indexes.js && node dist/seed-demo.js",
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
-    "test:integration": "jest --runInBand map.integration.spec.ts"
+    "test:integration": "jest --runInBand --testPathPatterns=integration.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",

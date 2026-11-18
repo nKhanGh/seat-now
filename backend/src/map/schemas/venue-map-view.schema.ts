@@ -37,6 +37,16 @@ export class VenueMapView {
   @Prop({ type: Number, default: null })
   tablesAvailable!: number | null;
 
+  @Prop({ type: Number, default: null }) tablesTotal!: number | null;
+  @Prop({ type: Number, default: null }) seatsAvailable!: number | null;
+  @Prop({ type: Number, default: null }) seatsTotal!: number | null;
+  @Prop({ type: Number, default: null }) estimatedWaitMinutes!: number | null;
+  @Prop({ type: Boolean, default: null }) acceptingGuests!: boolean | null;
+  @Prop({ type: String, default: null }) availabilitySource!: string | null;
+  @Prop({ type: Number, default: null }) availabilityConfidence!: number | null;
+  @Prop({ type: Number, default: null }) availabilityVersion!: number | null;
+  @Prop({ type: Date, default: null }) availabilityCapturedAt!: Date | null;
+
   @Prop({ type: Date, default: null })
   availabilityExpiresAt!: Date | null;
 }

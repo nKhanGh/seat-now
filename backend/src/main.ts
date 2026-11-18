@@ -29,8 +29,8 @@ async function bootstrap() {
   } } }));
   app.use(cookieParser());
   app.enableCors({ origin: process.env.PUBLIC_ORIGIN, credentials: true });
-  app.use((request: { method: string; headers: Record<string, string | undefined> }, response: { status: (code: number) => { json: (body: object) => void } }, next: () => void) => {
-    if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method) && request.headers.origin !== process.env.PUBLIC_ORIGIN) {
+  app.use((request: { method: string; path: string; headers: Record<string, string | undefined> }, response: { status: (code: number) => { json: (body: object) => void } }, next: () => void) => {
+    if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method) && !request.path.startsWith('/api/v1/internal/') && request.headers.origin !== process.env.PUBLIC_ORIGIN) {
       response.status(403).json({ statusCode: 403, code: 'INVALID_ORIGIN', message: ['Invalid origin'] });
       return;
     }

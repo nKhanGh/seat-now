@@ -15,6 +15,15 @@ type MapRow = {
   rating: number;
   crowdLevel: string;
   tablesAvailable: number | null;
+  tablesTotal: number | null;
+  seatsAvailable: number | null;
+  seatsTotal: number | null;
+  estimatedWaitMinutes: number | null;
+  acceptingGuests: boolean | null;
+  availabilitySource: string | null;
+  availabilityConfidence: number | null;
+  availabilityVersion: number | null;
+  availabilityCapturedAt: Date | null;
   availabilityExpiresAt: Date | null;
   distanceM: number;
 };
@@ -47,8 +56,18 @@ export class MapService {
         category: row.category, location: row.location, distanceM: Math.round(row.distanceM),
         priceTier: row.priceTier, rating: row.rating,
         availability: {
-          crowdLevel: row.availabilityExpiresAt && row.availabilityExpiresAt > now ? row.crowdLevel : 'UNKNOWN',
-          tablesAvailable: row.availabilityExpiresAt && row.availabilityExpiresAt > now ? row.tablesAvailable : null,
+          crowdLevel: row.availabilityExpiresAt ? row.crowdLevel : 'UNKNOWN',
+          tablesAvailable: row.tablesAvailable ?? null,
+          tablesTotal: row.tablesTotal ?? null,
+          seatsAvailable: row.seatsAvailable ?? null,
+          seatsTotal: row.seatsTotal ?? null,
+          estimatedWaitMinutes: row.estimatedWaitMinutes ?? null,
+          acceptingGuests: row.acceptingGuests ?? null,
+          source: row.availabilitySource ?? null,
+          confidence: row.availabilityConfidence ?? null,
+          version: row.availabilityVersion ?? null,
+          capturedAt: row.availabilityCapturedAt ?? null,
+          expiresAt: row.availabilityExpiresAt ?? null,
           freshness: !row.availabilityExpiresAt ? 'UNKNOWN' : row.availabilityExpiresAt > now ? 'FRESH' : 'STALE',
         },
       })),

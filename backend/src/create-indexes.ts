@@ -5,6 +5,7 @@ import { User, UserSchema } from './auth/schemas/user.schema';
 import { Session, SessionSchema } from './auth/schemas/session.schema';
 import { VenueMapView, VenueMapViewSchema } from './map/schemas/venue-map-view.schema';
 import { Venue, VenueSchema } from './map/schemas/venue.schema';
+import { AvailabilityLatest, AvailabilityLatestSchema, AvailabilitySnapshot, AvailabilitySnapshotSchema } from './availability/schemas/availability-snapshot.schema';
 
 async function createIndexes() {
   await ConfigModule.forRoot();
@@ -16,6 +17,8 @@ async function createIndexes() {
     await mongoose.model(Session.name, SessionSchema).createIndexes();
     await mongoose.model(VenueMapView.name, VenueMapViewSchema).createIndexes();
     await mongoose.model(Venue.name, VenueSchema).createIndexes();
+    await mongoose.model(AvailabilitySnapshot.name, AvailabilitySnapshotSchema).createIndexes();
+    await mongoose.model(AvailabilityLatest.name, AvailabilityLatestSchema).createIndexes();
   } finally {
     await mongoose.disconnect();
   }
