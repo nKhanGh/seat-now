@@ -1,6 +1,6 @@
 # F03 — Thông tin bãi đỗ xe
 
-Ưu tiên: **P2**. Trạng thái: **PLANNED**.
+Ưu tiên: **P2**. Trạng thái: **PARTIAL — demo geospatial + availability + Socket.IO + UI đã chạy**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md) · [F01 Map](F01-realtime-map.md)
 
@@ -31,7 +31,7 @@ Ngoài scope: giữ chỗ, thanh toán, navigation turn-by-turn, xác minh pháp
 ## 3. API logical contract
 
 ```http
-GET /api/v1/venues/{venueId}/parking
+GET /api/v1/venues/{slug}/parking
   ?vehicleType=CAR
   &openNow=true
   &hasAvailability=true
@@ -42,14 +42,15 @@ GET /api/v1/parking-facilities
   ?lat=10.7769&lng=106.7009&radiusM=1500
   &vehicleType=MOTORBIKE
 
-GET /api/v1/parking-facilities/{parkingId}
-GET /api/v1/parking-facilities/{parkingId}/availability
+GET /api/v1/parking-facilities/{slug}
+GET /api/v1/parking-facilities/{slug}/availability  # kế hoạch, chưa có route riêng
 ```
 
 Internal ingestion tương tự F02:
 
 ```http
-POST /api/v1/internal/parking-facilities/{parkingId}/availability-snapshots
+POST /api/v1/internal/parking-facilities/{slug}/availability-snapshots
+Authorization: Bearer <AVAILABILITY_INGEST_TOKEN>
 ```
 
 List item:
@@ -57,15 +58,17 @@ List item:
 ```text
 id, name, relation, location, distanceM
 vehicleTypes, isOpenNow, entranceNote
-pricingSummary { kind, amountMinor, currency, unit, note }
+pricing { kind, amountMinor, currency, unit, note }
 availability { availableSpaces, totalSpaces, freshness,
   confidence, capturedAt }
 ```
 
+Hiện tại client nhận `parking.availability.updated.v1` qua namespace `/live` sau khi `watch` `parkingSlugs[]`, rồi refetch REST. `isOpenNow` chỉ là `true` với bãi khai báo mở 24 giờ; nếu không có giờ mở cửa đáng tin thì trả `null`.
+
 ## 4. Quy tắc dữ liệu
 
 - Facility có location riêng; không mặc định dùng tọa độ venue.
-- `venueIds[]` thể hiện liên kết, không có nghĩa bãi chỉ phục vụ các venue đó.
+- `venueSlugs[]` thể hiện liên kết, không có nghĩa bãi chỉ phục vụ các venue đó.
 - `availableSpaces=null` là unknown; khác `0` là full.
 - `totalSpaces` profile và snapshot phải có quy tắc owner. Nếu snapshot gửi total mới, service validate/cập nhật theo contract, không âm thầm đổi profile.
 - Pricing không chỉ là một số: `FREE`, `FLAT`, `HOURLY`, `TIERED`, `UNKNOWN`; amount dùng minor unit/currency.

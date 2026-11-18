@@ -1,6 +1,6 @@
 # F02 — Tình trạng bàn/chỗ ngồi
 
-Ưu tiên: **P1**. Trạng thái: **PLANNED**.
+Ưu tiên: **P1**. Trạng thái: **PARTIAL — demo REST + Socket.IO + UI đã chạy**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md) · [F01 Map](F01-realtime-map.md)
 
@@ -52,16 +52,15 @@ Không publish event nếu latest projection không đổi.
 Public read:
 
 ```http
-GET /api/v1/venues/{venueId}/availability
-GET /api/v1/venues/{venueId}/availability/history?from=...&to=...  # không thuộc MVP public; giữ internal/admin nếu cần debug
+GET /api/v1/venues/{slug}/availability
+GET /api/v1/venues/{slug}/availability/history?from=...&to=...  # kế hoạch, chưa triển khai
 ```
 
 Internal write:
 
 ```http
-POST /api/v1/internal/venues/{venueId}/availability-snapshots
-Idempotency-Key: provider-record-id
-Authorization: service/operator credential
+POST /api/v1/internal/venues/{slug}/availability-snapshots
+Authorization: Bearer <AVAILABILITY_INGEST_TOKEN>
 ```
 
 Payload tối thiểu:
@@ -82,9 +81,11 @@ Payload tối thiểu:
 }
 ```
 
-Public response thêm `freshness`, `receivedAt` và không trả internal credential/raw payload.
+Public response hiện có `freshness`, `capturedAt`, `expiresAt`, `source`, `confidence`; `receivedAt` đang lưu trong history nhưng chưa trả qua public API. Không trả internal credential/raw payload.
 
-Event `venue.availability.updated.v1` theo envelope ở COMMON, data chứa snapshot summary đã sanitize.
+Event `venue.availability.updated.v1` cần tiếp tục được chuẩn hóa theo envelope ở COMMON khi mở rộng tích hợp.
+
+Hiện tại event chỉ chứa `eventId`, `slug`, `version`; client refetch REST sau khi nhận event. WebSocket namespace `/live`, client gửi `watch` với `venueSlugs[]`. Chưa có history API hay POS connector. `sourceRecordId` trong body là khóa idempotency.
 
 ## 5. UI
 

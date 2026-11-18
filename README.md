@@ -2,7 +2,7 @@
 
 SeatNow là ứng dụng giúp người dùng tìm địa điểm và bãi đỗ xe gần đó, xem mức độ đông/vắng cùng số chỗ còn trống gần thời gian thực, rồi ra quyết định trước khi di chuyển.
 
-Repository hiện đã có **đăng nhập và bản đồ địa điểm cơ bản**. Availability realtime và parking còn trong kế hoạch. Phạm vi MVP được khóa theo đúng thứ tự ưu tiên:
+Repository hiện có **đăng nhập, bản đồ, tình trạng chỗ ngồi, bãi đỗ xe và nền tảng gói người dùng**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được khóa theo đúng thứ tự ưu tiên:
 
 1. Bản đồ địa điểm thời gian thực và bộ lọc cơ bản.
 2. Tình trạng bàn/chỗ ngồi và thời gian chờ dự kiến.
@@ -19,7 +19,7 @@ Repository hiện đã có **đăng nhập và bản đồ địa điểm cơ b�
 - Local infrastructure: Docker Compose cho MongoDB; Redis chỉ thêm khi cần scale nhiều API instance hoặc rate limit phân tán.
 - Đăng nhập: NestJS + MongoDB tự quản lý user/session; xem [ADR 002](docs/adr/002-first-party-auth.md). Dockerfile phục vụ React và API cùng origin để cookie hoạt động ổn định.
 
-## Chạy lát cắt đăng nhập local
+## Chạy demo local
 
 Yêu cầu: Node.js 20.19+, npm, Docker Desktop.
 
@@ -41,13 +41,33 @@ npm ci
 npm run dev
 ```
 
-Mở `http://localhost:5173` để xem bản đồ demo, lọc địa điểm và đăng ký/đăng nhập. Backend ở `http://localhost:3000/api/v1/auth/*` và `/api/v1/map/venues`. Khi gọi POST bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này. `seed:demo` chỉ chạy ở local/test và tạo 5 địa điểm hư cấu ở TP.HCM; số bàn mẫu hết hạn sau 10 phút và không phải số liệu trực tiếp.
+Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế và bãi xe, lọc kết quả, đăng ký/đăng nhập và mở trang `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
+
+`seed:demo` chỉ chạy ở local/test, tạo 5 địa điểm và 4 bãi xe hư cấu tại TP.HCM. Snapshot mẫu hết hạn sau 10 phút; chạy lại `npm run seed:demo` trong `backend` để làm mới. Khi hết hạn, UI ghi **Dữ liệu cũ** và không coi số chỗ đó là còn trống hiện tại.
+
+Public API chính:
+
+- `GET /map/venues?lat=10.7769&lng=106.7009&radiusM=3000`
+- `GET /venues/:slug/availability`
+- `GET /venues/:slug/parking` hoặc `GET /parking-facilities?lat=...&lng=...`
+- `GET /me/subscription` và `GET /me/entitlements` (cần đăng nhập)
+
+Các POST nội bộ `/internal/venues/:slug/availability-snapshots` và `/internal/parking-facilities/:slug/availability-snapshots` cần `Authorization: Bearer <AVAILABILITY_INGEST_TOKEN>`. Chỉ cấu hình token trong môi trường chạy API; không đưa vào frontend. Snapshot mới được đẩy qua Socket.IO `/live`; client refetch REST khi kết nối lại và định kỳ 30 giây. Chưa có giao diện chủ quán, POS connector hay nguồn bãi xe thật.
+
+Để thử trạng thái Premium mà không tạo luồng thanh toán giả, đăng ký tài khoản local rồi chạy trong `backend`:
+
+```powershell
+$env:SEED_PREMIUM_EMAIL='email-cua-tai-khoan-demo@example.com'
+npm run seed:premium
+```
+
+Script này bị khóa trong `NODE_ENV=production`. Trang `/plans` phân biệt chức năng hiện có với chức năng **Sắp ra mắt**; chưa mở bán Premium.
 
 Kiểm tra nhanh: `cd backend; npm test; npm run typecheck; npm run build`. Integration test cần MongoDB: đặt `MONGODB_TEST_URI=mongodb://127.0.0.1:27017/seatnow` rồi chạy `npm run test:integration`. Test tạo và xóa database tạm `seatnow_test_*`. Frontend: `cd frontend; npm run build`.
 
 Dockerfile ở root build cả hai app và chạy cùng một origin. Khi deploy Render, đặt `MONGODB_URI` bằng MongoDB Atlas và `PUBLIC_ORIGIN` bằng URL HTTPS thực của service. Nếu dùng map style/tiles khác, đặt `VITE_MAP_STYLE_URL` lúc build frontend và `MAP_ASSET_ORIGINS` (danh sách origin phân cách dấu phẩy) cho Content Security Policy.
 
-Lát cắt auth hiện mới là demo: chưa có xác minh email, khôi phục mật khẩu và integration test với MongoDB thật. Không mở đăng ký công khai cho người dùng thật trước khi hoàn thiện các flow đó.
+Lát cắt auth hiện mới là demo: chưa có xác minh email và khôi phục mật khẩu. Không mở đăng ký công khai cho người dùng thật trước khi hoàn thiện các flow đó. Realtime hiện chạy trên một API instance; nếu scale ngang cần adapter Socket.IO dùng chung và cơ chế phát sự kiện bền vững.
 
 Chi tiết lựa chọn stack và trade-off nằm tại [ADR 001](docs/adr/001-stack-and-architecture.md).
 

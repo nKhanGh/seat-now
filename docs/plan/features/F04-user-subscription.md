@@ -1,6 +1,6 @@
 # F04 — Gói Free/Premium dành cho người dùng
 
-Ưu tiên: **P2 foundation; Premium capabilities PLANNED**. Trạng thái: **PLANNED**.
+Ưu tiên: **P2 foundation; Premium capabilities PLANNED**. Trạng thái: **PARTIAL — resolver, API, guard và trang gói đã chạy; payment/capabilities chưa triển khai**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md)
 
@@ -87,6 +87,8 @@ Response entitlement:
 ```
 
 Future mutation/payment API không được thiết kế giả trước khi chọn provider. Internal local seed không đưa vào public production route.
+
+Hiện tại `backend/src/seed-premium.ts` là CLI fixture local/test theo `SEED_PREMIUM_EMAIL`, bị khóa trong production. Trang `/plans` không có nút thanh toán hoặc nâng cấp giả.
 
 ## 5. Backend/frontend convention
 

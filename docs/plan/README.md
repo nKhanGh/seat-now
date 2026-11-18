@@ -1,6 +1,6 @@
 # Kế hoạch triển khai SeatNow
 
-Phiên bản 1.2 — 19/11/2026. Trạng thái: **F00 auth và F01 map PARTIAL; F02–F04 PLANNED**.
+Phiên bản 1.3 — 19/11/2026. Trạng thái: **F00/F01 PARTIAL; F02/F03 demo vertical slice PARTIAL; F04 foundation PARTIAL**. API, UI, Socket.IO và MongoDB integration test đã có; OpenAPI, POS/parking data connector, production operations và E2E browser automation còn ở M6.
 
 [Quy chuẩn chung](COMMON.md) · [ADR stack](../adr/001-stack-and-architecture.md) · [README dự án](../../README.md)
 
