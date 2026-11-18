@@ -18,12 +18,13 @@ async function bootstrap() {
   }
   app.setGlobalPrefix('api/v1');
   const mapAssetOrigins = (process.env.MAP_ASSET_ORIGINS ?? 'https://tiles.openfreemap.org,https://assets.openfreemap.com').split(',').map((value) => value.trim()).filter(Boolean);
+  const socketOrigin = process.env.PUBLIC_ORIGIN.replace(/^http/, 'ws');
   app.use(helmet({ contentSecurityPolicy: { directives: {
     defaultSrc: ["'self'"],
     scriptSrc: ["'self'"],
     styleSrc: ["'self'", "'unsafe-inline'"],
     imgSrc: ["'self'", 'data:', 'blob:', ...mapAssetOrigins],
-    connectSrc: ["'self'", ...mapAssetOrigins],
+    connectSrc: ["'self'", socketOrigin, ...mapAssetOrigins],
     workerSrc: ["'self'", 'blob:'],
     fontSrc: ["'self'", 'data:', ...mapAssetOrigins],
   } } }));

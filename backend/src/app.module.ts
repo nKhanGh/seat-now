@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { MapModule } from './map/map.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { ParkingModule } from './parking/parking.module';
+import { LiveModule } from './live/live.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ParkingModule } from './parking/parking.module';
       useFactory: (config: ConfigService) => ({ uri: config.getOrThrow<string>('MONGODB_URI'), autoIndex: process.env.NODE_ENV !== 'production' }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    LiveModule,
     AuthModule,
     MapModule,
     AvailabilityModule,

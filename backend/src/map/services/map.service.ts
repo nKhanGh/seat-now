@@ -38,7 +38,10 @@ export class MapService {
     if (query.category) match.category = query.category;
     if (query.priceTier) match.priceTier = query.priceTier;
     if (query.ratingGte !== undefined) match.rating = { $gte: query.ratingGte };
-    if (query.crowdLevel) match.crowdLevel = query.crowdLevel;
+    if (query.crowdLevel) {
+      match.crowdLevel = query.crowdLevel;
+      match.availabilityExpiresAt = { $gt: now };
+    }
     if (query.hasAvailability === 'true') {
       match.availabilityExpiresAt = { $gt: now };
       match.tablesAvailable = { $gt: 0 };

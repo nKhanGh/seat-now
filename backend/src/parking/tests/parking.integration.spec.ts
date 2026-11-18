@@ -4,6 +4,7 @@ import { ParkingService } from '../services/parking.service';
 import { ParkingFacility, ParkingFacilitySchema } from '../schemas/parking-facility.schema';
 import { ParkingSnapshot, ParkingSnapshotSchema } from '../schemas/parking-snapshot.schema';
 import { VenueMapView, VenueMapViewSchema } from '../../map/schemas/venue-map-view.schema';
+import { LiveGateway } from '../../live/live.gateway';
 
 const testUri = process.env.MONGODB_TEST_URI;
 const describeWithMongo = testUri ? describe : describe.skip;
@@ -25,7 +26,7 @@ describeWithMongo('ParkingService with MongoDB 2dsphere', () => {
       { ...common, slug: 'public', name: 'Public', address: 'Near', kind: 'PUBLIC', venueSlugs: [], location: { type: 'Point', coordinates: [106.7001, 10.7701] }, availabilityVersion: 1, availableSpaces: 0, totalSpaces: 20, availabilityCapturedAt: new Date(), availabilityExpiresAt: new Date(Date.now() - 60_000) },
       { ...common, slug: 'far', name: 'Far', address: 'Far', kind: 'PUBLIC', venueSlugs: [], location: { type: 'Point', coordinates: [106.73, 10.8] } },
     ]);
-    service = new ParkingService(facilities, snapshots, venues);
+    service = new ParkingService(facilities, snapshots, venues, new LiveGateway());
   });
 
   afterAll(async () => {

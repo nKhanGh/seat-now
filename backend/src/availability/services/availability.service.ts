@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { CreateAvailabilityDto } from '../dto/create-availability.dto';
 import { AvailabilityLatest, AvailabilitySnapshot, Capacity } from '../schemas/availability-snapshot.schema';
 import { VenueMapView } from '../../map/schemas/venue-map-view.schema';
+import { LiveGateway } from '../../live/live.gateway';
 
 type AvailabilityRecord = {
   version: number; tables: Capacity; seats: Capacity; crowdLevel: string;
@@ -28,6 +29,7 @@ export class AvailabilityService {
     @InjectModel(AvailabilitySnapshot.name) private readonly snapshots: Model<AvailabilitySnapshot>,
     @InjectModel(AvailabilityLatest.name) private readonly latest: Model<AvailabilityLatest>,
     @InjectModel(VenueMapView.name) private readonly venues: Model<VenueMapView>,
+    private readonly live: LiveGateway,
   ) {}
 
   async getBySlug(slug: string) {
@@ -84,6 +86,7 @@ export class AvailabilityService {
           availabilityCapturedAt: capturedAt, availabilityExpiresAt: expiresAt,
         } },
       );
+      this.live.venueUpdated(slug, dto.version);
     }
     return { data: publicAvailability(record), latestUpdated, duplicate: false };
   }

@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { AvailabilityLatest, AvailabilityLatestSchema, AvailabilitySnapshot, AvailabilitySnapshotSchema } from '../schemas/availability-snapshot.schema';
 import { AvailabilityService, publicAvailability } from '../services/availability.service';
 import { VenueMapView, VenueMapViewSchema } from '../../map/schemas/venue-map-view.schema';
+import { LiveGateway } from '../../live/live.gateway';
 
 const testUri = process.env.MONGODB_TEST_URI;
 const describeWithMongo = testUri ? describe : describe.skip;
@@ -19,7 +20,7 @@ describeWithMongo('AvailabilityService with MongoDB', () => {
     views = mongoose.model(VenueMapView.name, VenueMapViewSchema);
     await Promise.all([snapshots.createIndexes(), latest.createIndexes(), views.createIndexes()]);
     await views.create({ slug: 'test-cafe', name: 'Test café', category: 'CAFE', address: 'Test', location: { type: 'Point', coordinates: [106.7, 10.77] }, priceTier: 2, rating: 4 });
-    service = new AvailabilityService(snapshots, latest, views);
+    service = new AvailabilityService(snapshots, latest, views, new LiveGateway());
   });
 
   afterAll(async () => {

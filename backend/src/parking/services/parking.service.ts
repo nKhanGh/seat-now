@@ -6,6 +6,7 @@ import { CreateParkingSnapshotDto } from '../dto/create-parking-snapshot.dto';
 import { ParkingFacility } from '../schemas/parking-facility.schema';
 import { ParkingSnapshot } from '../schemas/parking-snapshot.schema';
 import { VenueMapView } from '../../map/schemas/venue-map-view.schema';
+import { LiveGateway } from '../../live/live.gateway';
 
 type ParkingRow = ParkingFacility & { _id: { toString(): string }; distanceM: number };
 
@@ -19,6 +20,7 @@ export class ParkingService {
     @InjectModel(ParkingFacility.name) private readonly facilities: Model<ParkingFacility>,
     @InjectModel(ParkingSnapshot.name) private readonly snapshots: Model<ParkingSnapshot>,
     @InjectModel(VenueMapView.name) private readonly venues: Model<VenueMapView>,
+    private readonly live: LiveGateway,
   ) {}
 
   async forVenue(slug: string, query: ParkingQueryDto) {
@@ -117,6 +119,7 @@ export class ParkingService {
         availabilityExpiresAt: expiresAt,
       } },
     );
+    if (result.modifiedCount === 1) this.live.parkingUpdated(slug, dto.version);
     return { latestUpdated: result.modifiedCount === 1, duplicate: false };
   }
 }
