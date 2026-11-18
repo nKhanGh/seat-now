@@ -7,6 +7,7 @@
     "build": "nest build",
     "start": "node dist/create-indexes.js && node dist/main.js",
     "seed:demo": "node dist/create-indexes.js && node dist/seed-demo.js",
+    "seed:premium": "node dist/seed-premium.js",
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
     "test:integration": "jest --runInBand --testPathPatterns=integration.spec.ts"

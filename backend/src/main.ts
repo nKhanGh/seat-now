@@ -42,7 +42,7 @@ async function bootstrap() {
   if (existsSync(join(frontendDist, 'index.html'))) {
     app.useStaticAssets(frontendDist);
     app.use((request: { method: string; path: string }, response: { sendFile: (path: string) => void }, next: () => void) => {
-      if (request.method === 'GET' && ['/login', '/register'].includes(request.path)) {
+      if (request.method === 'GET' && ['/login', '/register', '/plans'].includes(request.path)) {
         response.sendFile(join(frontendDist, 'index.html'));
         return;
       }

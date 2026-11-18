@@ -9,6 +9,7 @@ import { MapModule } from './map/map.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { ParkingModule } from './parking/parking.module';
 import { LiveModule } from './live/live.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { LiveModule } from './live/live.module';
     MapModule,
     AvailabilityModule,
     ParkingModule,
+    SubscriptionModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
