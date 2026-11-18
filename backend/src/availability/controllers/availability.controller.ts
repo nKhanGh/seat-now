@@ -1,5 +1,5 @@
-import { Controller, Get, Headers, Param, Post, Body, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
-import { timingSafeEqual } from 'node:crypto';
+import { Controller, Get, Headers, Param, Post, Body } from '@nestjs/common';
+import { assertIngestToken } from '../assert-ingest-token';
 import { CreateAvailabilityDto } from '../dto/create-availability.dto';
 import { AvailabilityService } from '../services/availability.service';
 
@@ -12,11 +12,7 @@ export class AvailabilityController {
 
   @Post('internal/venues/:slug/availability-snapshots')
   ingest(@Param('slug') slug: string, @Headers('authorization') authorization: string | undefined, @Body() body: CreateAvailabilityDto) {
-    const secret = process.env.AVAILABILITY_INGEST_TOKEN;
-    if (!secret) throw new ServiceUnavailableException('Availability ingestion is not configured');
-    const expected = Buffer.from(`Bearer ${secret}`);
-    const actual = Buffer.from(authorization ?? '');
-    if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) throw new UnauthorizedException();
+    assertIngestToken(authorization);
     return this.availability.ingest(slug, body);
   }
 }

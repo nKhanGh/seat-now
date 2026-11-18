@@ -7,6 +7,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { MapModule } from './map/map.module';
 import { AvailabilityModule } from './availability/availability.module';
+import { ParkingModule } from './parking/parking.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AvailabilityModule } from './availability/availability.module';
     AuthModule,
     MapModule,
     AvailabilityModule,
+    ParkingModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
