@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { useLogin, useRegister } from '../features/auth/api/authQueries';
 import { MapExplorer } from '../features/map/pages/MapExplorer';
+import { PlansPage } from '../features/subscription/pages/PlansPage';
 
 function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
@@ -31,5 +32,5 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 }
 
 export function App() {
-  return <Routes><Route path="/" element={<MapExplorer />} /><Route path="/login" element={<AuthForm mode="login" />} /><Route path="/register" element={<AuthForm mode="register" />} /></Routes>;
+  return <Routes><Route path="/" element={<MapExplorer />} /><Route path="/login" element={<AuthForm mode="login" />} /><Route path="/register" element={<AuthForm mode="register" />} /><Route path="/plans" element={<PlansPage />} /></Routes>;
 }

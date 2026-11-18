@@ -54,7 +54,7 @@ export function MapExplorer() {
   }
 
   return <main className="explorer">
-    <header className="explorer-header"><Link to="/" className="brand">SeatNow</Link><nav><span className="sync-status" role="status">{liveStatus === 'connected' ? 'Cập nhật trực tiếp' : liveStatus === 'offline' ? 'Đồng bộ định kỳ' : 'Đang kết nối'}</span>{auth.data ? <><span>Chào {auth.data.displayName}</span><button onClick={() => logout.mutate()} disabled={logout.isPending}>Đăng xuất</button></> : <><Link to="/login">Đăng nhập</Link><Link to="/register">Đăng ký</Link></>}</nav></header>
+    <header className="explorer-header"><Link to="/" className="brand">SeatNow</Link><nav><span className="sync-status" role="status">{liveStatus === 'connected' ? 'Cập nhật trực tiếp' : liveStatus === 'offline' ? 'Đồng bộ định kỳ' : 'Đang kết nối'}</span><Link to="/plans">Gói người dùng</Link>{auth.data ? <><span>Chào {auth.data.displayName}</span><button onClick={() => logout.mutate()} disabled={logout.isPending}>Đăng xuất</button></> : <><Link to="/login">Đăng nhập</Link><Link to="/register">Đăng ký</Link></>}</nav></header>
     <section className="filterbar" aria-label="Bộ lọc địa điểm">
       <select aria-label="Loại địa điểm" value={filters.category || ''} onChange={(event) => update({ category: event.target.value })}><option value="">Tất cả loại</option><option value="RESTAURANT">Nhà hàng</option><option value="CAFE">Cà phê</option><option value="CINEMA">Rạp phim</option></select>
       <select aria-label="Bán kính" value={filters.radiusM} onChange={(event) => update({ radiusM: event.target.value })}><option value="1000">1 km</option><option value="3000">3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
