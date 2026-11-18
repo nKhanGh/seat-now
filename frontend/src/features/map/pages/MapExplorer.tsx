@@ -5,6 +5,8 @@ import { useNearbyVenues } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
 import { MapFilters } from '../services/map.service';
+import { useParkingForVenue } from '../../parking/api/parkingQueries';
+import { ParkingList } from '../../parking/components/ParkingList';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -13,6 +15,7 @@ const readNumber = (value: string | null, fallback: number) => value !== null &&
 export function MapExplorer() {
   const [params, setParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
   const [locationMessage, setLocationMessage] = useState('');
   const auth = useCurrentUser();
   const logout = useLogout();
@@ -27,6 +30,9 @@ export function MapExplorer() {
     hasAvailability: params.get('hasAvailability') === 'true',
   }), [params]);
   const venues = useNearbyVenues(filters);
+  const selected = venues.data?.data.find((item) => item.id === selectedId);
+  const parking = useParkingForVenue(selected?.slug ?? null);
+  const selectVenue = useCallback((id: string) => { setSelectedId(id); setSelectedParkingSlug(null); }, []);
   const update = useCallback((patch: Record<string, string | null>) => {
     setParams((current) => {
       const next = new URLSearchParams(current);
@@ -45,7 +51,6 @@ export function MapExplorer() {
     );
   }
 
-  const selected = venues.data?.data.find((item) => item.id === selectedId);
   return <main className="explorer">
     <header className="explorer-header"><Link to="/" className="brand">SeatNow</Link><nav>{auth.data ? <><span>Chào {auth.data.displayName}</span><button onClick={() => logout.mutate()} disabled={logout.isPending}>Đăng xuất</button></> : <><Link to="/login">Đăng nhập</Link><Link to="/register">Đăng ký</Link></>}</nav></header>
     <section className="filterbar" aria-label="Bộ lọc địa điểm">
@@ -63,10 +68,10 @@ export function MapExplorer() {
       {venues.isPending && <p>Đang tìm địa điểm…</p>}
       {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => venues.refetch()}>Thử lại</button></p>}
       {venues.data?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
-      {venues.data?.data.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => setSelectedId(venue.id)}>
+      {venues.data?.data.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
         <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.name}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
       </button>)}
       {venues.data?.meta.truncated && <p>Hãy thu nhỏ khu vực tìm kiếm để xem thêm địa điểm.</p>}
-    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} onCenterChange={onCenterChange} onSelect={setSelectedId} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span><AvailabilityStatus availability={selected.availability} /></div>}</div></div>
+    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} parkingFacilities={parking.data?.data || []} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span><AvailabilityStatus availability={selected.availability} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <ParkingList facilities={parking.data.data} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />}</div>}</div></div>
   </main>;
 }

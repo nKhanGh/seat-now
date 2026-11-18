@@ -3,6 +3,7 @@ import { Map, Marker, NavigationControl, setWorkerUrl } from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { VenueMapItem } from '../services/map.service';
+import { ParkingFacilityItem } from '../../parking/services/parking.service';
 
 setWorkerUrl(workerUrl);
 
@@ -11,11 +12,14 @@ type Props = {
   lng: number;
   venues: VenueMapItem[];
   selectedId: string | null;
+  parkingFacilities: ParkingFacilityItem[];
+  selectedParkingSlug: string | null;
   onCenterChange: (lat: number, lng: number) => void;
   onSelect: (id: string) => void;
+  onSelectParking: (slug: string) => void;
 };
 
-export function VenueMap({ lat, lng, venues, selectedId, onCenterChange, onSelect }: Props) {
+export function VenueMap({ lat, lng, venues, selectedId, parkingFacilities, selectedParkingSlug, onCenterChange, onSelect, onSelectParking }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
@@ -62,7 +66,16 @@ export function VenueMap({ lat, lng, venues, selectedId, onCenterChange, onSelec
       button.addEventListener('click', () => onSelect(venue.id));
       markers.current.push(new Marker({ element: button }).setLngLat(venue.location.coordinates).addTo(map.current));
     }
-  }, [venues, selectedId, onSelect]);
+    for (const facility of parkingFacilities) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `parking-pin${facility.slug === selectedParkingSlug ? ' selected' : ''}`;
+      button.textContent = 'P';
+      button.setAttribute('aria-label', `Bãi đỗ xe ${facility.name}`);
+      button.addEventListener('click', () => onSelectParking(facility.slug));
+      markers.current.push(new Marker({ element: button }).setLngLat(facility.location.coordinates).addTo(map.current));
+    }
+  }, [venues, selectedId, onSelect, parkingFacilities, selectedParkingSlug, onSelectParking]);
 
   return <>
     <div ref={container} className="venue-map" aria-label="Bản đồ địa điểm" />
