@@ -81,9 +81,16 @@ async function bootstrap() {
       ) => {
         if (
           request.method === 'GET' &&
-          (['/login', '/register', '/plans', '/favorites', '/following', '/proposals', '/business'].includes(
-            request.path,
-          ) ||
+          ([
+            '/login',
+            '/register',
+            '/plans',
+            '/favorites',
+            '/following',
+            '/proposals',
+            '/business',
+            '/bookings',
+          ].includes(request.path) ||
             /^\/users\/[a-f0-9]{24}$/.test(request.path))
         ) {
           response.sendFile(join(frontendDist, 'index.html'));
