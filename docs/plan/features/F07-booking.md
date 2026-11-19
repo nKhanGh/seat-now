@@ -1,0 +1,16 @@
+# F07 — Yêu cầu đặt bàn tại quán đối tác
+
+Trạng thái: **demo** ngày 19/11/2026. [OpenAPI](../../../contracts/openapi/booking.json), React UI và MongoDB integration test đã có.
+
+## Luồng
+
+1. Chủ quán đã được duyệt quyền quản lý bật “Nhận yêu cầu đặt bàn” cho từng nhà hàng/quán cà phê. Mặc định tắt. Rạp phim không hỗ trợ luồng đặt bàn này.
+2. Người dùng đăng nhập chọn thời gian từ 1 giờ đến 14 ngày tới, số khách 1–12 và ghi chú tùy chọn. Hệ thống tạo yêu cầu `PENDING`; một tài khoản không thể gửi trùng thời gian tại cùng quán.
+3. Yêu cầu của người dùng Premium được gắn `priority` theo entitlement backend và đứng trước trong hàng chờ chủ quán. Tài khoản Free vẫn gửi được yêu cầu thường.
+4. Chủ quán xác nhận hoặc từ chối thủ công. Người dùng xem trạng thái trong “Đặt bàn của tôi” và có thể hủy yêu cầu đang chờ hoặc đã xác nhận.
+
+## Giới hạn demo
+
+- Yêu cầu `PENDING` chưa giữ bàn. Số bàn còn trống từ F02 là snapshot tham khảo, không phải inventory đặt bàn. Chủ quán phải kiểm tra khả năng phục vụ trước khi xác nhận; chưa có đồng bộ POS hay tự động chống overbooking.
+- Chưa có thông báo push/email/SMS, thanh toán, đặt chỗ xe hay chính sách no-show. Người dùng theo dõi trạng thái trong app.
+- Gói Premium demo được operator cấp theo F04, chưa mở thanh toán. `priority` chỉ thay đổi thứ tự hàng chờ, không bảo đảm chủ quán chấp nhận.

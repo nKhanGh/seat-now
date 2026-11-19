@@ -1,6 +1,6 @@
 # F04 — Gói Free/Premium dành cho người dùng
 
-Ưu tiên: **P2 foundation; Premium capabilities PLANNED**. Trạng thái: **PARTIAL — resolver, API, guard và trang gói đã chạy; payment/capabilities chưa triển khai**.
+Ưu tiên: **P2 foundation**. Trạng thái: **PARTIAL — resolver, API, guard, trang gói và quyền ưu tiên yêu cầu đặt bàn F07 đã chạy; payment và các quyền Premium khác chưa triển khai**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md)
 
@@ -21,7 +21,6 @@ MVP F04:
 Ngoài scope:
 
 - checkout/payment/webhook thực;
-- đặt bàn ưu tiên;
 - giữ chỗ xe;
 - voucher;
 - AI nâng cao;
@@ -34,9 +33,10 @@ Ngoài scope:
 | Bản đồ realtime + filter cơ bản | Có | Có | Implement qua F01 |
 | Xem chỗ ngồi/wait time | Có | Có | Implement qua F02 |
 | Xem bãi xe | Có | Có | Implement qua F03 |
-| Check-in/review/favorite/contribute | Có | Có | Later core |
+| Check-in/review/favorite/contribute | Có | Có | F05 demo |
+| Gửi yêu cầu đặt bàn tại quán đối tác | Có | Có | F07 demo, chờ chủ quán xác nhận |
 | Không quảng cáo | Không | Có | Entitlement/UI preview; chưa có ads |
-| Đặt bàn ưu tiên | Không | Có | Later |
+| Ưu tiên hàng chờ yêu cầu đặt bàn | Không | Có | F07 demo, không bảo đảm có bàn |
 | Giữ chỗ xe | Không | Có | Later |
 | Voucher độc quyền | Không | Có | Later |
 | AI gợi ý nâng cao | Không | Có | Later |

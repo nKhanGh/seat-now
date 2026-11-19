@@ -1,6 +1,6 @@
 # Kế hoạch triển khai SeatNow
 
-Phiên bản 1.7 — 19/11/2026. Trạng thái: **MVP demo F00–F04, cộng đồng F05 và chủ quán F06 chạy được; hardening M6 đang tiếp tục**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check, lint/format gate, CI và runbook demo đã có. POS/parking data connector thật, E2E browser automation và vận hành production còn ở M6.
+Phiên bản 1.8 — 19/11/2026. Trạng thái: **MVP demo F00–F04, cộng đồng F05, chủ quán F06 và yêu cầu đặt bàn F07 chạy được; hardening M6 đang tiếp tục**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check, lint/format gate, CI và runbook demo đã có. POS/parking data connector thật, E2E browser automation và vận hành production còn ở M6.
 
 [Quy chuẩn chung](COMMON.md) · [ADR stack](../adr/001-stack-and-architecture.md) · [README dự án](../../README.md)
 
@@ -33,6 +33,7 @@ Người dùng có thể mở app, cấp hoặc từ chối quyền vị trí, t
 | P2 | [F04 Gói người dùng](features/F04-user-subscription.md) | FREE/PREMIUM, subscription state, entitlement resolver, màn hình so sánh gói | Payment gateway, voucher, AI nâng cao, quảng cáo thật |
 | Done demo | [F05 Cộng đồng](features/F05-community.md) | Check-in, review/ảnh/báo cáo, favorite, follow/share, đề xuất địa điểm và duyệt nội bộ | Cần quy trình kiểm duyệt và chính sách dữ liệu trước public launch |
 | Done demo | [F06 Chủ quán](features/F06-business.md) | Claim qua duyệt nội bộ, hồ sơ/logo, Premium demo, dashboard, quảng cáo/ưu đãi trong app, nhiều chi nhánh/ảnh bìa | Chưa có billing, POS connector, push, đổi voucher |
+| Done demo | [F07 Đặt bàn](features/F07-booking.md) | Quán đối tác tự bật nhận yêu cầu, người dùng gửi và theo dõi, chủ quán xác nhận/từ chối, Premium đứng trước trong hàng chờ | Chưa giữ bàn tự động, POS, thông báo hay chống overbooking |
 
 Theo quyết định ngày 19/11/2026, nhóm [F05 cộng đồng](features/F05-community.md) và [F06 chủ quán](features/F06-business.md) được thực hiện sau MVP demo.
 

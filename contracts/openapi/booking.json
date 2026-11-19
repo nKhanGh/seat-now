@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SeatNow booking requests",
+    "version": "0.1.0",
+    "description": "Booking requests require manual owner confirmation. A pending request is not a held table."
+  },
+  "servers": [{ "url": "/api/v1" }],
+  "paths": {
+    "/venues/{slug}/booking-status": {
+      "get": { "summary": "Check whether an active restaurant or cafe accepts booking requests", "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "$ref": "#/components/responses/BookingStatus" }, "404": { "description": "Venue not found" } } }
+    },
+    "/venues/{slug}/bookings": {
+      "post": { "summary": "Send a booking request; Premium requests are marked priority", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateBooking" } } } }, "responses": { "201": { "$ref": "#/components/responses/Booking" }, "400": { "description": "Invalid time or guest count" }, "401": { "description": "Authentication required" }, "409": { "description": "Bookings disabled or duplicate request" } } }
+    },
+    "/me/bookings": {
+      "get": { "summary": "List current user's latest 100 requests", "security": [{ "sessionCookie": [] }], "responses": { "200": { "$ref": "#/components/responses/Bookings" }, "401": { "description": "Authentication required" } } }
+    },
+    "/me/bookings/{id}/cancel": {
+      "patch": { "summary": "Cancel own pending or confirmed request", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "200": { "$ref": "#/components/responses/Booking" }, "409": { "description": "Request cannot be canceled" } } }
+    },
+    "/business/venues/{slug}/booking-settings": {
+      "put": { "summary": "Owner opts in or out of booking requests", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["enabled"], "properties": { "enabled": { "type": "boolean" } } } } } }, "responses": { "200": { "$ref": "#/components/responses/BookingStatus" }, "403": { "description": "Not the approved owner" }, "409": { "description": "Cinema does not accept table bookings" } } }
+    },
+    "/business/venues/{slug}/bookings": {
+      "get": { "summary": "List at most 100 pending requests with Premium first", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "$ref": "#/components/responses/Bookings" }, "403": { "description": "Not the approved owner" } } }
+    },
+    "/business/venues/{slug}/bookings/{id}": {
+      "patch": { "summary": "Owner confirms or declines a pending request", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }, { "$ref": "#/components/parameters/id" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["status"], "properties": { "status": { "type": "string", "enum": ["CONFIRMED", "DECLINED"] } } } } } }, "responses": { "200": { "$ref": "#/components/responses/Booking" }, "403": { "description": "Not the approved owner" }, "409": { "description": "Request is no longer pending" } } }
+    }
+  },
+  "components": {
+    "securitySchemes": { "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "seatnow_sid" } },
+    "parameters": { "slug": { "in": "path", "name": "slug", "required": true, "schema": { "type": "string" } }, "id": { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } } },
+    "schemas": {
+      "CreateBooking": { "type": "object", "required": ["requestedAt", "guestCount"], "properties": { "requestedAt": { "type": "string", "format": "date-time", "description": "One hour to fourteen days ahead" }, "guestCount": { "type": "integer", "minimum": 1, "maximum": 12 }, "note": { "type": "string", "maxLength": 500 } } },
+      "Booking": { "type": "object", "required": ["id", "venueSlug", "requestedAt", "guestCount", "note", "priority", "status", "createdAt"], "properties": { "id": { "type": "string" }, "venueSlug": { "type": "string" }, "requestedAt": { "type": "string", "format": "date-time" }, "guestCount": { "type": "integer" }, "note": { "type": "string" }, "priority": { "type": "boolean" }, "status": { "type": "string", "enum": ["PENDING", "CONFIRMED", "DECLINED", "CANCELED"] }, "createdAt": { "type": "string", "format": "date-time" }, "resolvedAt": { "type": "string", "format": "date-time", "nullable": true } } }
+    },
+    "responses": {
+      "BookingStatus": { "description": "Owner opt-in status", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "enabled": { "type": "boolean" } } } } } } } },
+      "Booking": { "description": "Booking request state", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Booking" } } } } } },
+      "Bookings": { "description": "Booking request list", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Booking" } } } } } } }
+    }
+  }
+}
