@@ -45,6 +45,9 @@ p { line-height: 1.55; }
 .venue-map { position: absolute; inset: 0; }
 .venue-pin { border: 2px solid #fff; background: #17654d; color: white; border-radius: 50%; width: 42px; height: 42px; box-shadow: 0 3px 10px #0004; font-size: 1.1rem; }
 .venue-pin.selected { background: #d35c31; width: 49px; height: 49px; }
+.venue-pin-logo { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.venue-list-logo { width: 24px; height: 24px; object-fit: cover; border-radius: 50%; vertical-align: middle; margin-right: 7px; }
+.verified-badge { display: inline-grid; place-items: center; border-radius: 50%; width: 18px; height: 18px; background: #2467c8; color: white; font-size: .75rem; }
 .parking-pin { border: 2px solid white; background: #2854a1; color: white; border-radius: 9px; width: 31px; height: 31px; box-shadow: 0 3px 10px #0004; font-weight: 800; }
 .parking-pin.selected { background: #d35c31; }
 .map-selected { position: absolute; bottom: 18px; left: 18px; width: min(400px, calc(100% - 36px)); display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; background: white; border-radius: 12px; box-shadow: 0 5px 20px #0003; max-height: min(70vh, 520px); overflow-y: auto; }
@@ -69,6 +72,7 @@ p { line-height: 1.55; }
 .business-form { max-width: 700px; display: grid; gap: 12px; margin: 20px 0; }
 .business-form label { display: grid; gap: 5px; }
 .business-form textarea { min-height: 86px; resize: vertical; }
+.business-logo-preview { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; }
 .favorite-actions { display: flex; gap: 16px; align-items: center; }
 .review-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
 .review-panel h2 { font-size: 1rem; margin: 4px 0 8px; }

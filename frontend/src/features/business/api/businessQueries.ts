@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BusinessProfileInput, getMyBusinessVenues, getMyClaims, requestBusinessClaim, updateBusinessProfile } from '../services/business.service';
+import { BusinessProfileInput, ManualAvailabilityInput, getMyBusinessVenues, getMyClaims, requestBusinessClaim, updateBusinessProfile, updateManualAvailability, uploadBusinessLogo } from '../services/business.service';
 
 const claimsKey = (userId: string | null) => ['business', 'claims', userId] as const;
 const venuesKey = (userId: string | null) => ['business', 'venues', userId] as const;
@@ -21,6 +21,26 @@ export function useRequestBusinessClaim(userId: string | null) {
 export function useUpdateBusinessProfile(userId: string | null) {
   const client = useQueryClient();
   return useMutation({ mutationFn: ({ slug, input }: { slug: string; input: BusinessProfileInput }) => updateBusinessProfile(slug, input),
+    onSuccess: (_, { slug }) => Promise.all([
+      client.invalidateQueries({ queryKey: venuesKey(userId) }),
+      client.invalidateQueries({ queryKey: ['venues', 'detail', slug] }),
+      client.invalidateQueries({ queryKey: ['map', 'nearby'] }),
+    ]) });
+}
+
+export function useManualAvailability() {
+  const client = useQueryClient();
+  return useMutation({ mutationFn: ({ slug, input }: { slug: string; input: ManualAvailabilityInput }) => updateManualAvailability(slug, input),
+    onSuccess: (_, { slug }) => Promise.all([
+      client.invalidateQueries({ queryKey: ['venues', 'detail', slug] }),
+      client.invalidateQueries({ queryKey: ['availability', slug] }),
+      client.invalidateQueries({ queryKey: ['map', 'nearby'] }),
+    ]) });
+}
+
+export function useUploadBusinessLogo(userId: string | null) {
+  const client = useQueryClient();
+  return useMutation({ mutationFn: ({ slug, file }: { slug: string; file: File }) => uploadBusinessLogo(slug, file),
     onSuccess: (_, { slug }) => Promise.all([
       client.invalidateQueries({ queryKey: venuesKey(userId) }),
       client.invalidateQueries({ queryKey: ['venues', 'detail', slug] }),

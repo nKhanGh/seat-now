@@ -97,7 +97,7 @@ export function MapExplorer() {
       {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => venues.refetch()}>Thử lại</button></p>}
       {venues.data?.pages[0]?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
       {venueItems.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
-        <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.name}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
+        <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.logoUrl && <img className="venue-list-logo" src={venue.logoUrl} alt="" />}{venue.name} {venue.verified && <span className="verified-badge" aria-label="Chủ quán đã xác thực">✓</span>}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
       </button>)}
       {venues.hasNextPage && venueItems.length < 100 && <button className="load-more" onClick={() => void venues.fetchNextPage()} disabled={venues.isFetchingNextPage}>{venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}</button>}
       {venues.hasNextPage && venueItems.length >= 100 && <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}

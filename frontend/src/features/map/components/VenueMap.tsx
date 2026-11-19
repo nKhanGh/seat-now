@@ -75,7 +75,13 @@ export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkin
       const button = document.createElement('button');
       button.type = 'button';
       button.className = `venue-pin${venue.id === selectedId ? ' selected' : ''}`;
-      button.textContent = venue.category === 'CAFE' ? '☕' : venue.category === 'CINEMA' ? '🎬' : '🍽';
+      if (venue.logoUrl) {
+        const logo = document.createElement('img');
+        logo.src = venue.logoUrl;
+        logo.alt = '';
+        logo.className = 'venue-pin-logo';
+        button.appendChild(logo);
+      } else button.textContent = venue.category === 'CAFE' ? '☕' : venue.category === 'CINEMA' ? '🎬' : '🍽';
       button.setAttribute('aria-label', venue.name);
       button.addEventListener('click', () => onSelect(venue.id));
       markers.current.push(new Marker({ element: button }).setLngLat(venue.location.coordinates).addTo(map.current));

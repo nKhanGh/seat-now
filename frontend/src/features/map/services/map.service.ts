@@ -9,6 +9,8 @@ export type VenueMapItem = {
   distanceM: number;
   priceTier: number;
   rating: number;
+  verified: boolean;
+  logoUrl: string | null;
   availability: {
     crowdLevel: 'QUIET' | 'MODERATE' | 'BUSY' | 'FULL' | 'UNKNOWN';
     tablesAvailable: number | null; tablesTotal: number | null;
@@ -39,6 +41,8 @@ export type VenueDetail = {
   id: string; slug: string; name: string; category: VenueMapItem['category'];
   cuisineTypes: VenueMapItem['cuisineTypes']; description: string; openingHours: string; menuSummary: string; address: string;
   location: VenueMapItem['location']; priceTier: number; rating: number;
+  verified: boolean;
+  logoUrl: string | null;
 };
 
 export async function getVenueDetail(slug: string, signal?: AbortSignal): Promise<VenueDetail> {

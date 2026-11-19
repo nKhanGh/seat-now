@@ -1,11 +1,48 @@
 import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '../../auth/api/authQueries';
-import { useBusinessClaims, useBusinessVenues, useRequestBusinessClaim, useUpdateBusinessProfile } from '../api/businessQueries';
-import { BusinessProfileInput, BusinessVenue } from '../services/business.service';
+import { useBusinessClaims, useBusinessVenues, useManualAvailability, useRequestBusinessClaim, useUpdateBusinessProfile, useUploadBusinessLogo } from '../api/businessQueries';
+import { BusinessProfileInput, BusinessVenue, ManualAvailabilityInput } from '../services/business.service';
+
+function AvailabilityEditor({ venue }: { venue: BusinessVenue }) {
+  const save = useManualAvailability();
+  const [tablesTotal, setTablesTotal] = useState(0);
+  const [tablesAvailable, setTablesAvailable] = useState(0);
+  const [seatsTotal, setSeatsTotal] = useState(0);
+  const [seatsAvailable, setSeatsAvailable] = useState(0);
+  const [crowdLevel, setCrowdLevel] = useState<ManualAvailabilityInput['crowdLevel']>('MODERATE');
+  const [estimatedWaitMinutes, setEstimatedWaitMinutes] = useState(0);
+  const [acceptingGuests, setAcceptingGuests] = useState(true);
+  const [saved, setSaved] = useState(false);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setSaved(false);
+    const input: ManualAvailabilityInput = { crowdLevel, estimatedWaitMinutes, acceptingGuests,
+      seats: { total: seatsTotal, available: seatsAvailable },
+      ...(venue.category === 'CINEMA' ? {} : { tables: { total: tablesTotal, available: tablesAvailable } }),
+    };
+    try { await save.mutateAsync({ slug: venue.slug, input }); setSaved(true); }
+    catch { /* Error is shown below. */ }
+  }
+  return <form className="card business-form" onSubmit={(event) => void submit(event)}>
+    <h3>Cập nhật chỗ trống · {venue.name}</h3><p>Số liệu thủ công tự hết hạn sau 10 phút.</p>
+    {venue.category !== 'CINEMA' && <><label>Tổng số bàn<input type="number" min="0" value={tablesTotal} onChange={(event) => setTablesTotal(Number(event.target.value))} required /></label>
+      <label>Bàn còn trống<input type="number" min="0" max={tablesTotal} value={tablesAvailable} onChange={(event) => setTablesAvailable(Number(event.target.value))} required /></label></>}
+    <label>Tổng số ghế<input type="number" min="0" value={seatsTotal} onChange={(event) => setSeatsTotal(Number(event.target.value))} required /></label>
+    <label>Ghế còn trống<input type="number" min="0" max={seatsTotal} value={seatsAvailable} onChange={(event) => setSeatsAvailable(Number(event.target.value))} required /></label>
+    <label>Mức độ đông<select value={crowdLevel} onChange={(event) => setCrowdLevel(event.target.value as ManualAvailabilityInput['crowdLevel'])}>
+      <option value="QUIET">Vắng</option><option value="MODERATE">Vừa</option><option value="BUSY">Đông</option><option value="FULL">Đầy</option>
+    </select></label>
+    <label>Thời gian chờ (phút)<input type="number" min="0" max="240" value={estimatedWaitMinutes} onChange={(event) => setEstimatedWaitMinutes(Number(event.target.value))} required /></label>
+    <label><input type="checkbox" checked={acceptingGuests} onChange={(event) => setAcceptingGuests(event.target.checked)} /> Đang nhận khách</label>
+    <button className="primary" disabled={save.isPending}>{save.isPending ? 'Đang lưu…' : 'Cập nhật chỗ trống'}</button>
+    {save.isError && <p role="alert">{save.error.message}</p>}{saved && <p role="status">Đã cập nhật; nguồn hiển thị là chủ quán.</p>}
+  </form>;
+}
 
 function ProfileEditor({ venue, userId }: { venue: BusinessVenue; userId: string }) {
   const save = useUpdateBusinessProfile(userId);
+  const upload = useUploadBusinessLogo(userId);
+  const [logo, setLogo] = useState<File | null>(null);
   const [form, setForm] = useState<BusinessProfileInput>({
     name: venue.name, address: venue.address, description: venue.description,
     openingHours: venue.openingHours, menuSummary: venue.menuSummary, priceTier: venue.priceTier,
@@ -31,6 +68,14 @@ function ProfileEditor({ venue, userId }: { venue: BusinessVenue; userId: string
     <button className="primary" disabled={save.isPending}>{save.isPending ? 'Đang lưu…' : 'Lưu hồ sơ'}</button>
     {save.isError && <p role="alert">{save.error.message}</p>}
     {saved && <p role="status">Đã cập nhật hồ sơ công khai.</p>}
+    <label>Logo (JPEG, PNG, WebP; tối đa 2 MB)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setLogo(event.target.files?.[0] ?? null)} /></label>
+    <button type="button" disabled={!logo || logo.size > 2_000_000 || upload.isPending}
+      onClick={() => logo && upload.mutate({ slug: venue.slug, file: logo }, { onSuccess: () => setLogo(null) })}>
+      {upload.isPending ? 'Đang tải…' : 'Cập nhật logo'}
+    </button>
+    {logo && logo.size > 2_000_000 && <p role="alert">Logo vượt quá 2 MB.</p>}
+    {upload.isError && <p role="alert">{upload.error.message}</p>}
+    {venue.logoUrl && <img className="business-logo-preview" src={venue.logoUrl} alt={`Logo ${venue.name}`} />}
   </form>;
 }
 
@@ -69,7 +114,8 @@ export function BusinessPage() {
       <h2>Địa điểm đang quản lý</h2>
       {venues.isPending && <p>Đang tải địa điểm…</p>}{venues.isError && <p role="alert">{venues.error.message}</p>}
       {venues.data?.length === 0 && <p>Chưa có địa điểm được duyệt.</p>}
-      {venues.data?.map((venue) => <ProfileEditor key={venue.slug} venue={venue} userId={userId} />)}
+      {venues.data?.map((venue) => <div key={venue.slug}><ProfileEditor venue={venue} userId={userId} />
+        {venue.plan === 'PREMIUM' && <AvailabilityEditor venue={venue} />}</div>)}
     </>}
   </main>;
 }
