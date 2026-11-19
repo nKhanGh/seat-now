@@ -52,6 +52,9 @@ p { line-height: 1.55; }
 .map-selected button { border: 0; background: transparent; color: #17654d; }
 .availability-detail { display: flex; flex-direction: column; gap: 5px; padding-top: 8px; border-top: 1px solid #deebe1; }
 .availability-detail small, .availability-stale, .availability-unknown { color: #6a746c; }
+.check-in-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
+.check-in-panel h2 { font-size: 1rem; margin: 4px 0; }
+.check-in-panel p { margin: 4px 0 8px; }
 .availability-fresh { color: #17654d; }
 .parking-list { border-top: 1px solid #deebe1; padding-top: 8px; }
 .parking-list h2 { font-size: 1rem; margin: 4px 0; }
