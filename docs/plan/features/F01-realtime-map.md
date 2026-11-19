@@ -1,6 +1,6 @@
 # F01 — Bản đồ địa điểm thời gian thực
 
-Ưu tiên: **P1**. Trạng thái: **PARTIAL — geospatial API, map/list UI, filter cơ bản và seed demo đã có; cursor, detail, realtime và nguồn availability thật chưa có**.
+Ưu tiên: **P1**. Trạng thái: **MVP demo chạy được — geospatial API, map/list, filter, cursor, detail và realtime đã có; nguồn availability thật và E2E automation chưa có**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md) · [F02 Availability](F02-seat-availability.md)
 
@@ -119,5 +119,5 @@ Thứ tự lát cắt: venue seed/index → REST map query → list/map UI → a
 - Screenshot/video desktop/mobile cho happy/empty/error/location-denied.
 - Playwright critical flow và kết quả lint/typecheck/build.
 
-Evidence hiện tại: MongoDB `2dsphere` integration test pass (radius và category/availability filter); API local với 5 địa điểm demo trả 4 trong 3 km, 2 café, 2 có bàn demo và 0 trong 100 m. Backend typecheck/build/unit test và frontend build pass. Chưa có Playwright/UI browser test.
+Evidence hiện tại: MongoDB `2dsphere` integration test pass cho radius, cuisine, availability và cursor; API local trả 4 địa điểm trong 3 km. Bản đồ OpenFreeMap, marker, detail và bộ lọc đã được kiểm tra trực tiếp trên browser. Frontend có unit test cho stale/unknown. Chưa có Playwright automation, cluster cho tập dữ liệu lớn hoặc nguồn availability thật.
 

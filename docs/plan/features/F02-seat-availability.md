@@ -1,6 +1,6 @@
 # F02 — Tình trạng bàn/chỗ ngồi
 
-Ưu tiên: **P1**. Trạng thái: **PARTIAL — demo REST + Socket.IO + UI đã chạy**.
+Ưu tiên: **P1**. Trạng thái: **MVP demo chạy được — REST + Socket.IO + UI + rebuild projection; chưa có nguồn POS/chủ quán thật**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md) · [F01 Map](F01-realtime-map.md)
 
@@ -85,7 +85,7 @@ Public response hiện có `freshness`, `capturedAt`, `expiresAt`, `source`, `co
 
 Event `venue.availability.updated.v1` cần tiếp tục được chuẩn hóa theo envelope ở COMMON khi mở rộng tích hợp.
 
-Hiện tại event chỉ chứa `eventId`, `slug`, `version`; client refetch REST sau khi nhận event. WebSocket namespace `/live`, client gửi `watch` với `venueSlugs[]`. Chưa có history API hay POS connector. `sourceRecordId` trong body là khóa idempotency.
+Hiện tại event chỉ chứa `eventId`, `slug`, `version`; client refetch REST sau khi nhận event. WebSocket namespace `/live`, client gửi `watch` với `venueSlugs[]`. Lệnh `npm run rebuild:projections` phục hồi latest/map từ snapshot. Chưa có history API hay POS connector. `sourceRecordId` trong body là khóa idempotency.
 
 ## 5. UI
 

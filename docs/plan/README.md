@@ -1,6 +1,6 @@
 # Kế hoạch triển khai SeatNow
 
-Phiên bản 1.3 — 19/11/2026. Trạng thái: **F00/F01 PARTIAL; F02/F03 demo vertical slice PARTIAL; F04 foundation PARTIAL**. API, UI, Socket.IO và MongoDB integration test đã có; OpenAPI, POS/parking data connector, production operations và E2E browser automation còn ở M6.
+Phiên bản 1.4 — 19/11/2026. Trạng thái: **MVP demo F00–F04 chạy được; hardening M6 chưa hoàn tất**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check và runbook demo đã có. POS/parking data connector thật, lint/CI, E2E browser automation và vận hành production còn ở M6.
 
 [Quy chuẩn chung](COMMON.md) · [ADR stack](../adr/001-stack-and-architecture.md) · [README dự án](../../README.md)
 
@@ -44,6 +44,8 @@ Người dùng có thể mở app, cấp hoặc từ chối quyền vị trí, t
 - Docker Compose MongoDB; seed một vùng demo nhỏ có venue, availability và parking.
 - Thiết lập response envelope, error contract, Swagger/OpenAPI, request ID và health endpoint.
 - Gate: backend/frontend build, lint và test mẫu đều chạy từ máy sạch.
+
+Hiện có TypeScript strict, lockfile, build và test; lint/format gate còn phải thiết lập.
 
 ### M1 — F01 bản đồ tĩnh có dữ liệu thật từ API
 

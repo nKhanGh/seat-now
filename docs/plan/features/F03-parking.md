@@ -1,6 +1,6 @@
 # F03 — Thông tin bãi đỗ xe
 
-Ưu tiên: **P2**. Trạng thái: **PARTIAL — demo geospatial + availability + Socket.IO + UI đã chạy**.
+Ưu tiên: **P2**. Trạng thái: **MVP demo chạy được — geospatial + filter + cursor + availability + Socket.IO + UI; chưa có nguồn bãi xe thật**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md) · [F01 Map](F01-realtime-map.md)
 
@@ -33,7 +33,7 @@ Ngoài scope: giữ chỗ, thanh toán, navigation turn-by-turn, xác minh pháp
 ```http
 GET /api/v1/venues/{slug}/parking
   ?vehicleType=CAR
-  &openNow=true
+  &open24h=true
   &hasAvailability=true
   &radiusM=1500
   &cursor=...
@@ -78,7 +78,7 @@ Hiện tại client nhận `parking.availability.updated.v1` qua namespace `/liv
 
 Indexes ban đầu: `location: 2dsphere`, `venueIds`, status; snapshot theo facility/version/idempotency như F02.
 
-Query có filter availability chạy trên `parking_map_views` denormalized để cursor đúng. Không query một page facility rồi mới bỏ bãi stale/full ở application memory. Projection có version, `expiresAt`, `projectedAt` và command rebuild.
+Query có filter availability chạy trực tiếp trên `parking_facilities`, nơi lưu public profile và latest snapshot denormalized, trước khi sort/cursor/limit. Không query một page rồi mới bỏ bãi stale/full ở application memory. Projection có version, `expiresAt` và command rebuild.
 
 ## 5. UI và state
 

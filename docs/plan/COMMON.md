@@ -31,7 +31,7 @@ Map provider/geocoder là external adapter. Core domain chỉ biết tọa độ
 | `map` | Read/query composition cho viewport/radius | Ghi venue hay snapshot |
 | `availability` | Venue availability snapshot, latest projection, freshness policy, ingestion | Venue profile |
 | `parking` | Parking facility, pricing rules, parking snapshot/latest projection | Seat/table availability |
-| `realtime` | Socket authentication, room lifecycle, event transport | Business rule tạo snapshot |
+| `live` | Public Socket.IO room lifecycle và event transport | Business rule tạo snapshot |
 | `auth` | Credential hash, session, đăng ký/đăng nhập/đăng xuất, session guard | Subscription entitlement |
 | `users` | User profile tối thiểu | Credential/session |
 | `subscriptions` | Subscription state và entitlement resolution | Payment transaction ở MVP |
@@ -51,9 +51,9 @@ Version cụ thể phải được pin tại lúc bootstrap sau khi chạy compa
 | Frontend | React, Vite, React Router, TanStack Query |
 | Map | MapLibre GL qua adapter/config; tile/geocoding provider được cấu hình |
 | Identity | First-party NestJS auth; Argon2id + opaque cookie session trong MongoDB |
-| UI | Tailwind CSS + accessible primitives; design token tập trung |
+| UI | CSS theo feature/app, có nhãn và trạng thái truy cập được; Tailwind chưa dùng |
 | Client state | TanStack Query cho server state; URL cho filter; local state/Zustand chỉ cho UI state thật sự dùng chung |
-| Test | Jest/Supertest + MongoDB Testcontainers; Vitest/Testing Library/MSW; Playwright E2E |
+| Test | Jest + MongoDB Docker integration, Vitest component rendering và kiểm tra browser thủ công; API/Playwright E2E còn ở M6 |
 | Local | Docker Compose |
 
 Redis chưa là dependency bắt buộc. Chỉ thêm khi cần multi-instance Socket.IO adapter, distributed rate limit/cache hoặc job queue có bằng chứng.
@@ -141,27 +141,22 @@ Chỉ tạo folder khi có file thật. Không dựng cây rỗng “cho đẹp�
 
 Prefix: `/api/v1`.
 
-Success:
+Success hiện tại:
 
 ```json
 {
   "data": {},
-  "meta": {
-    "nextCursor": null,
-    "requestId": "..."
-  }
+  "meta": { "nextCursor": null }
 }
 ```
 
-Error:
+Error validation hiện tại:
 
 ```json
 {
   "statusCode": 400,
   "code": "MAP_INVALID_RADIUS",
-  "error": "Bad Request",
-  "message": ["radiusM must be between 100 and 20000"],
-  "requestId": "..."
+  "message": ["radiusM must be between 100 and 20000"]
 }
 ```
 
@@ -169,7 +164,7 @@ Error:
 - Client phân nhánh bằng `code`, không parse message.
 - `404` không tiết lộ resource riêng tư có tồn tại.
 - List lớn dùng cursor ổn định. Map viewport có hard limit số marker và trả `meta.truncated`/cluster strategy rõ ràng.
-- OpenAPI là executable contract; thay DTO/API phải cập nhật schema và example.
+- OpenAPI tĩnh tại `contracts/openapi/seatnow.json` phải được cập nhật cùng DTO/API. Swagger tự sinh và contract gate còn ở M6.
 - Mutation nhận `Idempotency-Key` khi có khả năng provider gửi lại, đặc biệt ingestion.
 
 ### 4.5 MongoDB conventions
@@ -238,7 +233,7 @@ ParkingAvailabilitySnapshot
   capturedAt, receivedAt, expiresAt, version
 ```
 
-`parking_map_views` áp dụng cùng nguyên tắc cho query geospatial + filter `hasAvailability`; detail vẫn đọc dữ liệu owner. Read projection có thể trễ và phải mang version/timestamp.
+Trong MVP, `parking_facilities` chứa public profile và latest snapshot denormalized để query geospatial + filter `hasAvailability` trước phân trang. Read projection có thể trễ và mang version/timestamp; `rebuild:projections` phục hồi từ snapshots.
 
 Khoảng cách thẳng dùng geospatial query; walking distance chỉ được gọi như vậy khi có routing provider. Nếu chưa có provider, UI ghi “cách khoảng X m” thay vì “đi bộ X phút”.
 
@@ -269,20 +264,17 @@ MVP không cho client ghi trực tiếp `plan`. Entitlement được resolve ser
   - `map.subscribe.v1`, `map.unsubscribe.v1`
   - `venue.subscribe.v1`, `venue.unsubscribe.v1`
 
-Event envelope:
+Event payload hiện tại:
 
 ```json
 {
   "eventId": "uuid",
-  "eventType": "venue.availability.updated.v1",
-  "aggregateId": "venue-id",
-  "version": 12,
-  "occurredAt": "2026-11-19T10:00:00.000Z",
-  "data": {}
+  "slug": "demo-cafe-nguyen-hue",
+  "version": 12
 }
 ```
 
-- Client bỏ event có `version` không mới hơn cache.
+- Client refetch REST sau event, không áp payload event thành availability; DB projection chặn version cũ.
 - Event chỉ là tín hiệu/update nhỏ, không thay REST snapshot đầy đủ vô hạn.
 - Sau reconnect: resubscribe rồi invalidate/refetch REST.
 - Duplicate, missing và out-of-order là trạng thái bình thường cần test.
