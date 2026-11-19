@@ -72,10 +72,15 @@ describeWithMongo('booking requests with MongoDB', () => {
     business.requireOwner.mockRejectedValueOnce(new ForbiddenException());
     await expect(service.forVenue(guest, 'cafe-a')).rejects.toThrow(ForbiddenException);
     expect((await service.resolve(owner, 'cafe-a', ordinary.id, 'CONFIRMED')).data.status).toBe('CONFIRMED');
+    expect((await service.forVenue(owner, 'cafe-a')).data.map((row) => row.status)).toEqual([
+      'PENDING',
+      'CONFIRMED',
+    ]);
     await expect(service.resolve(owner, 'cafe-a', ordinary.id, 'DECLINED')).rejects.toThrow(
       ConflictException,
     );
     expect((await service.cancel(guest, ordinary.id)).data.status).toBe('CANCELED');
+    expect((await service.forVenue(owner, 'cafe-a')).data.map((row) => row.id)).toEqual([premium.id]);
     await expect(service.cancel(guest, ordinary.id)).rejects.toThrow(ConflictException);
     expect((await service.resolve(owner, 'cafe-a', premium.id, 'DECLINED')).data.status).toBe('DECLINED');
   });

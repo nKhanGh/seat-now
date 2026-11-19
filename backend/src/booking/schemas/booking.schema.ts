@@ -20,5 +20,5 @@ export class Booking {
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);
 BookingSchema.index({ userId: 1, venueSlug: 1, requestedAt: 1 }, { unique: true });
-BookingSchema.index({ venueSlug: 1, status: 1, priority: -1, requestedAt: 1 });
+BookingSchema.index({ venueSlug: 1, status: -1, priority: -1, requestedAt: 1 });
 BookingSchema.index({ userId: 1, createdAt: -1 });

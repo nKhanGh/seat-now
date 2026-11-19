@@ -59,8 +59,12 @@ export class BookingService {
   async forVenue(userId: string, slug: string) {
     await this.business.requireOwner(userId, slug);
     const rows = await this.bookings
-      .find({ venueSlug: slug, status: 'PENDING' })
-      .sort({ priority: -1, requestedAt: 1, _id: 1 })
+      .find({
+        venueSlug: slug,
+        status: { $in: ['PENDING', 'CONFIRMED'] },
+        requestedAt: { $gte: new Date(Date.now() - 2 * 60 * 60_000) },
+      })
+      .sort({ status: -1, priority: -1, requestedAt: 1, _id: 1 })
       .limit(100)
       .lean();
     const users = await this.auth.publicUsersByIds(rows.map((row) => row.userId));
