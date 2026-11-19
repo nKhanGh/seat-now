@@ -1,13 +1,14 @@
 import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '../../auth/api/authQueries';
-import { useConfirmProposal, useCreateProposal, useProposals } from '../api/proposalsQueries';
+import { useConfirmProposal, useCreateProposal, useMyProposals, useProposals } from '../api/proposalsQueries';
 import { ProposalInput } from '../services/proposals.service';
 
 export function ProposalsPage() {
   const [params] = useSearchParams();
   const auth = useCurrentUser();
   const proposals = useProposals();
+  const mine = useMyProposals(auth.data?.id ?? null);
   const create = useCreateProposal();
   const confirm = useConfirmProposal();
   const [form, setForm] = useState<ProposalInput>({
@@ -44,6 +45,9 @@ export function ProposalsPage() {
       </Link>
       <h1>Đề xuất địa điểm</h1>
       <p>Địa điểm mới cần ba người khác xác nhận và được duyệt trước khi xuất hiện trên bản đồ.</p>
+      <p>
+        Muốn quản lý một quán đã có trên bản đồ? <Link to="/business">Gửi yêu cầu xác minh chủ quán</Link>.
+      </p>
       {auth.data ? (
         <form className="card proposal-form" onSubmit={(event) => void submit(event)}>
           <h2>Thêm địa điểm</h2>
@@ -150,6 +154,35 @@ export function ProposalsPage() {
         <p>
           <Link to="/login">Đăng nhập</Link> để đề xuất địa điểm mới.
         </p>
+      )}
+      {auth.data && (
+        <section aria-label="Đề xuất của tôi">
+          <h2>Đề xuất của tôi</h2>
+          {mine.isPending && <p>Đang tải tiến độ…</p>}
+          {mine.isError && <p role="alert">{mine.error.message}</p>}
+          {mine.data?.length === 0 && <p>Bạn chưa gửi đề xuất nào.</p>}
+          {mine.data?.map((proposal) => (
+            <article key={proposal.id} className="card proposal-card">
+              <h3>{proposal.name}</h3>
+              <p>
+                {proposal.status === 'PENDING'
+                  ? `Chờ cộng đồng xác nhận (${proposal.confirmationCount}/3)`
+                  : proposal.status === 'READY_FOR_REVIEW'
+                    ? 'Đủ xác nhận, chờ người vận hành duyệt'
+                    : proposal.status === 'APPROVED'
+                      ? 'Đã duyệt và lên bản đồ'
+                      : 'Đã bị từ chối'}
+              </p>
+              {proposal.status === 'APPROVED' && (
+                <Link
+                  to={`/?venue=${encodeURIComponent(proposal.slug)}&lat=${proposal.lat}&lng=${proposal.lng}`}
+                >
+                  Xem trên bản đồ
+                </Link>
+              )}
+            </article>
+          ))}
+        </section>
       )}
       <h2>Đang chờ xác nhận</h2>
       {proposals.isPending && <p>Đang tải đề xuất…</p>}

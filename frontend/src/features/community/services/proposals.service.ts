@@ -9,7 +9,7 @@ export type VenueProposal = {
   lat: number;
   lng: number;
   priceTier: number;
-  status: 'PENDING' | 'READY_FOR_REVIEW';
+  status: 'PENDING' | 'READY_FOR_REVIEW' | 'APPROVED' | 'REJECTED';
   confirmationCount: number;
   confirmationsRequired: number;
   createdAt: string;
@@ -29,6 +29,13 @@ export type ProposalInput = {
 export async function getProposals(signal?: AbortSignal): Promise<VenueProposal[]> {
   const response = await fetch('/api/v1/community/proposals', { signal });
   if (!response.ok) throw new Error(`Không tải được đề xuất (${response.status}).`);
+  const body = (await response.json()) as { data: VenueProposal[] };
+  return body.data;
+}
+
+export async function getMyProposals(signal?: AbortSignal): Promise<VenueProposal[]> {
+  const response = await fetch('/api/v1/community/proposals/mine', { signal, credentials: 'same-origin' });
+  if (!response.ok) throw new Error(`Không tải được đề xuất của tôi (${response.status}).`);
   const body = (await response.json()) as { data: VenueProposal[] };
   return body.data;
 }

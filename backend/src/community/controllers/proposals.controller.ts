@@ -25,6 +25,11 @@ export class ProposalsController {
     return this.proposals.list(query.status);
   }
 
+  @Get('community/proposals/mine')
+  async mine(@Req() request: CookieRequest) {
+    return this.proposals.mine(await this.userId(request));
+  }
+
   @Post('community/proposals')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async create(@Req() request: CookieRequest, @Body() input: CreateVenueProposalDto) {

@@ -40,6 +40,7 @@ describeWithMongo('community venue proposals with MongoDB', () => {
       priceTier: 2,
     };
     const proposal = (await service.create(creator, input)).data;
+    expect((await service.mine(creator)).data[0].status).toBe('PENDING');
     await expect(service.confirm(creator, proposal.id)).rejects.toThrow('Cannot confirm your own proposal');
     for (let i = 0; i < 3; i++) await service.confirm(new Types.ObjectId().toString(), proposal.id);
     expect((await proposals.findById(proposal.id))?.status).toBe('READY_FOR_REVIEW');
@@ -49,6 +50,7 @@ describeWithMongo('community venue proposals with MongoDB', () => {
     await service.approve(proposal.id);
     expect(await venues.countDocuments({ slug: proposal.slug })).toBe(1);
     expect((await views.findOne({ slug: proposal.slug }))?.status).toBe('ACTIVE');
+    expect((await service.mine(creator)).data[0].status).toBe('APPROVED');
     expect((await service.list()).data.some((item) => item.id === proposal.id)).toBe(false);
   });
 });
