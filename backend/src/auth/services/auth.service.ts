@@ -89,6 +89,11 @@ export class AuthService {
     }
   }
 
+  async publicUsersByIds(ids: Types.ObjectId[]) {
+    const users = await this.users.find({ _id: { $in: ids }, status: 'ACTIVE' }, { displayName: 1 }).lean();
+    return users.map((user) => ({ id: user._id.toString(), displayName: user.displayName }));
+  }
+
   private async createSession(userId: Types.ObjectId): Promise<string> {
     const selector = randomBytes(16).toString('hex');
     const verifier = randomBytes(32).toString('hex');

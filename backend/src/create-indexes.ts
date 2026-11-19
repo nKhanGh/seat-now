@@ -11,6 +11,7 @@ import { ParkingSnapshot, ParkingSnapshotSchema } from './parking/schemas/parkin
 import { UserSubscription, UserSubscriptionSchema } from './subscription/schemas/user-subscription.schema';
 import { CheckIn, CheckInSchema } from './community/schemas/check-in.schema';
 import { Favorite, FavoriteSchema } from './community/schemas/favorite.schema';
+import { Review, ReviewSchema } from './community/schemas/review.schema';
 
 async function createIndexes() {
   await ConfigModule.forRoot();
@@ -29,6 +30,7 @@ async function createIndexes() {
     await mongoose.model(UserSubscription.name, UserSubscriptionSchema).createIndexes();
     await mongoose.model(CheckIn.name, CheckInSchema).createIndexes();
     await mongoose.model(Favorite.name, FavoriteSchema).createIndexes();
+    await mongoose.model(Review.name, ReviewSchema).createIndexes();
   } finally {
     await mongoose.disconnect();
   }
