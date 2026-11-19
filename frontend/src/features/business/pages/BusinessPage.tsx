@@ -1,8 +1,28 @@
 import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '../../auth/api/authQueries';
-import { useBusinessClaims, useBusinessVenues, useManualAvailability, useRequestBusinessClaim, useUpdateBusinessProfile, useUploadBusinessLogo } from '../api/businessQueries';
+import { useBusinessClaims, useBusinessDashboard, useBusinessVenues, useManualAvailability, useRequestBusinessClaim, useUpdateBusinessProfile, useUploadBusinessLogo } from '../api/businessQueries';
 import { BusinessProfileInput, BusinessVenue, ManualAvailabilityInput } from '../services/business.service';
+
+function Dashboard({ venue, userId }: { venue: BusinessVenue; userId: string }) {
+  const dashboard = useBusinessDashboard(venue.slug, userId);
+  const data = dashboard.data;
+  const localHour = (hourUtc: number) => `${String((hourUtc + 7) % 24).padStart(2, '0')}:00`;
+  return <section className="card business-dashboard" aria-label={`Dashboard ${venue.name}`}>
+    <h3>Dashboard · {venue.name}</h3><p>7 ngày gần đây</p>
+    {dashboard.isPending && <p>Đang tải thống kê…</p>}
+    {dashboard.isError && <p role="alert">{dashboard.error.message} <button onClick={() => dashboard.refetch()}>Thử lại</button></p>}
+    {data && <>
+      <p><strong>{data.views.total}</strong> lượt mở trang chi tiết (không phải người dùng duy nhất).</p>
+      <p>Tỷ lệ lấp đầy trung bình: <strong>{data.occupancy.averagePercent === null ? 'Chưa có dữ liệu' : `${data.occupancy.averagePercent}%`}</strong> · {data.occupancy.samples} snapshot.</p>
+      {data.occupancy.peakHours.length > 0 && <div><h4>Khung giờ lấp đầy cao</h4><ul>
+        {data.occupancy.peakHours.map((hour) => <li key={hour.hourUtc}>{localHour(hour.hourUtc)} (giờ Việt Nam): {hour.averagePercent}% từ {hour.samples} snapshot</li>)}
+      </ul></div>}
+      <p className="small">Nguồn snapshot: mẫu {data.occupancy.sourceCounts.DEMO}, chủ quán {data.occupancy.sourceCounts.OPERATOR}, POS {data.occupancy.sourceCounts.POS}.</p>
+      {(data.views.truncated || data.occupancy.truncated) && <p className="small">Thống kê đã giới hạn số bản ghi.</p>}
+    </>}
+  </section>;
+}
 
 function AvailabilityEditor({ venue }: { venue: BusinessVenue }) {
   const save = useManualAvailability();
@@ -115,7 +135,7 @@ export function BusinessPage() {
       {venues.isPending && <p>Đang tải địa điểm…</p>}{venues.isError && <p role="alert">{venues.error.message}</p>}
       {venues.data?.length === 0 && <p>Chưa có địa điểm được duyệt.</p>}
       {venues.data?.map((venue) => <div key={venue.slug}><ProfileEditor venue={venue} userId={userId} />
-        {venue.plan === 'PREMIUM' && <AvailabilityEditor venue={venue} />}</div>)}
+        {venue.plan === 'PREMIUM' && <><AvailabilityEditor venue={venue} /><Dashboard venue={venue} userId={userId} /></>}</div>)}
     </>}
   </main>;
 }

@@ -10,6 +10,12 @@ export type ManualAvailabilityInput = {
   crowdLevel: 'QUIET' | 'MODERATE' | 'BUSY' | 'FULL';
   estimatedWaitMinutes: number; acceptingGuests: boolean;
 };
+export type BusinessDashboard = {
+  periodDays: number;
+  views: { total: number; byHour: Array<{ hourUtc: number; count: number }>; truncated: boolean };
+  occupancy: { averagePercent: number | null; samples: number; sourceCounts: { DEMO: number; OPERATOR: number; POS: number };
+    peakHours: Array<{ hourUtc: number; averagePercent: number; samples: number }>; truncated: boolean };
+};
 
 async function readData<T>(response: Response): Promise<T> {
   if (!response.ok) throw new Error(`Không tải hoặc lưu được dữ liệu chủ quán (${response.status}).`);
@@ -46,5 +52,11 @@ export async function uploadBusinessLogo(slug: string, file: File): Promise<void
   const form = new FormData(); form.set('logo', file);
   await readData(await fetch(`/api/v1/business/venues/${encodeURIComponent(slug)}/logo`, {
     method: 'POST', credentials: 'same-origin', body: form,
+  }));
+}
+
+export async function getBusinessDashboard(slug: string, signal?: AbortSignal): Promise<BusinessDashboard> {
+  return readData<BusinessDashboard>(await fetch(`/api/v1/business/venues/${encodeURIComponent(slug)}/dashboard`, {
+    credentials: 'same-origin', signal,
   }));
 }

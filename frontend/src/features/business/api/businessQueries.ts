@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BusinessProfileInput, ManualAvailabilityInput, getMyBusinessVenues, getMyClaims, requestBusinessClaim, updateBusinessProfile, updateManualAvailability, uploadBusinessLogo } from '../services/business.service';
+import { BusinessProfileInput, ManualAvailabilityInput, getBusinessDashboard, getMyBusinessVenues, getMyClaims, requestBusinessClaim, updateBusinessProfile, updateManualAvailability, uploadBusinessLogo } from '../services/business.service';
 
 const claimsKey = (userId: string | null) => ['business', 'claims', userId] as const;
 const venuesKey = (userId: string | null) => ['business', 'venues', userId] as const;
@@ -46,4 +46,9 @@ export function useUploadBusinessLogo(userId: string | null) {
       client.invalidateQueries({ queryKey: ['venues', 'detail', slug] }),
       client.invalidateQueries({ queryKey: ['map', 'nearby'] }),
     ]) });
+}
+
+export function useBusinessDashboard(slug: string | null, userId: string | null) {
+  return useQuery({ queryKey: ['business', 'dashboard', userId, slug],
+    queryFn: ({ signal }) => getBusinessDashboard(slug!, signal), enabled: Boolean(userId && slug), staleTime: 60_000 });
 }
