@@ -14,6 +14,15 @@ export class VenuesService {
     return venue.location.coordinates;
   }
 
+  async publicProfilesBySlugs(slugs: string[]) {
+    const venues = await this.venues.find({ slug: { $in: slugs }, status: 'ACTIVE' },
+      { slug: 1, name: 1, category: 1, address: 1, location: 1, priceTier: 1, rating: 1 }).lean();
+    return venues.map((venue) => ({
+      slug: venue.slug, name: venue.name, category: venue.category, address: venue.address,
+      location: venue.location, priceTier: venue.priceTier, rating: venue.rating,
+    }));
+  }
+
   async getBySlug(slug: string) {
     const venue = await this.venues.findOne({ slug, status: 'ACTIVE' }).lean();
     if (!venue) throw new NotFoundException('Venue not found');
