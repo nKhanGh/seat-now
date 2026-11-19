@@ -1,0 +1,29 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { BusinessProfileInput, getMyBusinessVenues, getMyClaims, requestBusinessClaim, updateBusinessProfile } from '../services/business.service';
+
+const claimsKey = (userId: string | null) => ['business', 'claims', userId] as const;
+const venuesKey = (userId: string | null) => ['business', 'venues', userId] as const;
+
+export function useBusinessClaims(userId: string | null) {
+  return useQuery({ queryKey: claimsKey(userId), queryFn: ({ signal }) => getMyClaims(signal), enabled: Boolean(userId) });
+}
+
+export function useBusinessVenues(userId: string | null) {
+  return useQuery({ queryKey: venuesKey(userId), queryFn: ({ signal }) => getMyBusinessVenues(signal), enabled: Boolean(userId) });
+}
+
+export function useRequestBusinessClaim(userId: string | null) {
+  const client = useQueryClient();
+  return useMutation({ mutationFn: ({ slug, evidence }: { slug: string; evidence: string }) => requestBusinessClaim(slug, evidence),
+    onSuccess: () => client.invalidateQueries({ queryKey: claimsKey(userId) }) });
+}
+
+export function useUpdateBusinessProfile(userId: string | null) {
+  const client = useQueryClient();
+  return useMutation({ mutationFn: ({ slug, input }: { slug: string; input: BusinessProfileInput }) => updateBusinessProfile(slug, input),
+    onSuccess: (_, { slug }) => Promise.all([
+      client.invalidateQueries({ queryKey: venuesKey(userId) }),
+      client.invalidateQueries({ queryKey: ['venues', 'detail', slug] }),
+      client.invalidateQueries({ queryKey: ['map', 'nearby'] }),
+    ]) });
+}

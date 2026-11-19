@@ -37,7 +37,7 @@ export type MapResponse = { data: VenueMapItem[]; meta: { nextCursor: string | n
 
 export type VenueDetail = {
   id: string; slug: string; name: string; category: VenueMapItem['category'];
-  cuisineTypes: VenueMapItem['cuisineTypes']; description: string; address: string;
+  cuisineTypes: VenueMapItem['cuisineTypes']; description: string; openingHours: string; menuSummary: string; address: string;
   location: VenueMapItem['location']; priceTier: number; rating: number;
 };
 

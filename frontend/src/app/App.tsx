@@ -7,6 +7,7 @@ import { FavoritesPage } from '../features/community/pages/FavoritesPage';
 import { PublicProfilePage } from '../features/community/pages/PublicProfilePage';
 import { FollowingPage } from '../features/community/pages/FollowingPage';
 import { ProposalsPage } from '../features/community/pages/ProposalsPage';
+import { BusinessPage } from '../features/business/pages/BusinessPage';
 
 function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
@@ -36,5 +37,5 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 }
 
 export function App() {
-  return <Routes><Route path="/" element={<MapExplorer />} /><Route path="/login" element={<AuthForm mode="login" />} /><Route path="/register" element={<AuthForm mode="register" />} /><Route path="/plans" element={<PlansPage />} /><Route path="/favorites" element={<FavoritesPage />} /><Route path="/following" element={<FollowingPage />} /><Route path="/users/:id" element={<PublicProfilePage />} /><Route path="/proposals" element={<ProposalsPage />} /></Routes>;
+  return <Routes><Route path="/" element={<MapExplorer />} /><Route path="/login" element={<AuthForm mode="login" />} /><Route path="/register" element={<AuthForm mode="register" />} /><Route path="/plans" element={<PlansPage />} /><Route path="/favorites" element={<FavoritesPage />} /><Route path="/following" element={<FollowingPage />} /><Route path="/users/:id" element={<PublicProfilePage />} /><Route path="/proposals" element={<ProposalsPage />} /><Route path="/business" element={<BusinessPage />} /></Routes>;
 }
