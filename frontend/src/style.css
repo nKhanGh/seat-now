@@ -55,6 +55,10 @@ p { line-height: 1.55; }
 .check-in-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
 .check-in-panel h2 { font-size: 1rem; margin: 4px 0; }
 .check-in-panel p { margin: 4px 0 8px; }
+.favorite-action { display: flex; gap: 8px; align-items: center; }
+.favorite-card { margin: 12px 0; max-width: 620px; }
+.favorite-card h2 { margin: 0 0 8px; }
+.favorite-actions { display: flex; gap: 16px; align-items: center; }
 .availability-fresh { color: #17654d; }
 .parking-list { border-top: 1px solid #deebe1; padding-top: 8px; }
 .parking-list h2 { font-size: 1rem; margin: 4px 0; }
