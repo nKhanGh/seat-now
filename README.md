@@ -2,12 +2,12 @@
 
 SeatNow là ứng dụng giúp người dùng tìm địa điểm và bãi đỗ xe gần đó, xem mức độ đông/vắng cùng số chỗ còn trống gần thời gian thực, rồi ra quyết định trước khi di chuyển.
 
-Repository hiện có **đăng nhập, bản đồ, tình trạng chỗ ngồi, bãi đỗ xe, nền tảng gói người dùng, cộng đồng và quản lý chủ quán**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được triển khai theo đúng thứ tự ưu tiên:
+Repository hiện có **đăng nhập, bản đồ, tình trạng chỗ ngồi, bãi đỗ xe, gói người dùng, cộng đồng, quản lý chủ quán và yêu cầu đặt bàn**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được triển khai theo đúng thứ tự ưu tiên:
 
 1. Bản đồ địa điểm thời gian thực và bộ lọc cơ bản.
 2. Tình trạng bàn/chỗ ngồi và thời gian chờ dự kiến.
 3. Bãi đỗ xe gần địa điểm và tình trạng chỗ trống.
-4. Nền tảng gói Free/Premium dành cho người dùng; các quyền Premium ngoài ba chức năng trên được triển khai ở release sau.
+4. Nền tảng gói Free/Premium dành cho người dùng; ưu tiên xử lý yêu cầu đặt bàn đã có ở bản demo, các quyền Premium khác thuộc release sau.
 
 Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm ảnh và báo cáo, theo dõi thành viên, chia sẻ địa điểm, đề xuất quán với ba lượt xác nhận và duyệt nội bộ. Nhóm chủ quán có yêu cầu nhận quản lý, hồ sơ/logo miễn phí và gói Premium demo gồm chỗ trống thủ công, dashboard, ảnh bìa, ưu đãi hẹn giờ và vị trí tài trợ. Kết nối dữ liệu thực và thanh toán vẫn thuộc release sau.
 
@@ -43,7 +43,7 @@ npm ci
 npm run dev
 ```
 
-Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
+Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
 
 `seed:demo` chỉ chạy ở local/test, tạo 5 địa điểm và 4 bãi xe hư cấu tại TP.HCM. Snapshot mẫu hết hạn sau 10 phút; chạy lại `npm run seed:demo` trong `backend` để làm mới. Khi hết hạn, UI ghi **Dữ liệu cũ** và không coi số chỗ đó là còn trống hiện tại.
 
@@ -56,9 +56,9 @@ Public API chính:
 - `GET /venues/:slug/parking` hoặc `GET /parking-facilities?lat=...&lng=...`
 - `GET /me/subscription` và `GET /me/entitlements` (cần đăng nhập)
 
-Danh sách địa điểm và bãi xe đều có `meta.nextCursor` để tải tiếp. Contract REST ở [OpenAPI MVP](contracts/openapi/seatnow.json), [OpenAPI cộng đồng](contracts/openapi/community.json) và [OpenAPI chủ quán](contracts/openapi/business.json); contract Socket.IO ở [live events](contracts/events/live.md). Quy trình chạy, kiểm tra, kiểm duyệt, backup/restore và dựng lại projection ở [runbook demo](docs/runbooks/local-demo.md).
+Danh sách địa điểm và bãi xe đều có `meta.nextCursor` để tải tiếp. Contract REST ở [OpenAPI MVP](contracts/openapi/seatnow.json), [OpenAPI cộng đồng](contracts/openapi/community.json), [OpenAPI chủ quán](contracts/openapi/business.json) và [OpenAPI đặt bàn](contracts/openapi/booking.json); contract Socket.IO ở [live events](contracts/events/live.md). Quy trình chạy, kiểm tra, kiểm duyệt, backup/restore và dựng lại projection ở [runbook demo](docs/runbooks/local-demo.md).
 
-Các POST nội bộ `/internal/venues/:slug/availability-snapshots` và `/internal/parking-facilities/:slug/availability-snapshots` cần `Authorization: Bearer <AVAILABILITY_INGEST_TOKEN>`. Chỉ cấu hình token trong môi trường chạy API; không đưa vào frontend. Snapshot mới được đẩy qua Socket.IO `/live`; client refetch REST khi kết nối lại và định kỳ 30 giây. Chưa có giao diện chủ quán, POS connector hay nguồn bãi xe thật.
+Các POST nội bộ `/internal/venues/:slug/availability-snapshots` và `/internal/parking-facilities/:slug/availability-snapshots` cần `Authorization: Bearer <AVAILABILITY_INGEST_TOKEN>`. Chỉ cấu hình token trong môi trường chạy API; không đưa vào frontend. Snapshot mới được đẩy qua Socket.IO `/live`; client refetch REST khi kết nối lại và định kỳ 30 giây. Giao diện chủ quán đã có; POS connector và nguồn bãi xe thật chưa có.
 
 Để thử trạng thái Premium mà không tạo luồng thanh toán giả, đăng ký tài khoản local rồi chạy trong `backend`:
 
@@ -90,6 +90,7 @@ Chi tiết lựa chọn stack và trade-off nằm tại [ADR 001](docs/adr/001-s
 7. [F04 — Gói dịch vụ người dùng](docs/plan/features/F04-user-subscription.md)
 8. [F05 — Cộng đồng địa điểm](docs/plan/features/F05-community.md)
 9. [F06 — Quản lý địa điểm cho chủ quán](docs/plan/features/F06-business.md)
+10. [F07 — Yêu cầu đặt bàn](docs/plan/features/F07-booking.md)
 
 ## Nguồn convention đã đối chiếu
 
@@ -105,4 +106,4 @@ Không sao chép nguyên xi kiến trúc microservices của project khác. Seat
 
 “Realtime” không có nghĩa mọi số liệu đều chính xác tuyệt đối. Mỗi trạng thái phải hiển thị nguồn, thời điểm cập nhật và độ tin cậy. Khi dữ liệu hết hạn, UI chuyển sang `STALE`/“chưa có dữ liệu mới”, không tiếp tục hiển thị như số liệu trực tiếp.
 
-Ba tính năng MVP là quyền Free. Premium được mô hình hóa bằng entitlement ngay từ đầu để tránh rải `if (plan === ...)` khắp code, nhưng đặt bàn ưu tiên, giữ chỗ xe, voucher và AI nâng cao chưa thuộc MVP này.
+Ba tính năng MVP là quyền Free. Premium được mô hình hóa bằng entitlement phía backend. Quyền ưu tiên xử lý yêu cầu đặt bàn đã có trong F07 demo; giữ chỗ xe, voucher và AI nâng cao chưa triển khai.

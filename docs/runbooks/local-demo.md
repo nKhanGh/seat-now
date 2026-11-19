@@ -23,7 +23,8 @@ parking information. The demo snapshots expire after ten minutes; run
 `npm run seed:demo` again in `backend` to make them fresh.
 
 The static OpenAPI contracts are at `contracts/openapi/seatnow.json`,
-`contracts/openapi/community.json` and `contracts/openapi/business.json`. The
+`contracts/openapi/community.json`, `contracts/openapi/business.json` and
+`contracts/openapi/booking.json`. The
 Socket.IO contract is at `contracts/events/live.md`.
 
 ## Business owner demo
@@ -63,6 +64,24 @@ dashboard counts detail requests, not unique people, and occupancy averages
 snapshot values including demo data. There is no push notification or voucher
 redemption flow in this demo.
 
+## Booking request demo
+
+After the operator approves a business claim, the owner opens `/business` and
+checks **Nhận yêu cầu đặt bàn** for a restaurant or cafe. This opt-in is off by
+default; cinema table bookings are not supported. Another signed-in user opens
+that venue on the map, chooses a time at least one hour and at most fourteen
+days ahead, and sends a request for 1–12 guests. The request appears as
+**Chờ xác nhận** on `/bookings`; the owner's `/business` queue shows it with the
+guest's display name. The owner confirms or declines; the guest sees the
+updated state on `/bookings` (which refreshes every 30 seconds). The owner
+keeps seeing upcoming confirmed bookings and the guest may cancel one.
+
+To verify priority, activate a local Premium fixture for a second user with
+`SEED_PREMIUM_EMAIL` and `npm run seed:premium` from `backend`, then send a
+request from that account. Premium pending requests appear above ordinary
+pending requests. The priority flag is assigned by the backend; it does not
+automatically hold a table or guarantee acceptance.
+
 ## Community demo and moderation
 
 Sign in to save a venue, check in while physically near it, write a short
@@ -96,6 +115,9 @@ There is no public moderation dashboard in this demo.
 ## Quality gate
 
 ```powershell
+npm ci
+npm run format:check
+npm run lint
 cd backend
 npm run typecheck
 npm run build
