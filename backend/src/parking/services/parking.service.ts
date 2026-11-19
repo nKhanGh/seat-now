@@ -109,7 +109,7 @@ export class ParkingService {
     } catch (error) {
       if (!isDuplicate(error)) throw error;
       const existing = await this.snapshots.findOne({ source: dto.source, sourceRecordId: dto.sourceRecordId }).lean();
-      if (existing) return { latestUpdated: false, duplicate: true };
+      if (existing?.facilitySlug === slug) return { latestUpdated: false, duplicate: true };
       throw new ConflictException('Parking version already exists');
     }
     const result = await this.facilities.updateOne(

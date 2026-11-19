@@ -60,5 +60,6 @@ describeWithMongo('ParkingService with MongoDB 2dsphere', () => {
     expect((await service.ingest('linked', payload)).duplicate).toBe(true);
     expect((await service.ingest('linked', { ...payload, version: 1, sourceRecordId: 'parking-1' })).latestUpdated).toBe(false);
     expect((await service.getBySlug('linked')).data.availability.availableSpaces).toBe(2);
+    await expect(service.ingest('public', { ...payload, version: 4 })).rejects.toThrow('Parking version already exists');
   });
 });

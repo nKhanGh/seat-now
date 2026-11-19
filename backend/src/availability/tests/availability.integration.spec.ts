@@ -20,6 +20,7 @@ describeWithMongo('AvailabilityService with MongoDB', () => {
     views = mongoose.model(VenueMapView.name, VenueMapViewSchema);
     await Promise.all([snapshots.createIndexes(), latest.createIndexes(), views.createIndexes()]);
     await views.create({ slug: 'test-cafe', name: 'Test café', category: 'CAFE', address: 'Test', location: { type: 'Point', coordinates: [106.7, 10.77] }, priceTier: 2, rating: 4 });
+    await views.create({ slug: 'other-cafe', name: 'Other café', category: 'CAFE', address: 'Test', location: { type: 'Point', coordinates: [106.701, 10.77] }, priceTier: 2, rating: 4 });
     service = new AvailabilityService(snapshots, latest, views, new LiveGateway());
   });
 
@@ -49,6 +50,11 @@ describeWithMongo('AvailabilityService with MongoDB', () => {
   it('rejects contradictory capacity and preserves current data', async () => {
     await expect(service.ingest('test-cafe', { ...payload(13, 'bad-record'), tables: { total: 5, available: 8 } })).rejects.toThrow('Available capacity exceeds total');
     expect((await service.getBySlug('test-cafe')).data.version).toBe(12);
+  });
+
+  it('rejects a source record reused for another venue', async () => {
+    await expect(service.ingest('other-cafe', payload(12, 'record-12'))).rejects.toThrow('Availability version already exists');
+    expect((await service.getBySlug('other-cafe')).data.freshness).toBe('UNKNOWN');
   });
 
   it('reports stale and unknown without pretending availability is live', async () => {

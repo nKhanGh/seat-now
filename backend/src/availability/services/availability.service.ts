@@ -65,7 +65,7 @@ export class AvailabilityService {
     } catch (error) {
       if (!isDuplicate(error)) throw error;
       const existing = await this.snapshots.findOne({ source: dto.source, sourceRecordId: dto.sourceRecordId }).lean();
-      if (existing) return { data: publicAvailability(existing), latestUpdated: false, duplicate: true };
+      if (existing?.slug === slug) return { data: publicAvailability(existing), latestUpdated: false, duplicate: true };
       throw new ConflictException('Availability version already exists');
     }
     let latestUpdated = false;
