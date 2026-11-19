@@ -5,6 +5,7 @@ import { ReviewsService } from '../services/reviews.service';
 import { VenuesService } from '../../venues/services/venues.service';
 import { AuthService } from '../../auth/services/auth.service';
 import { ReviewPhoto, ReviewPhotoSchema } from '../schemas/review-photo.schema';
+import { ReviewReport, ReviewReportSchema } from '../schemas/review-report.schema';
 import sharp from 'sharp';
 
 const testUri = process.env.MONGODB_TEST_URI;
@@ -19,10 +20,11 @@ describeWithMongo('reviews with MongoDB', () => {
   it('upserts only the author review and pages public reviews without duplicates', async () => {
     const model = mongoose.model(Review.name, ReviewSchema);
     const photos = mongoose.model(ReviewPhoto.name, ReviewPhotoSchema);
-    await Promise.all([model.createIndexes(), photos.createIndexes()]);
+    const reports = mongoose.model(ReviewReport.name, ReviewReportSchema);
+    await Promise.all([model.createIndexes(), photos.createIndexes(), reports.createIndexes()]);
     const venues = { activeLocation: jest.fn().mockResolvedValue([106.7, 10.77]) } as unknown as VenuesService;
     const auth = { publicUsersByIds: jest.fn().mockImplementation(async (ids: Types.ObjectId[]) => ids.map((id) => ({ id: id.toString(), displayName: 'Demo User' }))) } as unknown as AuthService;
-    const service = new ReviewsService(model, photos, venues, auth);
+    const service = new ReviewsService(model, photos, reports, venues, auth);
     const authorId = new Types.ObjectId().toString();
     await service.upsert(authorId, 'demo-cafe', { rating: 4, body: 'Không gian thoải mái.' });
     await service.upsert(authorId, 'demo-cafe', { rating: 5, body: 'Dịch vụ rất tốt hôm nay.' });
@@ -42,9 +44,20 @@ describeWithMongo('reviews with MongoDB', () => {
     const photo = await service.getPhoto(first.data[0].id);
     expect((await sharp(photo).metadata()).format).toBe('webp');
     expect((await service.list('demo-cafe')).data[0].photoUrl).toContain('/photo');
+    const reporterId = new Types.ObjectId().toString();
+    await service.report(reporterId, first.data[0].id, 'SPAM');
+    await service.report(reporterId, first.data[0].id, 'ABUSE');
+    expect((await service.pendingReports()).data).toMatchObject([{ reviewId: first.data[0].id, reportCount: 1 }]);
+    await expect(service.report(authorId, first.data[0].id, 'SPAM')).rejects.toThrow('Cannot report your own review');
+    await service.hide(first.data[0].id);
+    expect((await service.list('demo-cafe')).data.some((review) => review.id === first.data[0].id)).toBe(false);
+    await expect(service.getPhoto(first.data[0].id)).rejects.toThrow('Photo not found');
+    await expect(service.upsert(authorId, 'demo-cafe', { rating: 5, body: 'Không thể đăng lại review.' })).rejects.toThrow('Review is hidden');
+    expect((await service.pendingReports()).data).toHaveLength(0);
     await expect(service.list('another-cafe', first.meta.nextCursor!)).rejects.toThrow('Invalid review cursor');
     await service.remove(authorId, 'demo-cafe');
-    expect(await model.countDocuments({ userId: new Types.ObjectId(authorId) })).toBe(0);
+    expect(await model.findOne({ userId: new Types.ObjectId(authorId) }, { body: 1, status: 1 }).lean()).toMatchObject({ body: 'Review đã xóa.', status: 'HIDDEN' });
+    await expect(service.upsert(authorId, 'demo-cafe', { rating: 5, body: 'Vẫn không thể đăng lại.' })).rejects.toThrow('Review is hidden');
     await expect(service.getPhoto(first.data[0].id)).rejects.toThrow('Photo not found');
   });
 });

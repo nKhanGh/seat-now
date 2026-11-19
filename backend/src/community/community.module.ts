@@ -12,6 +12,7 @@ import { Review, ReviewSchema } from './schemas/review.schema';
 import { ReviewsService } from './services/reviews.service';
 import { ReviewsController } from './controllers/reviews.controller';
 import { ReviewPhoto, ReviewPhotoSchema } from './schemas/review-photo.schema';
+import { ReviewReport, ReviewReportSchema } from './schemas/review-report.schema';
 import { Follow, FollowSchema } from './schemas/follow.schema';
 import { FollowsService } from './services/follows.service';
 import { FollowsController } from './controllers/follows.controller';
@@ -26,6 +27,7 @@ import { ProposalsController } from './controllers/proposals.controller';
     { name: Favorite.name, schema: FavoriteSchema },
     { name: Review.name, schema: ReviewSchema },
     { name: ReviewPhoto.name, schema: ReviewPhotoSchema },
+    { name: ReviewReport.name, schema: ReviewReportSchema },
     { name: Follow.name, schema: FollowSchema },
     { name: VenueProposal.name, schema: VenueProposalSchema },
     { name: ProposalConfirmation.name, schema: ProposalConfirmationSchema },

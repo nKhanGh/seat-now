@@ -6,6 +6,7 @@ import { VenuesService } from '../../venues/services/venues.service';
 import { UpsertReviewDto } from '../dto/review.dto';
 import { Review } from '../schemas/review.schema';
 import { ReviewPhoto } from '../schemas/review-photo.schema';
+import { ReviewReport } from '../schemas/review-report.schema';
 import sharp from 'sharp';
 
 const PAGE_SIZE = 20;
@@ -15,6 +16,7 @@ export class ReviewsService {
   constructor(
     @InjectModel(Review.name) private readonly reviews: Model<Review>,
     @InjectModel(ReviewPhoto.name) private readonly photos: Model<ReviewPhoto>,
+    @InjectModel(ReviewReport.name) private readonly reports: Model<ReviewReport>,
     private readonly venues: VenuesService,
     private readonly auth: AuthService,
   ) {}
@@ -72,9 +74,55 @@ export class ReviewsService {
   }
 
   async remove(userId: string, slug: string) {
-    const review = await this.reviews.findOneAndDelete({ userId: new Types.ObjectId(userId), venueSlug: slug });
-    if (review) await this.photos.deleteOne({ reviewId: review._id });
+    const owner = { userId: new Types.ObjectId(userId), venueSlug: slug };
+    const existing = await this.reviews.findOne(owner);
+    if (existing?.status === 'HIDDEN') {
+      await this.reviews.updateOne({ _id: existing._id, status: 'HIDDEN' }, { $set: { body: 'Review đã xóa.' } });
+    }
+    const review = existing?.status === 'HIDDEN' ? existing
+      : await this.reviews.findOneAndDelete({ ...owner, status: 'PUBLISHED' });
+    if (review) await Promise.all([
+      this.photos.deleteOne({ reviewId: review._id }),
+      this.reports.deleteMany({ reviewId: review._id }),
+    ]);
     return { data: { deleted: true } };
+  }
+
+  async report(userId: string, id: string, reason: 'SPAM' | 'ABUSE' | 'OTHER') {
+    if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Review not found');
+    const reviewId = new Types.ObjectId(id);
+    const review = await this.reviews.findOne({ _id: reviewId, status: 'PUBLISHED' }, { userId: 1 }).lean();
+    if (!review) throw new NotFoundException('Review not found');
+    if (review.userId.toString() === userId) throw new BadRequestException('Cannot report your own review');
+    const reporterId = new Types.ObjectId(userId);
+    try {
+      await this.reports.updateOne({ reviewId, reporterId }, { $setOnInsert: { reason } }, { upsert: true });
+    } catch (error) {
+      if (!(typeof error === 'object' && error !== null && 'code' in error && error.code === 11000)) throw error;
+    }
+    return { data: { reported: true } };
+  }
+
+  async pendingReports() {
+    const rows = await this.reports.aggregate<{ _id: Types.ObjectId; count: number; latestAt: Date }>([
+      { $group: { _id: '$reviewId', count: { $sum: 1 }, latestAt: { $max: '$createdAt' } } },
+      { $sort: { latestAt: -1 } }, { $limit: 100 },
+    ]);
+    const published = await this.reviews.find({ _id: { $in: rows.map((row) => row._id) }, status: 'PUBLISHED' },
+      { venueSlug: 1, body: 1, rating: 1 }).lean();
+    const byId = new Map(published.map((row) => [row._id.toString(), row]));
+    return { data: rows.filter((row) => byId.has(row._id.toString())).map((row) => ({
+      reviewId: row._id.toString(), venueSlug: byId.get(row._id.toString())!.venueSlug,
+      body: byId.get(row._id.toString())!.body, rating: byId.get(row._id.toString())!.rating,
+      reportCount: row.count, latestAt: row.latestAt,
+    })) };
+  }
+
+  async hide(id: string) {
+    if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Review not found');
+    const review = await this.reviews.findByIdAndUpdate(id, { $set: { status: 'HIDDEN' } }, { new: true });
+    if (!review) throw new NotFoundException('Review not found');
+    return { data: { id, status: 'HIDDEN' } };
   }
 
   async uploadPhoto(userId: string, slug: string, file: { buffer: Buffer; size: number } | undefined) {

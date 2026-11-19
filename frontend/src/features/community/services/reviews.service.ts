@@ -34,3 +34,10 @@ export async function uploadReviewPhoto(slug: string, file: File): Promise<void>
   });
   if (!response.ok) throw new Error(`Không tải được ảnh review (${response.status}). Chỉ nhận JPEG, PNG hoặc WebP tối đa 2 MB.`);
 }
+
+export async function reportReview(id: string, reason: 'SPAM' | 'ABUSE' | 'OTHER'): Promise<void> {
+  const response = await fetch(`/api/v1/reviews/${encodeURIComponent(id)}/reports`, {
+    method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason }),
+  });
+  if (!response.ok) throw new Error(`Không gửi được báo cáo (${response.status}).`);
+}

@@ -1,12 +1,14 @@
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useRemoveReview, useReviews, useSaveReview, useUploadReviewPhoto } from '../api/reviewsQueries';
+import { useRemoveReview, useReportReview, useReviews, useSaveReview, useUploadReviewPhoto } from '../api/reviewsQueries';
 
 export function ReviewPanel({ slug, userId }: { slug: string; userId: string | null }) {
   const reviews = useReviews(slug);
   const save = useSaveReview();
   const remove = useRemoveReview();
   const upload = useUploadReviewPhoto();
+  const report = useReportReview();
+  const [reportedIds, setReportedIds] = useState<string[]>([]);
   const [rating, setRating] = useState(5);
   const [body, setBody] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -52,8 +54,13 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
       {review.photoUrl && <img className="review-photo" src={review.photoUrl} alt={`Ảnh review của ${review.author.displayName}`} loading="lazy" />}
       <small>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</small>
       {userId === review.author.id && <button onClick={() => remove.mutate(slug)} disabled={remove.isPending}>Xóa review của tôi</button>}
+      {userId && userId !== review.author.id && <button disabled={report.isPending || reportedIds.includes(review.id)}
+        onClick={() => report.mutate({ id: review.id, reason: 'OTHER' }, { onSuccess: () => setReportedIds((ids) => [...ids, review.id]) })}>
+        {reportedIds.includes(review.id) ? 'Đã báo cáo' : 'Báo cáo review'}
+      </button>}
     </article>)}
     {remove.isError && <p role="alert">{remove.error.message}</p>}
+    {report.isError && <p role="alert">{report.error.message}</p>}
     {reviews.hasNextPage && <button onClick={() => void reviews.fetchNextPage()} disabled={reviews.isFetchingNextPage}>{reviews.isFetchingNextPage ? 'Đang tải…' : 'Xem thêm review'}</button>}
   </section>;
 }

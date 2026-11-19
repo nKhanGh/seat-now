@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from '../../auth/services/auth.service';
 import { ReviewQueryDto, UpsertReviewDto } from '../dto/review.dto';
 import { ReviewsService } from '../services/reviews.service';
+import { ReportReviewDto } from '../dto/report-review.dto';
+import { assertModerationToken } from '../assert-moderation-token';
 
 type CookieRequest = Request & { cookies?: Record<string, string> };
 
@@ -43,5 +45,23 @@ export class ReviewsController {
   async photo(@Param('id') id: string, @Res() response: Response) {
     const data = await this.reviews.getPhoto(id);
     response.type('image/webp').setHeader('Cache-Control', 'no-store').send(data);
+  }
+
+  @Post('reviews/:id/reports')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  async report(@Req() request: CookieRequest, @Param('id') id: string, @Body() input: ReportReviewDto) {
+    return this.reviews.report(await this.userId(request), id, input.reason);
+  }
+
+  @Get('internal/community/review-reports')
+  pendingReports(@Headers('authorization') authorization: string | undefined) {
+    assertModerationToken(authorization);
+    return this.reviews.pendingReports();
+  }
+
+  @Post('internal/community/reviews/:id/hide')
+  hide(@Headers('authorization') authorization: string | undefined, @Param('id') id: string) {
+    assertModerationToken(authorization);
+    return this.reviews.hide(id);
   }
 }
