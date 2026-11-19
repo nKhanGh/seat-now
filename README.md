@@ -69,7 +69,7 @@ npm run seed:premium
 
 Script này bị khóa trong `NODE_ENV=production`. Trang `/plans` phân biệt chức năng hiện có với chức năng **Sắp ra mắt**; chưa mở bán Premium.
 
-Kiểm tra nhanh: `cd backend; npm test; npm run typecheck; npm run build`. Integration test cần MongoDB: đặt `MONGODB_TEST_URI=mongodb://127.0.0.1:27017/seatnow` rồi chạy `npm run test:integration`. Test tạo và xóa database tạm `seatnow_test_*`. Frontend: `cd frontend; npm test; npm run build`. Nếu projection bị ngắt giữa chừng, chạy `npm run rebuild:projections` trong `backend`.
+Kiểm tra nhanh: tại thư mục gốc chạy `npm ci; npm run format:check; npm run lint`. Backend: `cd backend; npm test; npm run typecheck; npm run build`. Integration test cần MongoDB: đặt `MONGODB_TEST_URI=mongodb://127.0.0.1:27017/seatnow` rồi chạy `npm run test:integration`. Test tạo và xóa database tạm `seatnow_test_*`. Frontend: `cd frontend; npm test; npm run build`. CI tại `.github/workflows/ci.yml` chạy các bước này với MongoDB 8.0. Nếu projection bị ngắt giữa chừng, chạy `npm run rebuild:projections` trong `backend`.
 
 Dockerfile ở root build cả hai app và chạy cùng một origin. Khi deploy Render, đặt `MONGODB_URI` bằng MongoDB Atlas và `PUBLIC_ORIGIN` bằng URL HTTPS thực của service. Nếu dùng map style/tiles khác, đặt `VITE_MAP_STYLE_URL` lúc build frontend và `MAP_ASSET_ORIGINS` (danh sách origin phân cách dấu phẩy) cho Content Security Policy.
 

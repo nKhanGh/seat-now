@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      MONGODB_TEST_URI: mongodb://127.0.0.1:27017/seatnow
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+      - name: Install tooling
+        run: npm ci
+      - name: Install API dependencies
+        run: npm ci --prefix backend
+      - name: Install web dependencies
+        run: npm ci --prefix frontend
+      - name: Check formatting
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck API
+        run: npm run typecheck --prefix backend
+      - name: Typecheck web
+        run: npm run typecheck --prefix frontend
+      - name: Test API with MongoDB
+        run: npm test --prefix backend
+      - name: Test web
+        run: npm test --prefix frontend
+      - name: Build API
+        run: npm run build --prefix backend
+      - name: Build web
+        run: npm run build --prefix frontend

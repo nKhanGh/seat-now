@@ -1,6 +1,6 @@
 # Kế hoạch triển khai SeatNow
 
-Phiên bản 1.6 — 19/11/2026. Trạng thái: **MVP demo F00–F04, cộng đồng F05 và chủ quán F06 chạy được; hardening M6 chưa hoàn tất**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check và runbook demo đã có. POS/parking data connector thật, lint/CI, E2E browser automation và vận hành production còn ở M6.
+Phiên bản 1.7 — 19/11/2026. Trạng thái: **MVP demo F00–F04, cộng đồng F05 và chủ quán F06 chạy được; hardening M6 đang tiếp tục**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check, lint/format gate, CI và runbook demo đã có. POS/parking data connector thật, E2E browser automation và vận hành production còn ở M6.
 
 [Quy chuẩn chung](COMMON.md) · [ADR stack](../adr/001-stack-and-architecture.md) · [README dự án](../../README.md)
 
@@ -47,7 +47,7 @@ Theo quyết định ngày 19/11/2026, nhóm [F05 cộng đồng](features/F05-c
 - Thiết lập response envelope, error contract, Swagger/OpenAPI, request ID và health endpoint.
 - Gate: backend/frontend build, lint và test mẫu đều chạy từ máy sạch.
 
-Hiện có TypeScript strict, lockfile, build và test; lint/format gate còn phải thiết lập.
+Hiện có TypeScript strict, lockfile, build, test, ESLint type-aware và Prettier. CI chạy các gate này với MongoDB 8.0.
 
 ### M1 — F01 bản đồ tĩnh có dữ liệu thật từ API
 
