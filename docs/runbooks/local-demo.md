@@ -22,9 +22,46 @@ venues around District 1, Ho Chi Minh City. Select a venue to see seat and
 parking information. The demo snapshots expire after ten minutes; run
 `npm run seed:demo` again in `backend` to make them fresh.
 
-The static OpenAPI contracts are at `contracts/openapi/seatnow.json` and
-`contracts/openapi/community.json`. The
+The static OpenAPI contracts are at `contracts/openapi/seatnow.json`,
+`contracts/openapi/community.json` and `contracts/openapi/business.json`. The
 Socket.IO contract is at `contracts/events/live.md`.
+
+## Business owner demo
+
+Open `/business` after signing in. An owner can submit a management request
+for an existing venue, including evidence for operator review. Set a strong
+`BUSINESS_ADMIN_TOKEN` only in the backend environment. The operator reviews
+the claim and approves or rejects it; a slug alone never grants edit access.
+
+```powershell
+$base = 'http://localhost:3000/api/v1'
+$headers = @{ Authorization = "Bearer $env:BUSINESS_ADMIN_TOKEN" }
+Invoke-RestMethod "$base/internal/business/claims" -Headers $headers
+# After reviewing evidence, replace the placeholder with the actual claim ID:
+Invoke-RestMethod "$base/internal/business/claims/<claimId>/approve" -Method Post -Headers $headers
+# Or reject invalid ownership evidence:
+Invoke-RestMethod "$base/internal/business/claims/<claimId>/reject" -Method Post -Headers $headers
+```
+
+An approved owner can edit the venue profile and upload a logo on the Basic
+plan. For a time-limited Premium demo, use the internal plan endpoint. This
+does not charge anyone or create a payment subscription:
+
+```powershell
+$base = 'http://localhost:3000/api/v1'
+$headers = @{ Authorization = "Bearer $env:BUSINESS_ADMIN_TOKEN"; 'Content-Type' = 'application/json' }
+$expires = (Get-Date).ToUniversalTime().AddDays(7).ToString('o')
+$body = @{ plan = 'PREMIUM'; premiumExpiresAt = $expires } | ConvertTo-Json
+Invoke-RestMethod "$base/internal/business/venues/<venueSlug>/plan" -Method Put -Headers $headers -Body $body
+```
+
+Premium owners can update seats manually, see a seven-day dashboard, upload a
+cover image and schedule an in-app offer on `/business`. Operator snapshots
+expire after ten minutes. Sponsored results are labeled and sorted first in
+map search. Offers and covers stop appearing when Premium expires. The
+dashboard counts detail requests, not unique people, and occupancy averages
+snapshot values including demo data. There is no push notification or voucher
+redemption flow in this demo.
 
 ## Community demo and moderation
 
@@ -118,6 +155,6 @@ Premium fixture commands are disabled in production. Before public signup,
 add email verification and password recovery. Before multi-instance deploy,
 add a shared Socket.IO adapter and a durable event delivery strategy. Set
 `PUBLIC_ORIGIN` to the actual HTTPS origin, `MONGODB_URI` to the production
-database and keep `AVAILABILITY_INGEST_TOKEN` and
-`COMMUNITY_MODERATION_TOKEN` in a secret manager. Public signup also needs
+database and keep `AVAILABILITY_INGEST_TOKEN`,
+`COMMUNITY_MODERATION_TOKEN` and `BUSINESS_ADMIN_TOKEN` in a secret manager. Public signup also needs
 an explicit retention/deletion policy and an operated moderation process.

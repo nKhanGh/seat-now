@@ -1,6 +1,6 @@
 # Kế hoạch triển khai SeatNow
 
-Phiên bản 1.5 — 19/11/2026. Trạng thái: **MVP demo F00–F04 và nhóm cộng đồng F05 chạy được; hardening M6 chưa hoàn tất**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check và runbook demo đã có. POS/parking data connector thật, lint/CI, E2E browser automation và vận hành production còn ở M6.
+Phiên bản 1.6 — 19/11/2026. Trạng thái: **MVP demo F00–F04, cộng đồng F05 và chủ quán F06 chạy được; hardening M6 chưa hoàn tất**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check và runbook demo đã có. POS/parking data connector thật, lint/CI, E2E browser automation và vận hành production còn ở M6.
 
 [Quy chuẩn chung](COMMON.md) · [ADR stack](../adr/001-stack-and-architecture.md) · [README dự án](../../README.md)
 
@@ -32,9 +32,9 @@ Người dùng có thể mở app, cấp hoặc từ chối quyền vị trí, t
 | P2 | [F03 Bãi đỗ xe](features/F03-parking.md) | Bãi của quán và bãi lân cận, khoảng cách, giá, latest spaces, stale state | Giữ chỗ/đặt chỗ xe, thanh toán |
 | P2 | [F04 Gói người dùng](features/F04-user-subscription.md) | FREE/PREMIUM, subscription state, entitlement resolver, màn hình so sánh gói | Payment gateway, voucher, AI nâng cao, quảng cáo thật |
 | Done demo | [F05 Cộng đồng](features/F05-community.md) | Check-in, review/ảnh/báo cáo, favorite, follow/share, đề xuất địa điểm và duyệt nội bộ | Cần quy trình kiểm duyệt và chính sách dữ liệu trước public launch |
-| Later | Business | Hồ sơ/chủ quán, xác thực, dashboard, ads, flash voucher, chuỗi chi nhánh | Chỉ giữ internal ingestion tối thiểu để tạo dữ liệu MVP |
+| Done demo | [F06 Chủ quán](features/F06-business.md) | Claim qua duyệt nội bộ, hồ sơ/logo, Premium demo, dashboard, quảng cáo/ưu đãi trong app, nhiều chi nhánh/ảnh bìa | Chưa có billing, POS connector, push, đổi voucher |
 
-Theo quyết định ngày 19/11/2026, nhóm [F05 cộng đồng](features/F05-community.md) được thực hiện sau MVP demo; tính năng chủ quán là nhóm tiếp theo.
+Theo quyết định ngày 19/11/2026, nhóm [F05 cộng đồng](features/F05-community.md) và [F06 chủ quán](features/F06-business.md) được thực hiện sau MVP demo.
 
 ## 3. Thứ tự triển khai theo vertical slice
 

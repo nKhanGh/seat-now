@@ -1,0 +1,43 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "SeatNow business API", "version": "0.1.0", "description": "Business management demo. Ownership and premium activation require operator review; no payment flow." },
+  "servers": [{ "url": "/api/v1" }],
+  "paths": {
+    "/business/claims/{slug}": { "post": { "summary": "Request management access to an active venue", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ClaimInput" } } } }, "responses": { "201": { "description": "Pending claim" }, "409": { "description": "Already claimed or managed" } } } },
+    "/business/claims/me": { "get": { "summary": "List my management requests", "security": [{ "sessionCookie": [] }], "responses": { "200": { "description": "Up to 100 claims without evidence text" } } } },
+    "/business/venues": { "get": { "summary": "List venues managed by the signed-in owner", "security": [{ "sessionCookie": [] }], "responses": { "200": { "description": "Up to 100 branch profiles with effective FREE or PREMIUM plan" } } } },
+    "/internal/business/claims": { "get": { "summary": "List pending claims and their evidence", "security": [{ "businessAdminToken": [] }], "responses": { "200": { "description": "Pending review queue" } } } },
+    "/internal/business/claims/{id}/approve": { "post": { "summary": "Grant ownership after checking evidence", "security": [{ "businessAdminToken": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "201": { "description": "Claim approved" }, "409": { "description": "Venue managed by another owner" } } } },
+    "/internal/business/claims/{id}/reject": { "post": { "summary": "Reject a pending claim", "security": [{ "businessAdminToken": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "201": { "description": "Claim rejected" } } } },
+    "/internal/business/venues/{slug}/plan": { "put": { "summary": "Set a demo FREE or time-limited PREMIUM business plan", "security": [{ "businessAdminToken": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlanInput" } } } }, "responses": { "200": { "description": "Plan updated" }, "400": { "description": "Invalid expiry" } } } },
+    "/business/venues/{slug}/profile": { "put": { "summary": "Update a managed venue profile; available to FREE owners", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProfileInput" } } } }, "responses": { "200": { "description": "Updated public profile" }, "403": { "description": "Owner access required" } } } },
+    "/business/venues/{slug}/logo": { "post": { "summary": "Upload a 2 MB maximum JPEG, PNG or WebP logo; stored as 256x256 WebP", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "logo": { "type": "string", "format": "binary" } }, "required": ["logo"] } } } }, "responses": { "201": { "description": "Logo uploaded" }, "403": { "description": "Owner access required" } } } },
+    "/venues/{slug}/logo": { "get": { "summary": "Public logo image", "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "image/webp" }, "404": { "description": "No logo" } } } },
+    "/business/venues/{slug}/cover": { "post": { "summary": "Upload a 2 MB maximum Premium cover image; stored as 1600x800 WebP", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "cover": { "type": "string", "format": "binary" } }, "required": ["cover"] } } } }, "responses": { "201": { "description": "Cover uploaded" }, "403": { "description": "Premium owner access required" } } } },
+    "/venues/{slug}/cover": { "get": { "summary": "Public cover image if present", "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "image/webp" }, "404": { "description": "No cover" } } } },
+    "/business/venues/{slug}/availability": { "put": { "summary": "Submit Premium manual availability; OPERATOR source expires after 10 minutes", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ManualAvailabilityInput" } } } }, "responses": { "200": { "description": "Snapshot stored and broadcast" }, "403": { "description": "Premium owner access required" } } } },
+    "/business/venues/{slug}/dashboard": { "get": { "summary": "Seven-day detail views and occupancy samples for a Premium owner", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Hourly aggregate views and occupancy; no visitor identity" }, "403": { "description": "Premium owner access required" } } } },
+    "/business/venues/{slug}/campaign": {
+      "put": { "summary": "Schedule a Premium in-app offer and optional labeled sponsorship", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CampaignInput" } } } }, "responses": { "200": { "description": "Campaign scheduled" }, "403": { "description": "Premium owner access required" } } },
+      "delete": { "summary": "Disable the active campaign", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Campaign disabled" } } }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "seatnow_sid", "description": "Production cookie: __Host-seatnow_sid" },
+      "businessAdminToken": { "type": "http", "scheme": "bearer", "description": "BUSINESS_ADMIN_TOKEN, never exposed to frontend" }
+    },
+    "parameters": {
+      "slug": { "in": "path", "name": "slug", "required": true, "schema": { "type": "string" } },
+      "id": { "in": "path", "name": "id", "required": true, "schema": { "type": "string", "pattern": "^[a-f0-9]{24}$" } }
+    },
+    "schemas": {
+      "ClaimInput": { "type": "object", "required": ["evidence"], "properties": { "evidence": { "type": "string", "minLength": 20, "maxLength": 300 } } },
+      "PlanInput": { "type": "object", "required": ["plan"], "properties": { "plan": { "type": "string", "enum": ["FREE", "PREMIUM"] }, "premiumExpiresAt": { "type": "string", "format": "date-time" } } },
+      "ProfileInput": { "type": "object", "required": ["name", "address", "description", "openingHours", "menuSummary", "priceTier"], "properties": { "name": { "type": "string", "minLength": 3, "maxLength": 100 }, "address": { "type": "string", "minLength": 5, "maxLength": 200 }, "description": { "type": "string", "maxLength": 500 }, "openingHours": { "type": "string", "maxLength": 200 }, "menuSummary": { "type": "string", "maxLength": 1000 }, "priceTier": { "type": "integer", "minimum": 1, "maximum": 4 } } },
+      "Capacity": { "type": "object", "required": ["total", "available"], "properties": { "total": { "type": "integer", "minimum": 0 }, "available": { "type": "integer", "minimum": 0 } } },
+      "ManualAvailabilityInput": { "type": "object", "required": ["crowdLevel", "acceptingGuests"], "properties": { "tables": { "$ref": "#/components/schemas/Capacity" }, "seats": { "$ref": "#/components/schemas/Capacity" }, "crowdLevel": { "type": "string", "enum": ["QUIET", "MODERATE", "BUSY", "FULL"] }, "estimatedWaitMinutes": { "type": "integer", "minimum": 0, "maximum": 240 }, "acceptingGuests": { "type": "boolean" } } },
+      "CampaignInput": { "type": "object", "required": ["promotionText", "startsAt", "endsAt", "sponsored"], "properties": { "promotionText": { "type": "string", "minLength": 10, "maxLength": 200 }, "startsAt": { "type": "string", "format": "date-time" }, "endsAt": { "type": "string", "format": "date-time" }, "sponsored": { "type": "boolean" } } }
+    }
+  }
+}
