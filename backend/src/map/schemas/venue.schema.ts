@@ -15,11 +15,14 @@ export class Venue {
   @Prop({ required: true }) category!: string;
   @Prop({ type: [String], default: [] }) cuisineTypes!: string[];
   @Prop({ type: String, default: '' }) description!: string;
+  @Prop({ type: String, default: '' }) openingHours!: string;
+  @Prop({ type: String, default: '' }) menuSummary!: string;
   @Prop({ required: true, type: PointSchema }) location!: { type: 'Point'; coordinates: [number, number] };
   @Prop({ required: true }) address!: string;
   @Prop({ required: true }) priceTier!: number;
   @Prop({ required: true }) rating!: number;
   @Prop({ default: 'ACTIVE' }) status!: string;
+  @Prop({ type: Boolean, default: false }) hasLogo!: boolean;
 }
 
 export const VenueSchema = SchemaFactory.createForClass(Venue);
