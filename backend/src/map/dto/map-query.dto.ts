@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 const toNumber = ({ value }: { value: unknown }) => value === undefined ? undefined : Number(value);
 
@@ -30,4 +30,10 @@ export class MapQueryDto {
 
   @IsOptional() @IsEnum(['true', 'false'])
   hasAvailability?: string;
+
+  @Transform(toNumber) @IsOptional() @IsInt() @Min(1) @Max(50)
+  limit = 20;
+
+  @IsOptional() @IsString() @MaxLength(500)
+  cursor?: string;
 }

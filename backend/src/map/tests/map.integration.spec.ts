@@ -30,19 +30,29 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
   });
 
   it('filters by radius before returning public results', async () => {
-    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100 });
+    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, limit: 20 });
     expect(result.data.map((venue) => venue.slug)).toEqual(['near-cafe', 'near-restaurant']);
     expect(result.data[0].distanceM).toBe(0);
   });
 
   it('applies category and availability filters inside the geo query', async () => {
-    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, category: 'CAFE', hasAvailability: 'true' });
+    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, limit: 20, category: 'CAFE', hasAvailability: 'true' });
     expect(result.data.map((venue) => venue.slug)).toEqual(['near-cafe']);
     expect(result.data[0].availability.freshness).toBe('FRESH');
   });
 
   it('filters cuisine in MongoDB before applying the result limit', async () => {
-    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, cuisine: 'WESTERN' });
+    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, limit: 20, cuisine: 'WESTERN' });
     expect(result.data.map((venue) => venue.slug)).toEqual(['near-restaurant']);
+  });
+
+  it('paginates by distance and id without repeating venues', async () => {
+    const query = { lat: 10.7769, lng: 106.7009, radiusM: 10_000, limit: 1 };
+    const first = await service.findNearby(query);
+    const second = await service.findNearby({ ...query, cursor: first.meta.nextCursor! });
+    const third = await service.findNearby({ ...query, cursor: second.meta.nextCursor! });
+    expect([first.data[0].slug, second.data[0].slug, third.data[0].slug]).toEqual(['near-cafe', 'near-restaurant', 'far-cafe']);
+    expect(third.meta.nextCursor).toBeNull();
+    await expect(service.findNearby({ ...query, category: 'CAFE', cursor: first.meta.nextCursor! })).rejects.toThrow('Invalid map cursor');
   });
 });
