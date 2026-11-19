@@ -36,7 +36,7 @@ export async function rebuildProjections(models: Models) {
     { $sort: { slug: 1, version: -1 } },
     { $group: { _id: '$slug', record: { $first: '$$ROOT' } } },
   ]).cursor();
-  for await (const { record } of venueSnapshots) {
+  for await (const { record } of venueSnapshots as AsyncIterable<{ _id: string; record: AvailabilitySnapshot }>) {
     const latestRecord = {
       slug: record.slug, version: record.version, tables: record.tables, seats: record.seats,
       crowdLevel: record.crowdLevel, estimatedWaitMinutes: record.estimatedWaitMinutes,
@@ -69,7 +69,7 @@ export async function rebuildProjections(models: Models) {
     { $sort: { facilitySlug: 1, version: -1 } },
     { $group: { _id: '$facilitySlug', record: { $first: '$$ROOT' } } },
   ]).cursor();
-  for await (const { record } of parkingSnapshots) {
+  for await (const { record } of parkingSnapshots as AsyncIterable<{ _id: string; record: ParkingSnapshot }>) {
     const result = await models.parking.updateOne(
       { slug: record.facilitySlug, status: 'ACTIVE', $or: [{ availabilityVersion: { $lt: record.version } }, { availabilityVersion: null }] },
       { $set: {

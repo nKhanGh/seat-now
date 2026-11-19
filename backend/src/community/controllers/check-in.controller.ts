@@ -1,3 +1,4 @@
+import { getSessionToken } from '../../auth/session-token';
 import { Body, Controller, Get, HttpCode, Param, Post, Req } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
@@ -18,8 +19,7 @@ export class CheckInController {
   @HttpCode(200)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async create(@Param('slug') slug: string, @Req() request: CookieRequest, @Body() input: CheckInDto) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    const user = await this.auth.authenticate(request.cookies?.[cookieName]);
+    const user = await this.auth.authenticate(getSessionToken(request));
     return this.checkIns.checkIn(user.id, slug, input);
   }
 }

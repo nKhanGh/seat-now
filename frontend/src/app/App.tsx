@@ -22,7 +22,7 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     try {
       if (mode === 'login') await login.mutateAsync({ email, password });
       else await register.mutateAsync({ email, password, displayName });
-      navigate('/');
+      void navigate('/');
     } catch { /* The error is displayed below. */ }
   }
   return <main className="auth-page"><Link to="/" className="brand">SeatNow</Link><form className="card" onSubmit={(event) => void submit(event)}>

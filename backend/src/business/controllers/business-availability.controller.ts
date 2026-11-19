@@ -1,3 +1,4 @@
+import { getSessionToken } from '../../auth/session-token';
 import { Body, Controller, Param, Put, Req } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
@@ -16,8 +17,7 @@ export class BusinessAvailabilityController {
   @Put(':slug/availability')
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async update(@Req() request: CookieRequest, @Param('slug') slug: string, @Body() input: ManualAvailabilityDto) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    const user = await this.auth.authenticate(request.cookies?.[cookieName]);
+    const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug, true);
     return this.availability.operatorUpdate(slug, input);
   }

@@ -1,3 +1,4 @@
+import { getSessionToken } from '../../auth/session-token';
 import { Controller, Get, Param, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from '../../auth/services/auth.service';
@@ -14,8 +15,7 @@ export class BusinessDashboardController {
 
   @Get(':slug/dashboard')
   async get(@Req() request: CookieRequest, @Param('slug') slug: string) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    const user = await this.auth.authenticate(request.cookies?.[cookieName]);
+    const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug, true);
     const [views, occupancy] = await Promise.all([
       this.pageViews.sevenDaySummary(slug), this.availability.sevenDayOccupancy(slug),

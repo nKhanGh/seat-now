@@ -21,7 +21,7 @@ export function PlansPage() {
     <section className="plans-hero"><p className="eyebrow">Gói dành cho người dùng</p><h1>Chọn cách khám phá phù hợp</h1><p>Ba tính năng chính hiện dùng miễn phí. Các quyền Premium đang được phát triển, chưa mở thanh toán.</p></section>
     {enabled ? <section className="plan-current" aria-label="Gói hiện tại">
       {subscription.isPending && <p>Đang tải gói của bạn…</p>}
-      {subscription.isError && <p role="alert">Không tải được gói hiện tại. <button onClick={() => subscription.refetch()}>Thử lại</button></p>}
+      {subscription.isError && <p role="alert">Không tải được gói hiện tại. <button onClick={() => void subscription.refetch()}>Thử lại</button></p>}
       {subscription.data && <p>Gói hiện tại: <strong>{subscription.data.plan}</strong>{subscription.data.plan === 'PREMIUM' && subscription.data.currentPeriodEnd && ` · Hiệu lực đến ${new Date(subscription.data.currentPeriodEnd).toLocaleDateString('vi-VN')}`}</p>}
       {entitlements.data && <p className="small">Bản đồ, tình trạng chỗ ngồi và bãi xe: {entitlements.data.entitlements['map.basic'] && entitlements.data.entitlements['availability.read'] && entitlements.data.entitlements['parking.read'] ? 'đang sử dụng được' : 'chưa khả dụng'}.</p>}
     </section> : <p className="plan-current">Bạn có thể dùng các tính năng Free ngay. <Link to="/login">Đăng nhập</Link> để xem gói của mình.</p>}

@@ -1,3 +1,4 @@
+import { getSessionToken } from '../../auth/session-token';
 import { Controller, Get, Param, Post, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,8 +21,7 @@ export class BusinessLogoController {
   @UseInterceptors(FileInterceptor('logo', { limits: { files: 1, fileSize: 2_000_000 } }))
   async upload(@Req() request: CookieRequest, @Param('slug') slug: string,
     @UploadedFile() file: { buffer: Buffer; size: number } | undefined) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    const user = await this.auth.authenticate(request.cookies?.[cookieName]);
+    const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug);
     return this.logos.upload(slug, file);
   }
@@ -37,8 +37,7 @@ export class BusinessLogoController {
   @UseInterceptors(FileInterceptor('cover', { limits: { files: 1, fileSize: 2_000_000 } }))
   async uploadCover(@Req() request: CookieRequest, @Param('slug') slug: string,
     @UploadedFile() file: { buffer: Buffer; size: number } | undefined) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    const user = await this.auth.authenticate(request.cookies?.[cookieName]);
+    const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug, true);
     return this.covers.upload(slug, file);
   }

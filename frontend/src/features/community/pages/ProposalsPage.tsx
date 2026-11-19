@@ -50,7 +50,7 @@ export function ProposalsPage() {
     </form> : <p><Link to="/login">Đăng nhập</Link> để đề xuất địa điểm mới.</p>}
     <h2>Đang chờ xác nhận</h2>
     {proposals.isPending && <p>Đang tải đề xuất…</p>}
-    {proposals.isError && <p role="alert">{proposals.error.message} <button onClick={() => proposals.refetch()}>Thử lại</button></p>}
+    {proposals.isError && <p role="alert">{proposals.error.message} <button onClick={() => void proposals.refetch()}>Thử lại</button></p>}
     {proposals.data?.length === 0 && <p>Chưa có đề xuất nào.</p>}
     {proposals.data?.map((proposal) => <article key={proposal.id} className="card proposal-card">
       <h3>{proposal.name}</h3><p>{proposal.address}</p><p>{proposal.description}</p>

@@ -1,3 +1,4 @@
+import { getSessionToken } from '../../auth/session-token';
 import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
@@ -15,8 +16,7 @@ export class ReviewsController {
   constructor(private readonly reviews: ReviewsService, private readonly auth: AuthService) {}
 
   private async userId(request: CookieRequest) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    return (await this.auth.authenticate(request.cookies?.[cookieName])).id;
+    return (await this.auth.authenticate(getSessionToken(request))).id;
   }
 
   @Get('venues/:slug/reviews')

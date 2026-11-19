@@ -1,3 +1,4 @@
+import { getSessionToken } from '../session-token';
 import { Body, Controller, Get, HttpCode, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
@@ -32,13 +33,13 @@ export class AuthController {
 
   @Get('me')
   async me(@Req() request: CookieRequest) {
-    return { data: await this.auth.authenticate(request.cookies?.[this.cookieName]) };
+    return { data: await this.auth.authenticate(getSessionToken(request)) };
   }
 
   @Post('logout')
   @HttpCode(204)
   async logout(@Req() request: CookieRequest, @Res({ passthrough: true }) response: Response) {
-    await this.auth.logout(request.cookies?.[this.cookieName]);
+    await this.auth.logout(getSessionToken(request));
     response.clearCookie(this.cookieName, { path: '/' });
   }
 

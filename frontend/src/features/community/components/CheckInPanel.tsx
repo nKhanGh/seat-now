@@ -24,7 +24,7 @@ export function CheckInPanel({ slug, signedIn }: { slug: string; signedIn: boole
   return <section className="check-in-panel" aria-label="Check-in cộng đồng">
     <h2>Check-in cộng đồng</h2>
     {summary.isPending && <p className="small">Đang tải lượt check-in…</p>}
-    {summary.isError && <p role="alert">{summary.error.message} <button onClick={() => summary.refetch()}>Thử lại</button></p>}
+    {summary.isError && <p role="alert">{summary.error.message} <button onClick={() => void summary.refetch()}>Thử lại</button></p>}
     {summary.data && <p>{summary.data.lastHourUsers === 0 ? 'Chưa có check-in trong giờ qua.' : `${summary.data.lastHourUsers} người đã check-in trong giờ qua.`}</p>}
     <p className="small">Lượt check-in tự báo cáo, không thay thế tình trạng bàn trống.</p>
     {signedIn ? <button onClick={checkIn} disabled={create.isPending}>{create.isPending ? 'Đang ghi nhận…' : 'Check-in tại đây'}</button> : <Link to="/login">Đăng nhập để check-in</Link>}

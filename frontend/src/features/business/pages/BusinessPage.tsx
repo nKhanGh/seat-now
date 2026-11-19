@@ -41,7 +41,7 @@ function Dashboard({ venue, userId }: { venue: BusinessVenue; userId: string }) 
   return <section className="card business-dashboard" aria-label={`Dashboard ${venue.name}`}>
     <h3>Dashboard · {venue.name}</h3><p>7 ngày gần đây</p>
     {dashboard.isPending && <p>Đang tải thống kê…</p>}
-    {dashboard.isError && <p role="alert">{dashboard.error.message} <button onClick={() => dashboard.refetch()}>Thử lại</button></p>}
+    {dashboard.isError && <p role="alert">{dashboard.error.message} <button onClick={() => void dashboard.refetch()}>Thử lại</button></p>}
     {data && <>
       <p><strong>{data.views.total}</strong> lượt mở trang chi tiết (không phải người dùng duy nhất).</p>
       <p>Tỷ lệ lấp đầy trung bình: <strong>{data.occupancy.averagePercent === null ? 'Chưa có dữ liệu' : `${data.occupancy.averagePercent}%`}</strong> · {data.occupancy.samples} snapshot.</p>

@@ -1,3 +1,4 @@
+import { getSessionToken } from '../../auth/session-token';
 import { Body, Controller, Get, Headers, Param, Post, Put, Req } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
@@ -14,8 +15,7 @@ export class BusinessAccessController {
   constructor(private readonly business: BusinessAccessService, private readonly auth: AuthService) {}
 
   private async userId(request: CookieRequest) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    return (await this.auth.authenticate(request.cookies?.[cookieName])).id;
+    return (await this.auth.authenticate(getSessionToken(request))).id;
   }
 
   @Post('business/claims/:slug')

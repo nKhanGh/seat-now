@@ -70,7 +70,7 @@ export class ReviewsService {
       { $set: { rating: input.rating, body } },
       { upsert: true, new: true },
     ).lean();
-    return { data: { id: review!._id.toString(), rating: review!.rating, body: review!.body, updatedAt: review!.updatedAt } };
+    return { data: { id: review._id.toString(), rating: review.rating, body: review.body, updatedAt: review.updatedAt } };
   }
 
   async remove(userId: string, slug: string) {

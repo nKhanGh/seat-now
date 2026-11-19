@@ -64,7 +64,10 @@ export function MapExplorer() {
   const update = useCallback((patch: Record<string, string | null>) => {
     setParams((current) => {
       const next = new URLSearchParams(current);
-      for (const [key, value] of Object.entries(patch)) value ? next.set(key, value) : next.delete(key);
+      for (const [key, value] of Object.entries(patch)) {
+        if (value) next.set(key, value);
+        else next.delete(key);
+      }
       return next;
     }, { replace: true });
   }, [setParams]);
@@ -95,7 +98,7 @@ export function MapExplorer() {
     <div className="explorer-body"><section className="venue-list" aria-label="Danh sách địa điểm">
       <h1>Khám phá quanh bạn</h1><p className="small">Dữ liệu mẫu hư cấu tại Quận 1, TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.</p>
       {venues.isPending && <p>Đang tìm địa điểm…</p>}
-      {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => venues.refetch()}>Thử lại</button></p>}
+      {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => void venues.refetch()}>Thử lại</button></p>}
       {venues.data?.pages[0]?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
       {displayedVenues.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
         <span className="venue-category">{venue.promotion?.sponsored && <span className="sponsored-label">Được tài trợ · </span>}{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.logoUrl && <img className="venue-list-logo" src={venue.logoUrl} alt="" />}{venue.name} {venue.verified && <span className="verified-badge" aria-label="Chủ quán đã xác thực">✓</span>}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span>{venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}{venue.verified && venue.availability.freshness === 'FRESH' && venue.availability.acceptingGuests && venue.availability.crowdLevel === 'QUIET' && venue.availability.tablesTotal !== null && venue.availability.tablesTotal > 0 && venue.availability.tablesAvailable !== null && venue.availability.tablesAvailable / venue.availability.tablesTotal >= 0.5 && <span className="promotion-label">Còn nhiều bàn trống</span>}<AvailabilityStatus availability={venue.availability} compact />
@@ -123,7 +126,7 @@ export function MapExplorer() {
         <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />
         <ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />
         {parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}
-        {parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}
+        {parking.isError && <p role="alert">{parking.error.message} <button onClick={() => void parking.refetch()}>Thử lại</button></p>}
         {parking.data && <><ParkingList facilities={parkingItems} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />
           {parking.hasNextPage && parkingItems.length < 100 && <button className="load-more" onClick={() => void parking.fetchNextPage()} disabled={parking.isFetchingNextPage}>{parking.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm bãi xe'}</button>}
           {parking.hasNextPage && parkingItems.length >= 100 && <p className="small">Đã hiển thị 100 bãi xe. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}</>}

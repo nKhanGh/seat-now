@@ -31,13 +31,15 @@ export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkin
 
   useEffect(() => {
     if (!container.current) return;
+    const configuredStyle: unknown = import.meta.env.VITE_MAP_STYLE_URL as unknown;
     const instance = new Map({
       container: container.current,
-      style: import.meta.env.VITE_MAP_STYLE_URL || 'https://tiles.openfreemap.org/styles/liberty',
+      style: typeof configuredStyle === 'string' && configuredStyle ? configuredStyle : 'https://tiles.openfreemap.org/styles/liberty',
       center: [lng, lat], zoom: 13,
     });
     instance.on('error', (event) => {
-      setMapError(event.error instanceof Error ? event.error.message : 'Không tải được bản đồ nền.');
+      const mapError: unknown = event.error;
+      setMapError(mapError instanceof Error ? mapError.message : 'Không tải được bản đồ nền.');
     });
     instance.on('load', () => setMapError(null));
     instance.addControl(new NavigationControl(), 'top-right');

@@ -1,3 +1,4 @@
+import { getSessionToken } from '../../auth/session-token';
 import { Body, Controller, Delete, Param, Put, Req } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
@@ -14,8 +15,7 @@ export class BusinessCampaignController {
     private readonly auth: AuthService) {}
 
   private async requirePremium(request: CookieRequest, slug: string) {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
-    const user = await this.auth.authenticate(request.cookies?.[cookieName]);
+    const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug, true);
   }
 

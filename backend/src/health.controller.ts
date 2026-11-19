@@ -1,6 +1,6 @@
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
+import { Connection, ConnectionStates } from 'mongoose';
 
 @Controller('health')
 export class HealthController {
@@ -8,7 +8,7 @@ export class HealthController {
 
   @Get()
   async get() {
-    if (this.connection.readyState !== 1 || !this.connection.db) {
+    if (this.connection.readyState !== ConnectionStates.connected || !this.connection.db) {
       throw new ServiceUnavailableException({ code: 'DATABASE_UNAVAILABLE', message: 'Database unavailable' });
     }
     try {

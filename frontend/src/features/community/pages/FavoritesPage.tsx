@@ -12,7 +12,7 @@ export function FavoritesPage() {
     {auth.isPending && <p>Đang kiểm tra đăng nhập…</p>}
     {!auth.isPending && !auth.data && <p><Link to="/login">Đăng nhập</Link> để xem danh sách của bạn.</p>}
     {auth.data && favorites.isPending && <p>Đang tải quán đã lưu…</p>}
-    {favorites.isError && <p role="alert">{favorites.error.message} <button onClick={() => favorites.refetch()}>Thử lại</button></p>}
+    {favorites.isError && <p role="alert">{favorites.error.message} <button onClick={() => void favorites.refetch()}>Thử lại</button></p>}
     {favorites.data?.length === 0 && <p>Bạn chưa lưu địa điểm nào.</p>}
     {favorites.data?.map((venue) => <article key={venue.slug} className="card favorite-card">
       <h2>{venue.name}</h2><p>{venue.address}</p>

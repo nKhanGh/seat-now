@@ -46,7 +46,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
       {fileError && <p role="alert">{fileError}</p>}
     </form> : <p><Link to="/login">Đăng nhập</Link> để viết review.</p>}
     {reviews.isPending && <p>Đang tải review…</p>}
-    {reviews.isError && <p role="alert">{reviews.error.message} <button onClick={() => reviews.refetch()}>Thử lại</button></p>}
+    {reviews.isError && <p role="alert">{reviews.error.message} <button onClick={() => void reviews.refetch()}>Thử lại</button></p>}
     {reviews.data && items.length === 0 && <p>Chưa có review nào.</p>}
     {items.map((review) => <article key={review.id} className="review-card">
       <Link to={`/users/${review.author.id}`}>{review.author.displayName}</Link><span> · {'★'.repeat(review.rating)}</span>
