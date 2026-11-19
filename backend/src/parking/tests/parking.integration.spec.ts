@@ -23,7 +23,7 @@ describeWithMongo('ParkingService with MongoDB 2dsphere', () => {
     const common = { status: 'ACTIVE', vehicleTypes: ['MOTORBIKE'], open24h: true, pricing: { kind: 'HOURLY', amountMinor: 10000, currency: 'VND', unit: 'HOUR', note: null } };
     await facilities.insertMany([
       { ...common, slug: 'linked', name: 'Linked', address: 'Near', kind: 'VENUE', venueSlugs: ['test-cafe'], location: { type: 'Point', coordinates: [106.7002, 10.7702] }, availabilityVersion: 2, availableSpaces: 3, totalSpaces: 10, availabilityCapturedAt: new Date(), availabilityExpiresAt: new Date(Date.now() + 60_000) },
-      { ...common, slug: 'public', name: 'Public', address: 'Near', kind: 'PUBLIC', venueSlugs: [], location: { type: 'Point', coordinates: [106.7001, 10.7701] }, availabilityVersion: 1, availableSpaces: 0, totalSpaces: 20, availabilityCapturedAt: new Date(), availabilityExpiresAt: new Date(Date.now() - 60_000) },
+      { ...common, slug: 'public', name: 'Public', address: 'Near', kind: 'PUBLIC', venueSlugs: [], open24h: false, pricing: { kind: 'FREE', amountMinor: 0, currency: 'VND', unit: 'VISIT', note: null }, location: { type: 'Point', coordinates: [106.7001, 10.7701] }, availabilityVersion: 1, availableSpaces: 0, totalSpaces: 20, availabilityCapturedAt: new Date(), availabilityExpiresAt: new Date(Date.now() - 60_000) },
       { ...common, slug: 'far', name: 'Far', address: 'Far', kind: 'PUBLIC', venueSlugs: [], location: { type: 'Point', coordinates: [106.73, 10.8] } },
     ]);
     service = new ParkingService(facilities, snapshots, venues, new LiveGateway());
@@ -45,6 +45,13 @@ describeWithMongo('ParkingService with MongoDB 2dsphere', () => {
   it('filters fresh free spaces inside the geospatial query', async () => {
     const result = await service.forVenue('test-cafe', { radiusM: 500, vehicleType: 'MOTORBIKE', hasAvailability: 'true' });
     expect(result.data.map((item) => item.slug)).toEqual(['linked']);
+  });
+
+  it('filters free pricing and known 24-hour opening before limiting', async () => {
+    const free = await service.forVenue('test-cafe', { radiusM: 500, freeOnly: 'true' });
+    expect(free.data.map((item) => item.slug)).toEqual(['public']);
+    const open = await service.forVenue('test-cafe', { radiusM: 500, open24h: 'true' });
+    expect(open.data.map((item) => item.slug)).toEqual(['linked']);
   });
 
   it('accepts only newer parking snapshots and deduplicates records', async () => {

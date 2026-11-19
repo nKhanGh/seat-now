@@ -38,6 +38,8 @@ export class ParkingService {
     const now = new Date();
     const match: Record<string, unknown> = { status: 'ACTIVE' };
     if (query.vehicleType) match.vehicleTypes = query.vehicleType;
+    if (query.open24h === 'true') match.open24h = true;
+    if (query.freeOnly === 'true') match['pricing.kind'] = 'FREE';
     if (query.hasAvailability === 'true') {
       match.availabilityExpiresAt = { $gt: now };
       match.availableSpaces = { $gt: 0 };

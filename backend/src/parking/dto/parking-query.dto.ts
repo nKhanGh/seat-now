@@ -9,4 +9,6 @@ export class ParkingQueryDto {
   @Transform(toNumber) @IsOptional() @IsInt() @Min(100) @Max(5000) radiusM = 1500;
   @IsOptional() @IsEnum(['CAR', 'MOTORBIKE']) vehicleType?: string;
   @IsOptional() @IsEnum(['true', 'false']) hasAvailability?: string;
+  @IsOptional() @IsEnum(['true', 'false']) open24h?: string;
+  @IsOptional() @IsEnum(['true', 'false']) freeOnly?: string;
 }
