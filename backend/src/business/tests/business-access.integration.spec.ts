@@ -21,6 +21,7 @@ describeWithMongo('business ownership with MongoDB', () => {
     const venues = {
       activeLocation: jest.fn().mockResolvedValue([106.7, 10.77]),
       publicProfilesBySlugs: jest.fn().mockResolvedValue([{ slug: 'demo-cafe', name: 'Demo Café' }]),
+      setBusinessPremiumUntil: jest.fn().mockResolvedValue(undefined),
     } as unknown as VenuesService;
     const auth = { publicProfileById: jest.fn().mockResolvedValue({ displayName: 'Owner' }) } as unknown as AuthService;
     const service = new BusinessAccessService(claims, access, venues, auth);
@@ -39,5 +40,11 @@ describeWithMongo('business ownership with MongoDB', () => {
     await expect(service.requireOwner(ownerId, 'demo-cafe', true)).rejects.toThrow('Premium business plan required');
     await expect(service.requestClaim(otherId, 'demo-cafe', 'Tôi cũng có giấy tờ quản lý quán.')).rejects.toThrow('Venue already managed');
     expect((await service.approveClaim(claim.data.id)).data.status).toBe('APPROVED');
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60_000).toISOString();
+    await service.setPlan('demo-cafe', { plan: 'PREMIUM', premiumExpiresAt: expires });
+    await service.requireOwner(ownerId, 'demo-cafe', true);
+    expect((await service.myVenues(ownerId)).data).toMatchObject([{ plan: 'PREMIUM', verified: true }]);
+    await service.setPlan('demo-cafe', { plan: 'FREE' });
+    await expect(service.requireOwner(ownerId, 'demo-cafe', true)).rejects.toThrow('Premium business plan required');
   });
 });

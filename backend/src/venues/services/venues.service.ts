@@ -45,6 +45,18 @@ export class VenuesService {
     return this.getBySlug(slug);
   }
 
+  async setBusinessPremiumUntil(slug: string, premiumExpiresAt: Date | null) {
+    const result = await this.venues.updateOne({ slug, status: 'ACTIVE' }, { $set: { businessPremiumExpiresAt: premiumExpiresAt } });
+    if (!result.matchedCount) throw new NotFoundException('Venue not found');
+    await this.views.updateOne({ slug, status: 'ACTIVE' }, { $set: { businessPremiumExpiresAt: premiumExpiresAt } });
+  }
+
+  async setHasLogo(slug: string) {
+    const result = await this.venues.updateOne({ slug, status: 'ACTIVE' }, { $set: { hasLogo: true } });
+    if (!result.matchedCount) throw new NotFoundException('Venue not found');
+    await this.views.updateOne({ slug, status: 'ACTIVE' }, { $set: { hasLogo: true } });
+  }
+
   async publicProfilesBySlugs(slugs: string[]) {
     const venues = await this.venues.find({ slug: { $in: slugs }, status: 'ACTIVE' },
       { slug: 1, name: 1, category: 1, address: 1, description: 1, openingHours: 1, menuSummary: 1,
@@ -53,6 +65,7 @@ export class VenuesService {
       slug: venue.slug, name: venue.name, category: venue.category, address: venue.address,
       description: venue.description ?? '', openingHours: venue.openingHours ?? '', menuSummary: venue.menuSummary ?? '',
       location: venue.location, priceTier: venue.priceTier, rating: venue.rating,
+      logoUrl: venue.hasLogo ? `/api/v1/venues/${encodeURIComponent(venue.slug)}/logo` : null,
     }));
   }
 
@@ -65,6 +78,8 @@ export class VenuesService {
       description: venue.description ?? '', openingHours: venue.openingHours ?? '',
       menuSummary: venue.menuSummary ?? '', address: venue.address,
       location: venue.location, priceTier: venue.priceTier, rating: venue.rating,
+      verified: Boolean(venue.businessPremiumExpiresAt && venue.businessPremiumExpiresAt > new Date()),
+      logoUrl: venue.hasLogo ? `/api/v1/venues/${encodeURIComponent(venue.slug)}/logo` : null,
       availability: await this.availability.summaryForSlug(slug),
     } };
   }

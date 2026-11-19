@@ -35,6 +35,7 @@ export class VenueMapView {
 
   @Prop({ required: true, default: 'ACTIVE' }) status!: string;
   @Prop({ type: Boolean, default: false }) hasLogo!: boolean;
+  @Prop({ type: Date, default: null }) businessPremiumExpiresAt!: Date | null;
 
   @Prop({ required: true, enum: ['QUIET', 'MODERATE', 'BUSY', 'FULL', 'UNKNOWN'], default: 'UNKNOWN' })
   crowdLevel!: string;

@@ -28,6 +28,8 @@ type MapRow = {
   availabilityCapturedAt: Date | null;
   availabilityExpiresAt: Date | null;
   distanceM: number;
+  businessPremiumExpiresAt: Date | null;
+  hasLogo: boolean;
 };
 
 @Injectable()
@@ -87,6 +89,8 @@ export class MapService {
         id: row._id.toString(), name: row.name, slug: row.slug, address: row.address,
         category: row.category, cuisineTypes: row.cuisineTypes ?? [], location: row.location, distanceM: Math.round(row.distanceM),
         priceTier: row.priceTier, rating: row.rating,
+        verified: Boolean(row.businessPremiumExpiresAt && row.businessPremiumExpiresAt > now),
+        logoUrl: row.hasLogo ? `/api/v1/venues/${encodeURIComponent(row.slug)}/logo` : null,
         availability: {
           crowdLevel: row.availabilityExpiresAt ? row.crowdLevel : 'UNKNOWN',
           tablesAvailable: row.tablesAvailable ?? null,

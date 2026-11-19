@@ -5,6 +5,8 @@ import { CreateAvailabilityDto } from '../dto/create-availability.dto';
 import { AvailabilityLatest, AvailabilitySnapshot, Capacity } from '../schemas/availability-snapshot.schema';
 import { VenueMapView } from '../../map/schemas/venue-map-view.schema';
 import { LiveGateway } from '../../live/live.gateway';
+import { randomInt, randomUUID } from 'node:crypto';
+import type { ManualAvailabilityDto } from '../../business/dto/manual-availability.dto';
 
 type AvailabilityRecord = {
   version: number; tables: Capacity; seats: Capacity; crowdLevel: string;
@@ -41,6 +43,19 @@ export class AvailabilityService {
   async summaryForSlug(slug: string) {
     const record = await this.latest.findOne({ slug }).lean();
     return publicAvailability(record);
+  }
+
+  async operatorUpdate(slug: string, input: ManualAvailabilityDto) {
+    if (!input.tables && !input.seats) throw new BadRequestException('Tables or seats are required');
+    const current = await this.latest.findOne({ slug }, { version: 1 }).lean();
+    const now = new Date();
+    return this.ingest(slug, {
+      version: Math.max((current?.version ?? 0) + 1, Date.now() * 1000 + randomInt(1000)),
+      tables: input.tables ?? null, seats: input.seats ?? null,
+      crowdLevel: input.crowdLevel, estimatedWaitMinutes: input.estimatedWaitMinutes ?? null,
+      acceptingGuests: input.acceptingGuests, source: 'OPERATOR', sourceRecordId: randomUUID(),
+      confidence: 0.7, capturedAt: now.toISOString(), expiresAt: new Date(now.getTime() + 10 * 60_000).toISOString(),
+    });
   }
 
   async ingest(slug: string, dto: CreateAvailabilityDto) {

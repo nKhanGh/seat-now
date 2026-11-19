@@ -1,0 +1,32 @@
+import { Controller, Get, Param, Post, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request, Response } from 'express';
+import { AuthService } from '../../auth/services/auth.service';
+import { VenueLogoService } from '../../venues/services/venue-logo.service';
+import { BusinessAccessService } from '../services/business-access.service';
+
+type CookieRequest = Request & { cookies?: Record<string, string> };
+
+@Controller()
+export class BusinessLogoController {
+  constructor(private readonly business: BusinessAccessService, private readonly logos: VenueLogoService,
+    private readonly auth: AuthService) {}
+
+  @Post('business/venues/:slug/logo')
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @UseInterceptors(FileInterceptor('logo', { limits: { files: 1, fileSize: 2_000_000 } }))
+  async upload(@Req() request: CookieRequest, @Param('slug') slug: string,
+    @UploadedFile() file: { buffer: Buffer; size: number } | undefined) {
+    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-seatnow_sid' : 'seatnow_sid';
+    const user = await this.auth.authenticate(request.cookies?.[cookieName]);
+    await this.business.requireOwner(user.id, slug);
+    return this.logos.upload(slug, file);
+  }
+
+  @Get('venues/:slug/logo')
+  async get(@Param('slug') slug: string, @Res() response: Response) {
+    const data = await this.logos.get(slug);
+    response.type('image/webp').setHeader('Cache-Control', 'no-store').send(data);
+  }
+}

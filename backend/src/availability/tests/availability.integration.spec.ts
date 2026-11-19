@@ -65,4 +65,16 @@ describeWithMongo('AvailabilityService with MongoDB', () => {
     const unknown = await service.getBySlug('test-cafe-missing').catch((error: unknown) => error);
     expect(unknown).toMatchObject({ status: 404 });
   });
+
+  it('publishes a short-lived operator update without changing provider snapshots', async () => {
+    await expect(service.operatorUpdate('test-cafe', { crowdLevel: 'QUIET', acceptingGuests: true })).rejects.toThrow('Tables or seats are required');
+    const result = await service.operatorUpdate('test-cafe', { tables: { total: 20, available: 6 },
+      crowdLevel: 'MODERATE', estimatedWaitMinutes: 12, acceptingGuests: true });
+    expect(result.latestUpdated).toBe(true);
+    expect(result.data).toMatchObject({ source: 'OPERATOR', crowdLevel: 'MODERATE', tables: { total: 20, available: 6 }, freshness: 'FRESH' });
+    expect((new Date(result.data.expiresAt!).getTime() - new Date(result.data.capturedAt!).getTime()) / 60_000).toBe(10);
+    expect((await views.findOne({ slug: 'test-cafe' }))?.tablesAvailable).toBe(6);
+    await expect(service.operatorUpdate('test-cafe', { tables: { total: 2, available: 3 },
+      crowdLevel: 'QUIET', acceptingGuests: true })).rejects.toThrow('Available capacity exceeds total');
+  });
 });

@@ -24,6 +24,7 @@ export async function rebuildProjections(models: Models) {
       name: venue.name, category: venue.category, cuisineTypes: venue.cuisineTypes ?? [],
       location: venue.location, address: venue.address, priceTier: venue.priceTier,
       rating: venue.rating, status: venue.status,
+      hasLogo: venue.hasLogo ?? false, businessPremiumExpiresAt: venue.businessPremiumExpiresAt ?? null,
     } }, { upsert: true });
     venueProfiles++;
   }

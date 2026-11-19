@@ -5,6 +5,7 @@ import { AuthService } from '../../auth/services/auth.service';
 import { VenuesService } from '../../venues/services/venues.service';
 import { BusinessAccess } from '../schemas/business-access.schema';
 import { BusinessClaim } from '../schemas/business-claim.schema';
+import { SetBusinessPlanDto } from '../dto/set-business-plan.dto';
 
 @Injectable()
 export class BusinessAccessService {
@@ -80,6 +81,20 @@ export class BusinessAccessService {
     if (!owner) throw new ForbiddenException('Venue management access required');
     if (premium && this.effectivePlan(owner) !== 'PREMIUM') throw new ForbiddenException('Premium business plan required');
     return owner;
+  }
+
+  async setPlan(slug: string, input: SetBusinessPlanDto) {
+    const owner = await this.access.findOne({ venueSlug: slug });
+    if (!owner) throw new NotFoundException('Managed venue not found');
+    await this.venues.activeLocation(slug);
+    const expiresAt = input.plan === 'PREMIUM' && input.premiumExpiresAt ? new Date(input.premiumExpiresAt) : null;
+    if (input.plan === 'PREMIUM' && (!expiresAt || expiresAt.getTime() <= Date.now()
+      || expiresAt.getTime() > Date.now() + 366 * 24 * 60 * 60_000)) {
+      throw new BadRequestException('Premium expiration must be within the next year');
+    }
+    await this.access.updateOne({ _id: owner._id }, { $set: { plan: input.plan, premiumExpiresAt: expiresAt } });
+    await this.venues.setBusinessPremiumUntil(slug, expiresAt);
+    return { data: { slug, plan: input.plan, premiumExpiresAt: expiresAt } };
   }
 
   private effectivePlan(access: BusinessAccess): 'FREE' | 'PREMIUM' {
