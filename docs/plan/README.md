@@ -34,6 +34,8 @@ Người dùng có thể mở app, cấp hoặc từ chối quyền vị trí, t
 | Later | Core còn lại | Check-in, review, favorite, follow/share, đề xuất địa điểm | Không được kéo vào MVP nếu chưa đổi scope |
 | Later | Business | Hồ sơ/chủ quán, xác thực, dashboard, ads, flash voucher, chuỗi chi nhánh | Chỉ giữ internal ingestion tối thiểu để tạo dữ liệu MVP |
 
+Theo quyết định ngày 19/11/2026, bắt đầu nhóm [F05 cộng đồng](features/F05-community.md) sau MVP demo; tính năng chủ quán vẫn là nhóm tiếp theo sau F05.
+
 ## 3. Thứ tự triển khai theo vertical slice
 
 ### M0 — Khóa contract và bootstrap
