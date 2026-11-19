@@ -5,6 +5,7 @@ import { AvailabilityService } from '../../availability/services/availability.se
 import { Venue } from '../../map/schemas/venue.schema';
 import { VenueMapView } from '../../map/schemas/venue-map-view.schema';
 import type { UpdateBusinessProfileDto } from '../../business/dto/update-business-profile.dto';
+import type { UpdateCampaignDto } from '../../business/dto/update-campaign.dto';
 
 @Injectable()
 export class VenuesService {
@@ -57,15 +58,54 @@ export class VenuesService {
     await this.views.updateOne({ slug, status: 'ACTIVE' }, { $set: { hasLogo: true } });
   }
 
+  async setHasCover(slug: string) {
+    const result = await this.venues.updateOne({ slug, status: 'ACTIVE' }, { $set: { hasCover: true } });
+    if (!result.matchedCount) throw new NotFoundException('Venue not found');
+    await this.views.updateOne({ slug, status: 'ACTIVE' }, { $set: { hasCover: true } });
+  }
+
+  async updateCampaign(slug: string, input: UpdateCampaignDto) {
+    const startsAt = new Date(input.startsAt);
+    const endsAt = new Date(input.endsAt);
+    const now = Date.now();
+    const promotionText = input.promotionText.trim();
+    if (promotionText.length < 10 || !Number.isFinite(startsAt.getTime()) || !Number.isFinite(endsAt.getTime())
+      || endsAt <= startsAt || endsAt.getTime() <= now || startsAt.getTime() < now - 24 * 60 * 60_000
+      || startsAt.getTime() > now + 30 * 24 * 60 * 60_000
+      || endsAt.getTime() > now + 31 * 24 * 60 * 60_000) {
+      throw new BadRequestException('Campaign must be valid and within 31 days');
+    }
+    const campaign = { promotionText, promotionStartsAt: startsAt, promotionEndsAt: endsAt, sponsored: input.sponsored };
+    const result = await this.venues.updateOne({ slug, status: 'ACTIVE' }, { $set: campaign });
+    if (!result.matchedCount) throw new NotFoundException('Venue not found');
+    await this.views.updateOne({ slug, status: 'ACTIVE' }, { $set: campaign });
+    return { data: { slug, ...campaign } };
+  }
+
+  async clearCampaign(slug: string) {
+    const campaign = { promotionText: null, promotionStartsAt: null, promotionEndsAt: null, sponsored: false };
+    const result = await this.venues.updateOne({ slug, status: 'ACTIVE' }, { $set: campaign });
+    if (!result.matchedCount) throw new NotFoundException('Venue not found');
+    await this.views.updateOne({ slug, status: 'ACTIVE' }, { $set: campaign });
+    return { data: { slug, active: false } };
+  }
+
   async publicProfilesBySlugs(slugs: string[]) {
     const venues = await this.venues.find({ slug: { $in: slugs }, status: 'ACTIVE' },
       { slug: 1, name: 1, category: 1, address: 1, description: 1, openingHours: 1, menuSummary: 1,
-        location: 1, priceTier: 1, rating: 1 }).lean();
+        location: 1, priceTier: 1, rating: 1, hasLogo: 1, hasCover: 1, businessPremiumExpiresAt: 1, promotionText: 1,
+        promotionStartsAt: 1, promotionEndsAt: 1, sponsored: 1 }).lean();
     return venues.map((venue) => ({
       slug: venue.slug, name: venue.name, category: venue.category, address: venue.address,
       description: venue.description ?? '', openingHours: venue.openingHours ?? '', menuSummary: venue.menuSummary ?? '',
       location: venue.location, priceTier: venue.priceTier, rating: venue.rating,
       logoUrl: venue.hasLogo ? `/api/v1/venues/${encodeURIComponent(venue.slug)}/logo` : null,
+      coverUrl: venue.hasCover && venue.businessPremiumExpiresAt && venue.businessPremiumExpiresAt > new Date()
+        ? `/api/v1/venues/${encodeURIComponent(venue.slug)}/cover` : null,
+      promotion: venue.businessPremiumExpiresAt && venue.businessPremiumExpiresAt > new Date()
+        && venue.promotionText && venue.promotionStartsAt && venue.promotionEndsAt
+        && venue.promotionStartsAt <= new Date() && venue.promotionEndsAt > new Date()
+        ? { text: venue.promotionText, startsAt: venue.promotionStartsAt, endsAt: venue.promotionEndsAt, sponsored: venue.sponsored } : null,
     }));
   }
 
@@ -80,6 +120,12 @@ export class VenuesService {
       location: venue.location, priceTier: venue.priceTier, rating: venue.rating,
       verified: Boolean(venue.businessPremiumExpiresAt && venue.businessPremiumExpiresAt > new Date()),
       logoUrl: venue.hasLogo ? `/api/v1/venues/${encodeURIComponent(venue.slug)}/logo` : null,
+      coverUrl: venue.hasCover && venue.businessPremiumExpiresAt && venue.businessPremiumExpiresAt > new Date()
+        ? `/api/v1/venues/${encodeURIComponent(venue.slug)}/cover` : null,
+      promotion: venue.businessPremiumExpiresAt && venue.businessPremiumExpiresAt > new Date()
+        && venue.promotionText && venue.promotionStartsAt && venue.promotionEndsAt
+        && venue.promotionStartsAt <= new Date() && venue.promotionEndsAt > new Date()
+        ? { text: venue.promotionText, startsAt: venue.promotionStartsAt, endsAt: venue.promotionEndsAt, sponsored: venue.sponsored } : null,
       availability: await this.availability.summaryForSlug(slug),
     } };
   }

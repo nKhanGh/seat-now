@@ -24,7 +24,10 @@ export async function rebuildProjections(models: Models) {
       name: venue.name, category: venue.category, cuisineTypes: venue.cuisineTypes ?? [],
       location: venue.location, address: venue.address, priceTier: venue.priceTier,
       rating: venue.rating, status: venue.status,
-      hasLogo: venue.hasLogo ?? false, businessPremiumExpiresAt: venue.businessPremiumExpiresAt ?? null,
+      hasLogo: venue.hasLogo ?? false, hasCover: venue.hasCover ?? false,
+      businessPremiumExpiresAt: venue.businessPremiumExpiresAt ?? null,
+      promotionText: venue.promotionText ?? null, promotionStartsAt: venue.promotionStartsAt ?? null,
+      promotionEndsAt: venue.promotionEndsAt ?? null, sponsored: venue.sponsored ?? false,
     } }, { upsert: true });
     venueProfiles++;
   }

@@ -29,6 +29,14 @@ describeWithMongo('business venue profile with MongoDB', () => {
     expect(await views.findOne({ slug: 'demo-cafe' }, { name: 1, address: 1, priceTier: 1 }).lean()).toMatchObject({
       name: 'New Café', address: 'New street', priceTier: 2,
     });
+    await service.setBusinessPremiumUntil('demo-cafe', new Date(Date.now() + 7 * 24 * 60 * 60_000));
+    const campaign = await service.updateCampaign('demo-cafe', { promotionText: 'Ưu đãi thử nghiệm giờ vắng',
+      startsAt: new Date(Date.now() - 60_000).toISOString(), endsAt: new Date(Date.now() + 60 * 60_000).toISOString(), sponsored: true });
+    expect(campaign.data.sponsored).toBe(true);
+    expect((await service.getBySlug('demo-cafe')).data.promotion).toMatchObject({ sponsored: true });
+    expect((await views.findOne({ slug: 'demo-cafe' }))?.promotionText).toBe('Ưu đãi thử nghiệm giờ vắng');
+    await service.clearCampaign('demo-cafe');
+    expect((await service.getBySlug('demo-cafe')).data.promotion).toBeNull();
     await expect(service.updateBusinessProfile('missing', { name: 'Missing', address: 'Unknown street',
       description: '', openingHours: '', menuSummary: '', priceTier: 1 })).rejects.toThrow('Venue not found');
   });

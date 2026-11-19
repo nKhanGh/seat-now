@@ -23,7 +23,12 @@ export class Venue {
   @Prop({ required: true }) rating!: number;
   @Prop({ default: 'ACTIVE' }) status!: string;
   @Prop({ type: Boolean, default: false }) hasLogo!: boolean;
+  @Prop({ type: Boolean, default: false }) hasCover!: boolean;
   @Prop({ type: Date, default: null }) businessPremiumExpiresAt!: Date | null;
+  @Prop({ type: String, default: null }) promotionText!: string | null;
+  @Prop({ type: Date, default: null }) promotionStartsAt!: Date | null;
+  @Prop({ type: Date, default: null }) promotionEndsAt!: Date | null;
+  @Prop({ type: Boolean, default: false }) sponsored!: boolean;
 }
 
 export const VenueSchema = SchemaFactory.createForClass(Venue);

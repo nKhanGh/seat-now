@@ -9,6 +9,8 @@ import { VenueLogo, VenueLogoSchema } from './schemas/venue-logo.schema';
 import { VenueLogoService } from './services/venue-logo.service';
 import { VenuePageView, VenuePageViewSchema } from './schemas/venue-page-view.schema';
 import { VenuePageViewService } from './services/venue-page-view.service';
+import { VenueCover, VenueCoverSchema } from './schemas/venue-cover.schema';
+import { VenueCoverService } from './services/venue-cover.service';
 
 @Module({
   imports: [AvailabilityModule, MongooseModule.forFeature([
@@ -16,9 +18,10 @@ import { VenuePageViewService } from './services/venue-page-view.service';
     { name: VenueMapView.name, schema: VenueMapViewSchema },
     { name: VenueLogo.name, schema: VenueLogoSchema },
     { name: VenuePageView.name, schema: VenuePageViewSchema },
+    { name: VenueCover.name, schema: VenueCoverSchema },
   ])],
   controllers: [VenuesController],
-  providers: [VenuesService, VenueLogoService, VenuePageViewService],
-  exports: [VenuesService, VenueLogoService, VenuePageViewService],
+  providers: [VenuesService, VenueLogoService, VenueCoverService, VenuePageViewService],
+  exports: [VenuesService, VenueLogoService, VenueCoverService, VenuePageViewService],
 })
 export class VenuesModule {}

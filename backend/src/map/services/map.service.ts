@@ -28,8 +28,13 @@ type MapRow = {
   availabilityCapturedAt: Date | null;
   availabilityExpiresAt: Date | null;
   distanceM: number;
+  sponsorRank: number;
   businessPremiumExpiresAt: Date | null;
   hasLogo: boolean;
+  promotionText: string | null;
+  promotionStartsAt: Date | null;
+  promotionEndsAt: Date | null;
+  sponsored: boolean;
 };
 
 @Injectable()
@@ -44,14 +49,15 @@ export class MapService {
       query.priceTier ?? null, query.ratingGte ?? null, query.crowdLevel ?? null,
       query.hasAvailability ?? null,
     ])).digest('base64url').slice(0, 16);
-    let cursor: { distanceM: number; id: string } | null = null;
+    let cursor: { sponsorRank: number; distanceM: number; id: string } | null = null;
     if (query.cursor) {
       try {
         if (!/^[A-Za-z0-9_-]+$/.test(query.cursor)) throw new Error('invalid characters');
-        const parsed = JSON.parse(Buffer.from(query.cursor, 'base64url').toString('utf8')) as { distanceM?: unknown; id?: unknown; filterHash?: unknown };
+        const parsed = JSON.parse(Buffer.from(query.cursor, 'base64url').toString('utf8')) as { sponsorRank?: unknown; distanceM?: unknown; id?: unknown; filterHash?: unknown };
         if (parsed.filterHash !== filterHash || typeof parsed.distanceM !== 'number' || !Number.isFinite(parsed.distanceM)
-          || parsed.distanceM < 0 || typeof parsed.id !== 'string' || !/^[a-f0-9]{24}$/.test(parsed.id)) throw new Error('invalid cursor');
-        cursor = { distanceM: parsed.distanceM, id: parsed.id };
+          || parsed.distanceM < 0 || ![0, 1].includes(parsed.sponsorRank as number)
+          || typeof parsed.id !== 'string' || !/^[a-f0-9]{24}$/.test(parsed.id)) throw new Error('invalid cursor');
+        cursor = { sponsorRank: parsed.sponsorRank as number, distanceM: parsed.distanceM, id: parsed.id };
       } catch { throw new BadRequestException({ code: 'MAP_INVALID_CURSOR', message: 'Invalid map cursor' }); }
     }
     const match: Record<string, unknown> = { status: 'ACTIVE' };
@@ -71,18 +77,23 @@ export class MapService {
     const pipeline: PipelineStage[] = [
       { $geoNear: { near: { type: 'Point', coordinates: [query.lng, query.lat] }, distanceField: 'distanceM', maxDistance: query.radiusM, spherical: true } },
       { $match: match },
+      { $addFields: { sponsorRank: { $cond: [{ $and: [
+        { $eq: ['$sponsored', true] }, { $lte: ['$promotionStartsAt', now] },
+        { $gt: ['$promotionEndsAt', now] }, { $gt: ['$businessPremiumExpiresAt', now] },
+      ] }, 1, 0] } } },
       ...(cursor ? [{ $match: { $or: [
-        { distanceM: { $gt: cursor.distanceM } },
-        { distanceM: cursor.distanceM, _id: { $gt: new Types.ObjectId(cursor.id) } },
+        { sponsorRank: { $lt: cursor.sponsorRank } },
+        { sponsorRank: cursor.sponsorRank, distanceM: { $gt: cursor.distanceM } },
+        { sponsorRank: cursor.sponsorRank, distanceM: cursor.distanceM, _id: { $gt: new Types.ObjectId(cursor.id) } },
       ] } } as PipelineStage] : []),
-      { $sort: { distanceM: 1, _id: 1 } },
+      { $sort: { sponsorRank: -1, distanceM: 1, _id: 1 } },
       { $limit: limit + 1 },
     ];
     const rows = await this.venues.aggregate<MapRow>(pipeline);
     const page = rows.slice(0, limit);
     const last = page.at(-1);
     const nextCursor = rows.length > limit && last
-      ? Buffer.from(JSON.stringify({ distanceM: last.distanceM, id: last._id.toString(), filterHash })).toString('base64url')
+      ? Buffer.from(JSON.stringify({ sponsorRank: last.sponsorRank, distanceM: last.distanceM, id: last._id.toString(), filterHash })).toString('base64url')
       : null;
     return {
       data: page.map((row) => ({
@@ -91,6 +102,10 @@ export class MapService {
         priceTier: row.priceTier, rating: row.rating,
         verified: Boolean(row.businessPremiumExpiresAt && row.businessPremiumExpiresAt > now),
         logoUrl: row.hasLogo ? `/api/v1/venues/${encodeURIComponent(row.slug)}/logo` : null,
+        promotion: row.businessPremiumExpiresAt && row.businessPremiumExpiresAt > now
+          && row.promotionText && row.promotionStartsAt && row.promotionEndsAt
+          && row.promotionStartsAt <= now && row.promotionEndsAt > now
+          ? { text: row.promotionText, startsAt: row.promotionStartsAt, endsAt: row.promotionEndsAt, sponsored: row.sponsored } : null,
         availability: {
           crowdLevel: row.availabilityExpiresAt ? row.crowdLevel : 'UNKNOWN',
           tablesAvailable: row.tablesAvailable ?? null,

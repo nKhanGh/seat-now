@@ -21,6 +21,7 @@ import { BusinessClaim, BusinessClaimSchema } from './business/schemas/business-
 import { BusinessAccess, BusinessAccessSchema } from './business/schemas/business-access.schema';
 import { VenueLogo, VenueLogoSchema } from './venues/schemas/venue-logo.schema';
 import { VenuePageView, VenuePageViewSchema } from './venues/schemas/venue-page-view.schema';
+import { VenueCover, VenueCoverSchema } from './venues/schemas/venue-cover.schema';
 
 async function createIndexes() {
   await ConfigModule.forRoot();
@@ -49,6 +50,7 @@ async function createIndexes() {
     await mongoose.model(BusinessAccess.name, BusinessAccessSchema).createIndexes();
     await mongoose.model(VenueLogo.name, VenueLogoSchema).createIndexes();
     await mongoose.model(VenuePageView.name, VenuePageViewSchema).createIndexes();
+    await mongoose.model(VenueCover.name, VenueCoverSchema).createIndexes();
   } finally {
     await mongoose.disconnect();
   }

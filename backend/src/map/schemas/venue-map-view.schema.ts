@@ -35,7 +35,12 @@ export class VenueMapView {
 
   @Prop({ required: true, default: 'ACTIVE' }) status!: string;
   @Prop({ type: Boolean, default: false }) hasLogo!: boolean;
+  @Prop({ type: Boolean, default: false }) hasCover!: boolean;
   @Prop({ type: Date, default: null }) businessPremiumExpiresAt!: Date | null;
+  @Prop({ type: String, default: null }) promotionText!: string | null;
+  @Prop({ type: Date, default: null }) promotionStartsAt!: Date | null;
+  @Prop({ type: Date, default: null }) promotionEndsAt!: Date | null;
+  @Prop({ type: Boolean, default: false }) sponsored!: boolean;
 
   @Prop({ required: true, enum: ['QUIET', 'MODERATE', 'BUSY', 'FULL', 'UNKNOWN'], default: 'UNKNOWN' })
   crowdLevel!: string;

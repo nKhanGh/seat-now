@@ -64,4 +64,20 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     expect(third.meta.nextCursor).toBeNull();
     await expect(service.findNearby({ ...query, category: 'CAFE', cursor: first.meta.nextCursor! })).rejects.toThrow('Invalid map cursor');
   });
+
+  it('puts active labeled sponsorship before nearer organic results and pages correctly', async () => {
+    const model = mongoose.model(VenueMapView.name);
+    await model.updateOne({ slug: 'far-cafe' }, { $set: {
+      sponsored: true, promotionText: 'Ưu đãi thử nghiệm giờ vắng',
+      promotionStartsAt: new Date(Date.now() - 60_000), promotionEndsAt: new Date(Date.now() + 60_000),
+      businessPremiumExpiresAt: new Date(Date.now() + 60_000),
+    } });
+    const query = { lat: 10.7769, lng: 106.7009, radiusM: 10_000, limit: 1 };
+    const first = await service.findNearby(query);
+    const second = await service.findNearby({ ...query, cursor: first.meta.nextCursor! });
+    expect(first.data[0]).toMatchObject({ slug: 'far-cafe', promotion: { sponsored: true } });
+    expect(second.data[0].slug).toBe('near-cafe');
+    await model.updateOne({ slug: 'far-cafe' }, { $set: { businessPremiumExpiresAt: new Date(Date.now() - 60_000) } });
+    expect((await service.findNearby(query)).data[0].slug).toBe('near-cafe');
+  });
 });
