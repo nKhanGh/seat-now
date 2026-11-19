@@ -47,7 +47,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
     {reviews.isError && <p role="alert">{reviews.error.message} <button onClick={() => reviews.refetch()}>Thử lại</button></p>}
     {reviews.data && items.length === 0 && <p>Chưa có review nào.</p>}
     {items.map((review) => <article key={review.id} className="review-card">
-      <strong>{review.author.displayName}</strong><span> · {'★'.repeat(review.rating)}</span>
+      <Link to={`/users/${review.author.id}`}>{review.author.displayName}</Link><span> · {'★'.repeat(review.rating)}</span>
       <p>{review.body}</p>
       {review.photoUrl && <img className="review-photo" src={review.photoUrl} alt={`Ảnh review của ${review.author.displayName}`} loading="lazy" />}
       <small>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</small>
