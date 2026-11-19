@@ -63,7 +63,8 @@ export class MapService {
     }
     if (query.hasAvailability === 'true') {
       match.availabilityExpiresAt = { $gt: now };
-      match.tablesAvailable = { $gt: 0 };
+      match.acceptingGuests = true;
+      match.$or = [{ tablesAvailable: { $gt: 0 } }, { seatsAvailable: { $gt: 0 } }];
     }
     const pipeline: PipelineStage[] = [
       { $geoNear: { near: { type: 'Point', coordinates: [query.lng, query.lat] }, distanceField: 'distanceM', maxDistance: query.radiusM, spherical: true } },
