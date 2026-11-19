@@ -5,9 +5,11 @@ import { useEntitlements, useSubscription } from '../api/subscriptionQueries';
 const features = [
   { name: 'Bản đồ, bộ lọc và tình trạng chỗ ngồi', free: true, premium: true, available: true },
   { name: 'Thông tin bãi đỗ xe gần địa điểm', free: true, premium: true, available: true },
-  { name: 'Check-in, review và lưu địa điểm', free: true, premium: true, available: false },
+  { name: 'Check-in, review và lưu địa điểm', free: true, premium: true, available: true },
+  { name: 'Gửi yêu cầu đặt bàn tại quán đối tác', free: true, premium: true, available: true },
+  { name: 'Ưu tiên xử lý yêu cầu đặt bàn', free: false, premium: true, available: true },
   { name: 'Không quảng cáo', free: false, premium: true, available: false },
-  { name: 'Đặt bàn ưu tiên và giữ chỗ xe', free: false, premium: true, available: false },
+  { name: 'Giữ chỗ xe trước', free: false, premium: true, available: false },
   { name: 'Voucher độc quyền và gợi ý AI nâng cao', free: false, premium: true, available: false },
 ] as const;
 
@@ -28,7 +30,8 @@ export function PlansPage() {
         <p className="eyebrow">Gói dành cho người dùng</p>
         <h1>Chọn cách khám phá phù hợp</h1>
         <p>
-          Ba tính năng chính hiện dùng miễn phí. Các quyền Premium đang được phát triển, chưa mở thanh toán.
+          Bản đồ, cộng đồng và yêu cầu đặt bàn tại quán đối tác dùng miễn phí. Premium demo được ưu tiên trong
+          hàng chờ; chưa mở thanh toán.
         </p>
       </section>
       {enabled ? (
@@ -83,7 +86,7 @@ export function PlansPage() {
         </section>
         <section className="plan-card">
           <h2>Premium</h2>
-          <p>Thêm quyền ưu tiên và cá nhân hóa khi các tính năng ra mắt.</p>
+          <p>Ưu tiên xử lý yêu cầu đặt bàn trong bản demo; các quyền khác sẽ mở sau.</p>
           <strong>Chưa mở bán</strong>
           <ul>
             {features

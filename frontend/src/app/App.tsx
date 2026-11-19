@@ -8,6 +8,7 @@ import { PublicProfilePage } from '../features/community/pages/PublicProfilePage
 import { FollowingPage } from '../features/community/pages/FollowingPage';
 import { ProposalsPage } from '../features/community/pages/ProposalsPage';
 import { BusinessPage } from '../features/business/pages/BusinessPage';
+import { MyBookingsPage } from '../features/booking/pages/MyBookingsPage';
 
 function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
@@ -105,6 +106,7 @@ export function App() {
       <Route path="/users/:id" element={<PublicProfilePage />} />
       <Route path="/proposals" element={<ProposalsPage />} />
       <Route path="/business" element={<BusinessPage />} />
+      <Route path="/bookings" element={<MyBookingsPage />} />
     </Routes>
   );
 }

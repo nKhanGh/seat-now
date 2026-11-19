@@ -13,6 +13,7 @@ import {
   useUploadBusinessLogo,
 } from '../api/businessQueries';
 import { BusinessProfileInput, BusinessVenue, ManualAvailabilityInput } from '../services/business.service';
+import { BookingQueue } from '../../booking/components/BookingQueue';
 
 function CampaignEditor({ venue, userId }: { venue: BusinessVenue; userId: string }) {
   const campaign = useBusinessCampaign(userId);
@@ -494,6 +495,9 @@ export function BusinessPage() {
           {venues.data?.map((venue) => (
             <div key={venue.slug}>
               <ProfileEditor venue={venue} userId={userId} />
+              {venue.category !== 'CINEMA' && (
+                <BookingQueue slug={venue.slug} userId={userId} enabled={venue.bookingEnabled} />
+              )}
               {venue.plan === 'PREMIUM' && (
                 <>
                   <AvailabilityEditor venue={venue} />

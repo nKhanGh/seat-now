@@ -14,6 +14,7 @@ import { CheckInPanel } from '../../community/components/CheckInPanel';
 import { FavoriteButton } from '../../community/components/FavoriteButton';
 import { ReviewPanel } from '../../community/components/ReviewPanel';
 import { ShareVenueButton } from '../../community/components/ShareVenueButton';
+import { BookingPanel } from '../../booking/components/BookingPanel';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -162,6 +163,7 @@ export function MapExplorer() {
           {auth.data ? (
             <>
               <Link to="/favorites">Quán đã lưu</Link>
+              <Link to="/bookings">Đặt bàn của tôi</Link>
               <Link to="/following">Đang theo dõi</Link>
               <span>Chào {auth.data.displayName}</span>
               <button onClick={() => logout.mutate()} disabled={logout.isPending}>
@@ -377,6 +379,9 @@ export function MapExplorer() {
               />
               <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
               <AvailabilityStatus availability={selected.availability} />
+              {selected.category !== 'CINEMA' && (
+                <BookingPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
+              )}
               <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />
               <ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />
               {parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}

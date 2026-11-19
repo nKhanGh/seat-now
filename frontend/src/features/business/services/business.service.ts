@@ -15,6 +15,7 @@ export type BusinessVenue = {
   priceTier: number;
   plan: 'FREE' | 'PREMIUM';
   verified: boolean;
+  bookingEnabled: boolean;
   logoUrl: string | null;
   coverUrl: string | null;
   promotion: { text: string; startsAt: string; endsAt: string; sponsored: boolean } | null;

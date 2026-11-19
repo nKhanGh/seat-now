@@ -79,6 +79,16 @@ p { line-height: 1.55; }
 .business-cover-preview { width: min(100%, 320px); aspect-ratio: 2; object-fit: cover; border-radius: 12px; }
 .venue-cover { width: 100%; aspect-ratio: 2; object-fit: cover; border-radius: 12px; }
 .business-dashboard { max-width: 700px; margin: 20px 0; }
+.booking-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
+.booking-panel h3 { margin: 4px 0; }
+.booking-panel form, .booking-panel label { display: grid; gap: 6px; }
+.booking-panel form { gap: 10px; }
+.booking-panel input, .booking-panel textarea { width: 100%; padding: 9px; border: 1px solid #b8cfc2; border-radius: 8px; }
+.booking-panel textarea { min-height: 70px; resize: vertical; }
+.map-selected .booking-panel .primary { background: #17654d; color: white; padding: 10px 14px; border-radius: 8px; }
+.booking-card { width: min(100%, 700px); margin: 16px 0; }
+.booking-card input[type="checkbox"] { width: auto; display: inline; margin: 0 6px 0 0; }
+.booking-row { display: grid; gap: 6px; border-top: 1px solid #deebe1; padding: 12px 0; }
 .favorite-actions { display: flex; gap: 16px; align-items: center; }
 .review-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
 .review-panel h2 { font-size: 1rem; margin: 4px 0 8px; }
