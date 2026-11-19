@@ -12,6 +12,9 @@ import { Review, ReviewSchema } from './schemas/review.schema';
 import { ReviewsService } from './services/reviews.service';
 import { ReviewsController } from './controllers/reviews.controller';
 import { ReviewPhoto, ReviewPhotoSchema } from './schemas/review-photo.schema';
+import { Follow, FollowSchema } from './schemas/follow.schema';
+import { FollowsService } from './services/follows.service';
+import { FollowsController } from './controllers/follows.controller';
 
 @Module({
   imports: [AuthModule, VenuesModule, MongooseModule.forFeature([
@@ -19,8 +22,9 @@ import { ReviewPhoto, ReviewPhotoSchema } from './schemas/review-photo.schema';
     { name: Favorite.name, schema: FavoriteSchema },
     { name: Review.name, schema: ReviewSchema },
     { name: ReviewPhoto.name, schema: ReviewPhotoSchema },
+    { name: Follow.name, schema: FollowSchema },
   ])],
-  controllers: [CheckInController, FavoritesController, ReviewsController],
-  providers: [CheckInService, FavoritesService, ReviewsService],
+  controllers: [CheckInController, FavoritesController, ReviewsController, FollowsController],
+  providers: [CheckInService, FavoritesService, ReviewsService, FollowsService],
 })
 export class CommunityModule {}

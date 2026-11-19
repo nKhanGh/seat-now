@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -92,6 +93,13 @@ export class AuthService {
   async publicUsersByIds(ids: Types.ObjectId[]) {
     const users = await this.users.find({ _id: { $in: ids }, status: 'ACTIVE' }, { displayName: 1 }).lean();
     return users.map((user) => ({ id: user._id.toString(), displayName: user.displayName }));
+  }
+
+  async publicProfileById(id: string) {
+    if (!Types.ObjectId.isValid(id)) throw new NotFoundException('User not found');
+    const user = await this.users.findOne({ _id: new Types.ObjectId(id), status: 'ACTIVE' }, { displayName: 1 }).lean();
+    if (!user) throw new NotFoundException('User not found');
+    return { id: user._id.toString(), displayName: user.displayName };
   }
 
   private async createSession(userId: Types.ObjectId): Promise<string> {

@@ -13,6 +13,7 @@ import { CheckIn, CheckInSchema } from './community/schemas/check-in.schema';
 import { Favorite, FavoriteSchema } from './community/schemas/favorite.schema';
 import { Review, ReviewSchema } from './community/schemas/review.schema';
 import { ReviewPhoto, ReviewPhotoSchema } from './community/schemas/review-photo.schema';
+import { Follow, FollowSchema } from './community/schemas/follow.schema';
 
 async function createIndexes() {
   await ConfigModule.forRoot();
@@ -33,6 +34,7 @@ async function createIndexes() {
     await mongoose.model(Favorite.name, FavoriteSchema).createIndexes();
     await mongoose.model(Review.name, ReviewSchema).createIndexes();
     await mongoose.model(ReviewPhoto.name, ReviewPhotoSchema).createIndexes();
+    await mongoose.model(Follow.name, FollowSchema).createIndexes();
   } finally {
     await mongoose.disconnect();
   }
