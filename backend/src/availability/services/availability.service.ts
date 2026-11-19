@@ -33,7 +33,7 @@ export class AvailabilityService {
   ) {}
 
   async getBySlug(slug: string) {
-    const venue = await this.venues.exists({ slug });
+    const venue = await this.venues.exists({ slug, status: 'ACTIVE' });
     if (!venue) throw new NotFoundException('Venue not found');
     return { data: await this.summaryForSlug(slug) };
   }
@@ -44,7 +44,7 @@ export class AvailabilityService {
   }
 
   async ingest(slug: string, dto: CreateAvailabilityDto) {
-    const venue = await this.venues.exists({ slug });
+    const venue = await this.venues.exists({ slug, status: 'ACTIVE' });
     if (!venue) throw new NotFoundException('Venue not found');
     for (const capacity of [dto.tables, dto.seats]) {
       if (capacity && capacity.available > capacity.total) throw new BadRequestException('Available capacity exceeds total');
