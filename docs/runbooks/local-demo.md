@@ -8,6 +8,7 @@ Use fictional demo data only. The Docker Compose database is bound to localhost.
 ```powershell
 docker compose -f infra/compose.yaml up -d
 Copy-Item backend/.env.example backend/.env
+# Đặt JWT_SECRET dài ít nhất 32 ký tự trong backend/.env và giữ cố định giữa các lần khởi động.
 cd backend
 npm ci
 npm run build
@@ -17,10 +18,15 @@ npm run start:dev
 
 In a second terminal, run `cd frontend; npm ci; npm run dev`. Open
 `http://localhost:5173`. `GET http://localhost:3000/api/v1/health` must return
-`{"data":{"status":"ok","database":"ok"}}`. The map should show fictional
-venues around District 1, Ho Chi Minh City. Select a venue to see seat and
+`{"data":{"status":"ok","database":"ok"}}`. The map should show 100 fictional
+venues across Ho Chi Minh City. Select a venue to see seat and
 parking information. The demo snapshots expire after ten minutes; run
 `npm run seed:demo` again in `backend` to make them fresh.
+Click **Vị trí của tôi** on localhost or HTTPS and allow location access to see
+the blue position dot. Pan the map to verify that venue pins remain visible.
+Sign in, choose a venue, submit a star rating (comment optional), and check
+that its displayed rating changes. A new venue submitted at `/proposals` stays
+off the map until three other users confirm it and an operator approves it.
 
 The static OpenAPI contracts are at `contracts/openapi/seatnow.json`,
 `contracts/openapi/community.json`, `contracts/openapi/business.json` and
@@ -84,8 +90,8 @@ automatically hold a table or guarantee acceptance.
 
 ## Community demo and moderation
 
-Sign in to save a venue, check in while physically near it, write a short
-review with one optional photo, follow a public profile or propose a venue.
+Sign in to save a venue, check in while physically near it, submit a star rating
+with an optional comment and photo, follow a public profile or propose a venue.
 Check-ins require browser geolocation, reported accuracy within 100 m and a
 position within 150 m of the venue. The server does not retain submitted
 coordinates. The count is self-reported and never replaces seat availability.
@@ -95,6 +101,10 @@ The token is separate from `AVAILABILITY_INGEST_TOKEN` and must not be included
 in frontend variables. A proposed venue needs three confirmations from users
 other than its creator before approval. Review reports and proposals can be
 inspected and acted on from the operator terminal:
+
+The submitter can track pending confirmations, operator review, approval or
+rejection under **Đề xuất của tôi**. After approval, the venue appears on the map.
+To manage an existing venue, submit an ownership claim at `/business`.
 
 ```powershell
 $base = 'http://localhost:3000/api/v1'
@@ -177,6 +187,6 @@ Premium fixture commands are disabled in production. Before public signup,
 add email verification and password recovery. Before multi-instance deploy,
 add a shared Socket.IO adapter and a durable event delivery strategy. Set
 `PUBLIC_ORIGIN` to the actual HTTPS origin, `MONGODB_URI` to the production
-database and keep `AVAILABILITY_INGEST_TOKEN`,
+database, set a stable `JWT_SECRET` of at least 32 characters and keep `AVAILABILITY_INGEST_TOKEN`,
 `COMMUNITY_MODERATION_TOKEN` and `BUSINESS_ADMIN_TOKEN` in a secret manager. Public signup also needs
 an explicit retention/deletion policy and an operated moderation process.

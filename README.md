@@ -19,7 +19,7 @@ Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm 
 - Frontend: React + Vite + TypeScript, React Router, TanStack Query, MapLibre GL.
 - Kiến trúc: modular monolith theo feature để ra MVP nhanh, nhưng giữ boundary đủ rõ để tách service khi có dữ liệu tải thực tế.
 - Local infrastructure: Docker Compose cho MongoDB; Redis chỉ thêm khi cần scale nhiều API instance hoặc rate limit phân tán.
-- Đăng nhập: NestJS + MongoDB tự quản lý user/session; xem [ADR 002](docs/adr/002-first-party-auth.md). Dockerfile phục vụ React và API cùng origin để cookie hoạt động ổn định.
+- Đăng nhập: NestJS cấp JWT trong cookie HttpOnly; MongoDB giữ phiên để thu hồi ngay khi đăng xuất. Xem [ADR 002](docs/adr/002-first-party-auth.md). Dockerfile phục vụ React và API cùng origin để cookie hoạt động ổn định.
 
 ## Chạy demo local
 
@@ -28,6 +28,7 @@ Yêu cầu: Node.js 20.19+, npm, Docker Desktop.
 ```powershell
 docker compose -f infra/compose.yaml up -d
 Copy-Item backend/.env.example backend/.env
+# Đặt JWT_SECRET dài ít nhất 32 ký tự trong backend/.env và giữ cố định.
 cd backend
 npm ci
 npm run build
@@ -45,7 +46,7 @@ npm run dev
 
 Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
 
-`seed:demo` chỉ chạy ở local/test, tạo 5 địa điểm và 4 bãi xe hư cấu tại TP.HCM. Snapshot mẫu hết hạn sau 10 phút; chạy lại `npm run seed:demo` trong `backend` để làm mới. Khi hết hạn, UI ghi **Dữ liệu cũ** và không coi số chỗ đó là còn trống hiện tại.
+`seed:demo` chỉ chạy ở local/test, tạo 100 địa điểm hư cấu (chủ yếu quán ăn/cà phê ở nhiều quận TP.HCM) và 4 bãi xe. Slug cố định nên chạy lại không nhân đôi quán. Snapshot mẫu hết hạn sau 10 phút; chạy lại `npm run seed:demo` trong `backend` để làm mới. Khi hết hạn, UI ghi **Dữ liệu cũ** và không coi số chỗ đó là còn trống hiện tại.
 
 Public API chính:
 
@@ -73,7 +74,7 @@ Kiểm tra nhanh: tại thư mục gốc chạy `npm ci; npm run format:check; n
 
 Đặt bàn demo: chủ quán đã được duyệt quyền quản lý mở trang `/business` và bật nhận yêu cầu cho quán ăn/cà phê. Người dùng đăng nhập mở quán trên bản đồ, gửi yêu cầu và theo dõi tại `/bookings`; chủ quán xác nhận hoặc từ chối trong hàng chờ. Yêu cầu đang chờ chưa giữ bàn. [Chi tiết F07](docs/plan/features/F07-booking.md).
 
-Dockerfile ở root build cả hai app và chạy cùng một origin. Khi deploy Render, đặt `MONGODB_URI` bằng MongoDB Atlas và `PUBLIC_ORIGIN` bằng URL HTTPS thực của service. Nếu dùng map style/tiles khác, đặt `VITE_MAP_STYLE_URL` lúc build frontend và `MAP_ASSET_ORIGINS` (danh sách origin phân cách dấu phẩy) cho Content Security Policy.
+Dockerfile ở root build cả hai app và chạy cùng một origin. Khi deploy Render, đặt `MONGODB_URI` bằng MongoDB Atlas, `PUBLIC_ORIGIN` bằng URL HTTPS thực của service và `JWT_SECRET` dài ít nhất 32 ký tự. Nếu dùng map style/tiles khác, đặt `VITE_MAP_STYLE_URL` lúc build frontend và `MAP_ASSET_ORIGINS` (danh sách origin phân cách dấu phẩy) cho Content Security Policy.
 
 Lát cắt auth hiện mới là demo: chưa có xác minh email và khôi phục mật khẩu. Không mở đăng ký công khai cho người dùng thật trước khi hoàn thiện các flow đó. Realtime hiện chạy trên một API instance; nếu scale ngang cần adapter Socket.IO dùng chung và cơ chế phát sự kiện bền vững.
 
