@@ -22,8 +22,39 @@ venues around District 1, Ho Chi Minh City. Select a venue to see seat and
 parking information. The demo snapshots expire after ten minutes; run
 `npm run seed:demo` again in `backend` to make them fresh.
 
-The static OpenAPI contract is at `contracts/openapi/seatnow.json`. The
+The static OpenAPI contracts are at `contracts/openapi/seatnow.json` and
+`contracts/openapi/community.json`. The
 Socket.IO contract is at `contracts/events/live.md`.
+
+## Community demo and moderation
+
+Sign in to save a venue, check in while physically near it, write a short
+review with one optional photo, follow a public profile or propose a venue.
+Check-ins require browser geolocation, reported accuracy within 100 m and a
+position within 150 m of the venue. The server does not retain submitted
+coordinates. The count is self-reported and never replaces seat availability.
+
+Set a strong `COMMUNITY_MODERATION_TOKEN` only in the backend environment.
+The token is separate from `AVAILABILITY_INGEST_TOKEN` and must not be included
+in frontend variables. A proposed venue needs three confirmations from users
+other than its creator before approval. Review reports and proposals can be
+inspected and acted on from the operator terminal:
+
+```powershell
+$base = 'http://localhost:3000/api/v1'
+$headers = @{ Authorization = "Bearer $env:COMMUNITY_MODERATION_TOKEN" }
+Invoke-RestMethod "$base/internal/community/review-reports" -Headers $headers
+Invoke-RestMethod "$base/community/proposals?status=READY_FOR_REVIEW"
+# After inspecting the content, replace the placeholder with the actual ID:
+Invoke-RestMethod "$base/internal/community/reviews/<reviewId>/hide" -Method Post -Headers $headers
+Invoke-RestMethod "$base/internal/community/proposals/<proposalId>/approve" -Method Post -Headers $headers
+# To reject an invalid proposal instead:
+Invoke-RestMethod "$base/internal/community/proposals/<proposalId>/reject" -Method Post -Headers $headers
+```
+
+Hiding a review removes it and its photo from public reads. Proposal approval
+publishes the venue profile and map projection; repeat approval is idempotent.
+There is no public moderation dashboard in this demo.
 
 ## Quality gate
 
@@ -36,6 +67,7 @@ $env:MONGODB_TEST_URI='mongodb://127.0.0.1:27017/seatnow'
 npm run test:integration
 cd ../frontend
 npm run typecheck
+npm test
 npm run build
 ```
 
@@ -86,4 +118,6 @@ Premium fixture commands are disabled in production. Before public signup,
 add email verification and password recovery. Before multi-instance deploy,
 add a shared Socket.IO adapter and a durable event delivery strategy. Set
 `PUBLIC_ORIGIN` to the actual HTTPS origin, `MONGODB_URI` to the production
-database and keep `AVAILABILITY_INGEST_TOKEN` in a secret manager.
+database and keep `AVAILABILITY_INGEST_TOKEN` and
+`COMMUNITY_MODERATION_TOKEN` in a secret manager. Public signup also needs
+an explicit retention/deletion policy and an operated moderation process.

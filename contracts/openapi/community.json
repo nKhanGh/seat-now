@@ -1,0 +1,50 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "SeatNow community API", "version": "0.1.0", "description": "Community features built after the prioritized MVP. Public check-in counts are self-reported signals, not seat availability." },
+  "servers": [{ "url": "/api/v1" }],
+  "paths": {
+    "/venues/{slug}/check-ins": {
+      "get": { "summary": "Read distinct check-ins in the last hour", "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Aggregate count, latest timestamp and SELF_REPORTED source" } } },
+      "post": { "summary": "Check in near a venue", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CheckInInput" } } } }, "responses": { "200": { "description": "Check-in recorded or deduplicated" }, "400": { "description": "Location accuracy too low" }, "401": { "description": "Login required" }, "403": { "description": "Too far from venue" } } }
+    },
+    "/me/favorites": { "get": { "summary": "List the signed-in user's saved venues", "security": [{ "sessionCookie": [] }], "responses": { "200": { "description": "Up to 100 favorite venue summaries" }, "401": { "description": "Login required" } } } },
+    "/me/favorites/{slug}": {
+      "put": { "summary": "Save a venue idempotently", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Saved" } } },
+      "delete": { "summary": "Remove a saved venue", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Removed" } } }
+    },
+    "/venues/{slug}/reviews": { "get": { "summary": "Read public reviews by newest first", "parameters": [{ "$ref": "#/components/parameters/slug" }, { "$ref": "#/components/parameters/cursor" }], "responses": { "200": { "description": "20 reviews with meta.nextCursor" }, "400": { "description": "Invalid cursor" } } } },
+    "/me/reviews/{slug}": {
+      "put": { "summary": "Create or update one review per user and venue", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewInput" } } } }, "responses": { "200": { "description": "Review saved" } } },
+      "delete": { "summary": "Delete the author's review and photo", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Deleted" } } }
+    },
+    "/me/reviews/{slug}/photo": { "post": { "summary": "Attach one JPEG, PNG or WebP photo; strips metadata and stores WebP", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "photo": { "type": "string", "format": "binary" } }, "required": ["photo"] } } } }, "responses": { "201": { "description": "Photo stored" }, "413": { "description": "Over 2 MB" }, "415": { "description": "Invalid format" } } } },
+    "/reviews/{id}/photo": { "get": { "summary": "Read a published review's WebP photo", "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "200": { "description": "image/webp" }, "404": { "description": "Photo not found or review hidden" } } } },
+    "/reviews/{id}/reports": { "post": { "summary": "Report another user's public review once per reporter", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewReportInput" } } } }, "responses": { "201": { "description": "Report recorded" }, "400": { "description": "Cannot report own review" }, "404": { "description": "Review not found" } } } },
+    "/internal/community/review-reports": { "get": { "summary": "Review moderation queue, up to 100 newest reported reviews", "security": [{ "moderationToken": [] }], "responses": { "200": { "description": "Reported published reviews and report counts" }, "401": { "description": "Moderation token required" } } } },
+    "/internal/community/reviews/{id}/hide": { "post": { "summary": "Hide a review and its photo from public access", "security": [{ "moderationToken": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "201": { "description": "Review hidden" }, "404": { "description": "Review not found" } } } },
+    "/users/{id}": { "get": { "summary": "Public profile with display name and follower count; no email", "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "200": { "description": "Public profile" }, "404": { "description": "User not found" } } } },
+    "/me/follows": { "get": { "summary": "List up to 100 followed profiles", "security": [{ "sessionCookie": [] }], "responses": { "200": { "description": "Following list and meta.truncated" } } } },
+    "/me/follows/{id}": {
+      "get": { "summary": "Check whether the current user follows a profile", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "200": { "description": "Following status" } } },
+      "put": { "summary": "Follow a profile idempotently", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "200": { "description": "Following" }, "400": { "description": "Cannot follow self" } } },
+      "delete": { "summary": "Unfollow a profile", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "200": { "description": "Not following" } } }
+    },
+    "/community/proposals": {
+      "get": { "summary": "List pending and review-ready venue proposals", "responses": { "200": { "description": "Up to 50 proposals and meta.truncated" } } },
+      "post": { "summary": "Suggest a venue; it does not appear on the map yet", "security": [{ "sessionCookie": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProposalInput" } } } }, "responses": { "201": { "description": "Proposal pending confirmation" }, "429": { "description": "Daily limit reached" } } }
+    },
+    "/community/proposals/{id}/confirm": { "put": { "summary": "Confirm another user's proposed venue", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "200": { "description": "Confirmation counted once per user" }, "400": { "description": "Cannot self-confirm" }, "409": { "description": "Proposal closed" } } } },
+    "/internal/community/proposals/{id}/approve": { "post": { "summary": "Publish a proposal after three confirmations", "security": [{ "moderationToken": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "201": { "description": "Venue published to map" }, "409": { "description": "Proposal not ready" } } } },
+    "/internal/community/proposals/{id}/reject": { "post": { "summary": "Reject an open proposal", "security": [{ "moderationToken": [] }], "parameters": [{ "$ref": "#/components/parameters/id" }], "responses": { "201": { "description": "Proposal rejected" } } } }
+  },
+  "components": {
+    "securitySchemes": { "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "seatnow_sid", "description": "Production cookie: __Host-seatnow_sid" }, "moderationToken": { "type": "http", "scheme": "bearer", "description": "COMMUNITY_MODERATION_TOKEN; never expose to frontend" } },
+    "parameters": { "slug": { "in": "path", "name": "slug", "required": true, "schema": { "type": "string" } }, "id": { "in": "path", "name": "id", "required": true, "schema": { "type": "string", "pattern": "^[a-f0-9]{24}$" } }, "cursor": { "in": "query", "name": "cursor", "schema": { "type": "string" } } },
+    "schemas": {
+      "CheckInInput": { "type": "object", "required": ["lat", "lng", "accuracyM"], "properties": { "lat": { "type": "number", "minimum": -90, "maximum": 90 }, "lng": { "type": "number", "minimum": -180, "maximum": 180 }, "accuracyM": { "type": "number", "minimum": 0, "maximum": 100 } } },
+      "ReviewInput": { "type": "object", "required": ["rating", "body"], "properties": { "rating": { "type": "integer", "minimum": 1, "maximum": 5 }, "body": { "type": "string", "minLength": 10, "maxLength": 500 } } },
+      "ReviewReportInput": { "type": "object", "required": ["reason"], "properties": { "reason": { "type": "string", "enum": ["SPAM", "ABUSE", "OTHER"] } } },
+      "ProposalInput": { "type": "object", "required": ["name", "category", "cuisineTypes", "description", "address", "lat", "lng", "priceTier"], "properties": { "name": { "type": "string", "minLength": 3, "maxLength": 100 }, "category": { "type": "string", "enum": ["RESTAURANT", "CAFE", "CINEMA"] }, "cuisineTypes": { "type": "array", "items": { "type": "string", "enum": ["VIETNAMESE", "WESTERN", "COFFEE", "DESSERT"] } }, "description": { "type": "string", "minLength": 10, "maxLength": 500 }, "address": { "type": "string", "minLength": 5, "maxLength": 200 }, "lat": { "type": "number", "minimum": -90, "maximum": 90 }, "lng": { "type": "number", "minimum": -180, "maximum": 180 }, "priceTier": { "type": "integer", "minimum": 1, "maximum": 4 } } }
+    }
+  }
+}

@@ -2,12 +2,14 @@
 
 SeatNow là ứng dụng giúp người dùng tìm địa điểm và bãi đỗ xe gần đó, xem mức độ đông/vắng cùng số chỗ còn trống gần thời gian thực, rồi ra quyết định trước khi di chuyển.
 
-Repository hiện có **đăng nhập, bản đồ, tình trạng chỗ ngồi, bãi đỗ xe và nền tảng gói người dùng**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được khóa theo đúng thứ tự ưu tiên:
+Repository hiện có **đăng nhập, bản đồ, tình trạng chỗ ngồi, bãi đỗ xe, nền tảng gói người dùng và nhóm cộng đồng**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được triển khai theo đúng thứ tự ưu tiên:
 
 1. Bản đồ địa điểm thời gian thực và bộ lọc cơ bản.
 2. Tình trạng bàn/chỗ ngồi và thời gian chờ dự kiến.
 3. Bãi đỗ xe gần địa điểm và tình trạng chỗ trống.
 4. Nền tảng gói Free/Premium dành cho người dùng; các quyền Premium ngoài ba chức năng trên được triển khai ở release sau.
+
+Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm ảnh và báo cáo, theo dõi thành viên, chia sẻ địa điểm, đề xuất quán với ba lượt xác nhận và duyệt nội bộ. Đây là bản demo; tính năng cho chủ quán và kết nối dữ liệu thực vẫn thuộc release sau.
 
 ## Quyết định kỹ thuật hiện tại
 
@@ -41,7 +43,7 @@ npm ci
 npm run dev
 ```
 
-Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế và bãi xe, lọc kết quả, đăng ký/đăng nhập và mở trang `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
+Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
 
 `seed:demo` chỉ chạy ở local/test, tạo 5 địa điểm và 4 bãi xe hư cấu tại TP.HCM. Snapshot mẫu hết hạn sau 10 phút; chạy lại `npm run seed:demo` trong `backend` để làm mới. Khi hết hạn, UI ghi **Dữ liệu cũ** và không coi số chỗ đó là còn trống hiện tại.
 
@@ -54,7 +56,7 @@ Public API chính:
 - `GET /venues/:slug/parking` hoặc `GET /parking-facilities?lat=...&lng=...`
 - `GET /me/subscription` và `GET /me/entitlements` (cần đăng nhập)
 
-Danh sách địa điểm và bãi xe đều có `meta.nextCursor` để tải tiếp. Contract REST ở [OpenAPI](contracts/openapi/seatnow.json), contract Socket.IO ở [live events](contracts/events/live.md). Quy trình chạy, kiểm tra, backup/restore và dựng lại projection ở [runbook demo](docs/runbooks/local-demo.md).
+Danh sách địa điểm và bãi xe đều có `meta.nextCursor` để tải tiếp. Contract REST ở [OpenAPI MVP](contracts/openapi/seatnow.json) và [OpenAPI cộng đồng](contracts/openapi/community.json), contract Socket.IO ở [live events](contracts/events/live.md). Quy trình chạy, kiểm tra, kiểm duyệt, backup/restore và dựng lại projection ở [runbook demo](docs/runbooks/local-demo.md).
 
 Các POST nội bộ `/internal/venues/:slug/availability-snapshots` và `/internal/parking-facilities/:slug/availability-snapshots` cần `Authorization: Bearer <AVAILABILITY_INGEST_TOKEN>`. Chỉ cấu hình token trong môi trường chạy API; không đưa vào frontend. Snapshot mới được đẩy qua Socket.IO `/live`; client refetch REST khi kết nối lại và định kỳ 30 giây. Chưa có giao diện chủ quán, POS connector hay nguồn bãi xe thật.
 
@@ -84,6 +86,7 @@ Chi tiết lựa chọn stack và trade-off nằm tại [ADR 001](docs/adr/001-s
 5. [F02 — Tình trạng chỗ ngồi](docs/plan/features/F02-seat-availability.md)
 6. [F03 — Bãi đỗ xe](docs/plan/features/F03-parking.md)
 7. [F04 — Gói dịch vụ người dùng](docs/plan/features/F04-user-subscription.md)
+8. [F05 — Cộng đồng địa điểm](docs/plan/features/F05-community.md)
 
 ## Nguồn convention đã đối chiếu
 
