@@ -12,6 +12,7 @@ import { UserSubscription, UserSubscriptionSchema } from './subscription/schemas
 import { CheckIn, CheckInSchema } from './community/schemas/check-in.schema';
 import { Favorite, FavoriteSchema } from './community/schemas/favorite.schema';
 import { Review, ReviewSchema } from './community/schemas/review.schema';
+import { ReviewPhoto, ReviewPhotoSchema } from './community/schemas/review-photo.schema';
 
 async function createIndexes() {
   await ConfigModule.forRoot();
@@ -31,6 +32,7 @@ async function createIndexes() {
     await mongoose.model(CheckIn.name, CheckInSchema).createIndexes();
     await mongoose.model(Favorite.name, FavoriteSchema).createIndexes();
     await mongoose.model(Review.name, ReviewSchema).createIndexes();
+    await mongoose.model(ReviewPhoto.name, ReviewPhotoSchema).createIndexes();
   } finally {
     await mongoose.disconnect();
   }

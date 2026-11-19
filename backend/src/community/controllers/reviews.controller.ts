@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Put, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from '../../auth/services/auth.service';
 import { ReviewQueryDto, UpsertReviewDto } from '../dto/review.dto';
 import { ReviewsService } from '../services/reviews.service';
@@ -28,5 +29,19 @@ export class ReviewsController {
   @Delete('me/reviews/:slug')
   async remove(@Req() request: CookieRequest, @Param('slug') slug: string) {
     return this.reviews.remove(await this.userId(request), slug);
+  }
+
+  @Post('me/reviews/:slug/photo')
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @UseInterceptors(FileInterceptor('photo', { limits: { files: 1, fileSize: 2_000_000 } }))
+  async uploadPhoto(@Req() request: CookieRequest, @Param('slug') slug: string,
+    @UploadedFile() file: { buffer: Buffer; size: number } | undefined) {
+    return this.reviews.uploadPhoto(await this.userId(request), slug, file);
+  }
+
+  @Get('reviews/:id/photo')
+  async photo(@Param('id') id: string, @Res() response: Response) {
+    const data = await this.reviews.getPhoto(id);
+    response.type('image/webp').setHeader('Cache-Control', 'no-store').send(data);
   }
 }
