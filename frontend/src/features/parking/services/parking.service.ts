@@ -19,16 +19,17 @@ export type ParkingFacilityItem = {
   };
 };
 
-export type ParkingResponse = { data: ParkingFacilityItem[]; meta: { truncated: boolean; distanceType: 'STRAIGHT_LINE'; queryCenter: { lat: number; lng: number } } };
+export type ParkingResponse = { data: ParkingFacilityItem[]; meta: { nextCursor: string | null; truncated: boolean; distanceType: 'STRAIGHT_LINE'; queryCenter: { lat: number; lng: number } } };
 
 export type ParkingFilters = { vehicleType: '' | 'CAR' | 'MOTORBIKE'; hasAvailability: boolean; open24h: boolean; freeOnly: boolean };
 
-export async function getParkingForVenue(slug: string, filters: ParkingFilters, signal?: AbortSignal): Promise<ParkingResponse> {
+export async function getParkingForVenue(slug: string, filters: ParkingFilters, cursor: string | null, signal?: AbortSignal): Promise<ParkingResponse> {
   const params = new URLSearchParams();
   if (filters.vehicleType) params.set('vehicleType', filters.vehicleType);
   if (filters.hasAvailability) params.set('hasAvailability', 'true');
   if (filters.open24h) params.set('open24h', 'true');
   if (filters.freeOnly) params.set('freeOnly', 'true');
+  if (cursor) params.set('cursor', cursor);
   const response = await fetch(`/api/v1/venues/${encodeURIComponent(slug)}/parking?${params}`, { signal });
   if (!response.ok) throw new Error(`Không tải được bãi đỗ xe (${response.status}).`);
   return response.json() as Promise<ParkingResponse>;

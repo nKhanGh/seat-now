@@ -54,6 +54,15 @@ describeWithMongo('ParkingService with MongoDB 2dsphere', () => {
     expect(open.data.map((item) => item.slug)).toEqual(['linked']);
   });
 
+  it('paginates linked and nearby parking without duplicates', async () => {
+    const query = { radiusM: 500, limit: 1 };
+    const first = await service.forVenue('test-cafe', query);
+    const second = await service.forVenue('test-cafe', { ...query, cursor: first.meta.nextCursor! });
+    expect([first.data[0].slug, second.data[0].slug]).toEqual(['linked', 'public']);
+    expect(second.meta.nextCursor).toBeNull();
+    await expect(service.forVenue('test-cafe', { ...query, freeOnly: 'true', cursor: first.meta.nextCursor! })).rejects.toThrow('Invalid parking cursor');
+  });
+
   it('accepts only newer parking snapshots and deduplicates records', async () => {
     const payload = { version: 3, availableSpaces: 2, totalSpaces: 10, source: 'DEMO', sourceRecordId: 'parking-3', confidence: 0.8, capturedAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 60_000).toISOString() };
     expect((await service.ingest('linked', payload)).latestUpdated).toBe(true);
