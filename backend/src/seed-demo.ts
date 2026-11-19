@@ -96,6 +96,54 @@ const demoVenues = [
   },
 ] as const;
 
+const hcmAreas = [
+  { name: 'Quận 1', lat: 10.7769, lng: 106.7009 },
+  { name: 'Quận 3', lat: 10.7832, lng: 106.6837 },
+  { name: 'Quận 4', lat: 10.7613, lng: 106.7031 },
+  { name: 'Quận 5', lat: 10.7543, lng: 106.6675 },
+  { name: 'Quận 10', lat: 10.7727, lng: 106.6678 },
+  { name: 'Bình Thạnh', lat: 10.8014, lng: 106.7112 },
+  { name: 'Phú Nhuận', lat: 10.7991, lng: 106.6816 },
+  { name: 'Thảo Điền', lat: 10.8025, lng: 106.733 },
+  { name: 'Quận 7', lat: 10.7292, lng: 106.7201 },
+  { name: 'Tân Bình', lat: 10.8012, lng: 106.6523 },
+] as const;
+
+const generatedVenues = Array.from({ length: 95 }, (_, index) => {
+  const area = hcmAreas[index % hcmAreas.length];
+  const number = String(index + 1).padStart(3, '0');
+  const cafe = index % 3 !== 0;
+  const angle = index * 2.39996;
+  const radius = 0.002 + (index % 7) * 0.0012;
+  const total = 12 + (index % 8) * 4;
+  const available = index % 9 === 0 ? 0 : Math.max(1, Math.floor(total * (0.15 + (index % 5) * 0.12)));
+  return {
+    slug: `demo-hcm-${number}`,
+    name: `SeatNow Demo ${cafe ? 'Café' : 'Quán ăn'} ${number} · ${area.name}`,
+    category: cafe ? ('CAFE' as const) : ('RESTAURANT' as const),
+    cuisineTypes: cafe ? ['COFFEE', 'DESSERT'] : [index % 2 === 0 ? 'VIETNAMESE' : 'WESTERN'],
+    description: `Địa điểm hư cấu để thử bản đồ, bộ lọc và đánh giá tại ${area.name}, TP.HCM.`,
+    address: `Khu vực ${area.name}, TP.HCM (địa chỉ mô phỏng)`,
+    lat: Number((area.lat + Math.sin(angle) * radius).toFixed(5)),
+    lng: Number((area.lng + Math.cos(angle) * radius).toFixed(5)),
+    priceTier: (index % 4) + 1,
+    rating: Number((3.7 + (index % 12) * 0.1).toFixed(1)),
+    crowdLevel:
+      available === 0
+        ? ('FULL' as const)
+        : index % 3 === 0
+          ? ('BUSY' as const)
+          : index % 3 === 1
+            ? ('MODERATE' as const)
+            : ('QUIET' as const),
+    tables: { total, available },
+    seats: { total: total * 4, available: available * 4 },
+    wait: available === 0 ? 30 : index % 3 === 0 ? 10 : 0,
+  };
+});
+
+const allDemoVenues = [...demoVenues, ...generatedVenues];
+
 const demoParking = [
   {
     slug: 'demo-nguyen-hue-parking',
@@ -174,7 +222,7 @@ async function seedDemo() {
     const capturedAt = new Date();
     const expiresAt = new Date(capturedAt.getTime() + 10 * 60_000);
     const version = capturedAt.getTime();
-    for (const item of demoVenues) {
+    for (const item of allDemoVenues) {
       const location = { type: 'Point', coordinates: [item.lng, item.lat] };
       const profile = {
         name: item.name,
@@ -287,7 +335,7 @@ async function seedDemo() {
       }
     }
     console.log(
-      `Seeded ${demoVenues.length} fictional demo venues and ${demoParking.length} parking facilities`,
+      `Seeded ${allDemoVenues.length} fictional demo venues and ${demoParking.length} parking facilities`,
     );
   } finally {
     await mongoose.disconnect();
