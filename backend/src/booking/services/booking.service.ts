@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BusinessAccessService } from '../../business/services/business-access.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { EntitlementService } from '../../subscription/services/entitlement.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { Booking } from '../schemas/booking.schema';
@@ -12,6 +13,7 @@ export class BookingService {
     @InjectModel(Booking.name) private readonly bookings: Model<Booking>,
     private readonly business: BusinessAccessService,
     private readonly entitlements: EntitlementService,
+    private readonly auth: AuthService,
   ) {}
 
   bookingStatus(slug: string) {
@@ -61,7 +63,14 @@ export class BookingService {
       .sort({ priority: -1, requestedAt: 1, _id: 1 })
       .limit(100)
       .lean();
-    return { data: rows.map((row) => this.publicBooking(row)) };
+    const users = await this.auth.publicUsersByIds(rows.map((row) => row.userId));
+    const names = new Map(users.map((user) => [user.id, user.displayName]));
+    return {
+      data: rows.map((row) => ({
+        ...this.publicBooking(row),
+        guestDisplayName: names.get(row.userId.toString()) ?? 'Tài khoản không còn hoạt động',
+      })),
+    };
   }
 
   async cancel(userId: string, id: string) {

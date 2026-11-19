@@ -8,6 +8,7 @@ export type BookingRequest = {
   status: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELED';
   createdAt: string;
   resolvedAt: string | null;
+  guestDisplayName?: string;
 };
 
 async function readData<T>(response: Response): Promise<T> {

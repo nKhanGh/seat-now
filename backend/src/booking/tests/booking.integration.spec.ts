@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import mongoose from 'mongoose';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { BusinessAccessService } from '../../business/services/business-access.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { EntitlementService } from '../../subscription/services/entitlement.service';
 import { Booking, BookingSchema } from '../schemas/booking.schema';
 import { BookingService } from '../services/booking.service';
@@ -19,6 +20,13 @@ describeWithMongo('booking requests with MongoDB', () => {
     bookingStatus: jest.fn(),
   };
   const entitlements = { can: jest.fn().mockResolvedValue(false) };
+  const auth = {
+    publicUsersByIds: jest
+      .fn()
+      .mockImplementation(async (ids: mongoose.Types.ObjectId[]) =>
+        ids.map((id) => ({ id: id.toString(), displayName: 'Khách thử nghiệm' })),
+      ),
+  };
   const guest = new mongoose.Types.ObjectId().toString();
   const owner = new mongoose.Types.ObjectId().toString();
 
@@ -30,6 +38,7 @@ describeWithMongo('booking requests with MongoDB', () => {
       model,
       business as unknown as BusinessAccessService,
       entitlements as unknown as EntitlementService,
+      auth as unknown as AuthService,
     );
   });
   afterAll(async () => {
@@ -56,6 +65,7 @@ describeWithMongo('booking requests with MongoDB', () => {
     const premium = (await service.create(guest, 'cafe-a', { requestedAt: secondAt, guestCount: 3 })).data;
     const queue = (await service.forVenue(owner, 'cafe-a')).data;
     expect(queue.map((row) => row.id)).toEqual([premium.id, ordinary.id]);
+    expect(queue[0].guestDisplayName).toBe('Khách thử nghiệm');
     expect(premium).toMatchObject({ status: 'PENDING', priority: true });
     expect(business.requireOwner).toHaveBeenCalledWith(owner, 'cafe-a');
 

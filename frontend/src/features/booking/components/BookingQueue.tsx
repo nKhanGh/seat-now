@@ -26,6 +26,7 @@ export function BookingQueue({ slug, userId, enabled }: { slug: string; userId: 
       {bookings.data?.map((booking) => (
         <div className="booking-row" key={booking.id}>
           <strong>{new Date(booking.requestedAt).toLocaleString('vi-VN')}</strong>
+          {booking.guestDisplayName && <span>Người gửi: {booking.guestDisplayName}</span>}
           <span>
             {booking.guestCount} khách · {booking.priority ? 'Ưu tiên Premium' : 'Thường'} · {booking.status}
           </span>
