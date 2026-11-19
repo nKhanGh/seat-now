@@ -52,7 +52,7 @@ export class MapService {
         cursor = { distanceM: parsed.distanceM, id: parsed.id };
       } catch { throw new BadRequestException({ code: 'MAP_INVALID_CURSOR', message: 'Invalid map cursor' }); }
     }
-    const match: Record<string, unknown> = {};
+    const match: Record<string, unknown> = { status: 'ACTIVE' };
     if (query.category) match.category = query.category;
     if (query.cuisine) match.cuisineTypes = query.cuisine;
     if (query.priceTier) match.priceTier = query.priceTier;
