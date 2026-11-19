@@ -3,10 +3,26 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AvailabilityService } from '../../availability/services/availability.service';
 import { Venue } from '../../map/schemas/venue.schema';
+import { VenueMapView } from '../../map/schemas/venue-map-view.schema';
 
 @Injectable()
 export class VenuesService {
-  constructor(@InjectModel(Venue.name) private readonly venues: Model<Venue>, private readonly availability: AvailabilityService) {}
+  constructor(
+    @InjectModel(Venue.name) private readonly venues: Model<Venue>,
+    @InjectModel(VenueMapView.name) private readonly views: Model<VenueMapView>,
+    private readonly availability: AvailabilityService,
+  ) {}
+
+  async publishProposal(profile: { slug: string; name: string; category: 'RESTAURANT' | 'CAFE' | 'CINEMA'; cuisineTypes: string[]; description: string; address: string; lat: number; lng: number; priceTier: number }) {
+    const publicFields = {
+      name: profile.name, category: profile.category, cuisineTypes: profile.cuisineTypes,
+      address: profile.address, location: { type: 'Point' as const, coordinates: [profile.lng, profile.lat] as [number, number] },
+      priceTier: profile.priceTier, rating: 0, status: 'ACTIVE',
+    };
+    await this.venues.updateOne({ slug: profile.slug }, { $setOnInsert: { ...publicFields, description: profile.description } }, { upsert: true });
+    await this.views.updateOne({ slug: profile.slug }, { $setOnInsert: publicFields }, { upsert: true });
+    return { slug: profile.slug };
+  }
 
   async activeLocation(slug: string): Promise<[number, number]> {
     const venue = await this.venues.findOne({ slug, status: 'ACTIVE' }, { location: 1 }).lean();
