@@ -17,6 +17,8 @@ import { ReviewReport, ReviewReportSchema } from './community/schemas/review-rep
 import { Follow, FollowSchema } from './community/schemas/follow.schema';
 import { VenueProposal, VenueProposalSchema } from './community/schemas/venue-proposal.schema';
 import { ProposalConfirmation, ProposalConfirmationSchema } from './community/schemas/proposal-confirmation.schema';
+import { BusinessClaim, BusinessClaimSchema } from './business/schemas/business-claim.schema';
+import { BusinessAccess, BusinessAccessSchema } from './business/schemas/business-access.schema';
 
 async function createIndexes() {
   await ConfigModule.forRoot();
@@ -41,6 +43,8 @@ async function createIndexes() {
     await mongoose.model(Follow.name, FollowSchema).createIndexes();
     await mongoose.model(VenueProposal.name, VenueProposalSchema).createIndexes();
     await mongoose.model(ProposalConfirmation.name, ProposalConfirmationSchema).createIndexes();
+    await mongoose.model(BusinessClaim.name, BusinessClaimSchema).createIndexes();
+    await mongoose.model(BusinessAccess.name, BusinessAccessSchema).createIndexes();
   } finally {
     await mongoose.disconnect();
   }

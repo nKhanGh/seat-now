@@ -13,6 +13,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { VenuesModule } from './venues/venues.module';
 import { HealthController } from './health.controller';
 import { CommunityModule } from './community/community.module';
+import { BusinessModule } from './business/business.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CommunityModule } from './community/community.module';
     SubscriptionModule,
     VenuesModule,
     CommunityModule,
+    BusinessModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
   controllers: [HealthController],
