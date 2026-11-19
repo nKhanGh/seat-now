@@ -1,5 +1,19 @@
 import { getSessionToken } from '../../auth/session-token';
-import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -13,14 +27,19 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller()
 export class ReviewsController {
-  constructor(private readonly reviews: ReviewsService, private readonly auth: AuthService) {}
+  constructor(
+    private readonly reviews: ReviewsService,
+    private readonly auth: AuthService,
+  ) {}
 
   private async userId(request: CookieRequest) {
     return (await this.auth.authenticate(getSessionToken(request))).id;
   }
 
   @Get('venues/:slug/reviews')
-  list(@Param('slug') slug: string, @Query() query: ReviewQueryDto) { return this.reviews.list(slug, query.cursor); }
+  list(@Param('slug') slug: string, @Query() query: ReviewQueryDto) {
+    return this.reviews.list(slug, query.cursor);
+  }
 
   @Put('me/reviews/:slug')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -36,8 +55,11 @@ export class ReviewsController {
   @Post('me/reviews/:slug/photo')
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @UseInterceptors(FileInterceptor('photo', { limits: { files: 1, fileSize: 2_000_000 } }))
-  async uploadPhoto(@Req() request: CookieRequest, @Param('slug') slug: string,
-    @UploadedFile() file: { buffer: Buffer; size: number } | undefined) {
+  async uploadPhoto(
+    @Req() request: CookieRequest,
+    @Param('slug') slug: string,
+    @UploadedFile() file: { buffer: Buffer; size: number } | undefined,
+  ) {
     return this.reviews.uploadPhoto(await this.userId(request), slug, file);
   }
 

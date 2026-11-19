@@ -9,15 +9,36 @@ export function useCurrentUser() {
 
 export function useLogin() {
   const client = useQueryClient();
-  return useMutation({ mutationFn: ({ email, password }: { email: string; password: string }) => authService.login(email, password), onSuccess: (user) => client.setQueryData(authQueryKey, user) });
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      authService.login(email, password),
+    onSuccess: (user) => client.setQueryData(authQueryKey, user),
+  });
 }
 
 export function useRegister() {
   const client = useQueryClient();
-  return useMutation({ mutationFn: ({ email, password, displayName }: { email: string; password: string; displayName: string }) => authService.register(email, password, displayName), onSuccess: (user) => client.setQueryData(authQueryKey, user) });
+  return useMutation({
+    mutationFn: ({
+      email,
+      password,
+      displayName,
+    }: {
+      email: string;
+      password: string;
+      displayName: string;
+    }) => authService.register(email, password, displayName),
+    onSuccess: (user) => client.setQueryData(authQueryKey, user),
+  });
 }
 
 export function useLogout() {
   const client = useQueryClient();
-  return useMutation({ mutationFn: authService.logout, onSuccess: () => { client.clear(); client.setQueryData(authQueryKey, null); } });
+  return useMutation({
+    mutationFn: authService.logout,
+    onSuccess: () => {
+      client.clear();
+      client.setQueryData(authQueryKey, null);
+    },
+  });
 }

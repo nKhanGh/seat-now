@@ -10,15 +10,20 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller('business/venues')
 export class BusinessDashboardController {
-  constructor(private readonly business: BusinessAccessService, private readonly pageViews: VenuePageViewService,
-    private readonly availability: AvailabilityService, private readonly auth: AuthService) {}
+  constructor(
+    private readonly business: BusinessAccessService,
+    private readonly pageViews: VenuePageViewService,
+    private readonly availability: AvailabilityService,
+    private readonly auth: AuthService,
+  ) {}
 
   @Get(':slug/dashboard')
   async get(@Req() request: CookieRequest, @Param('slug') slug: string) {
     const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug, true);
     const [views, occupancy] = await Promise.all([
-      this.pageViews.sevenDaySummary(slug), this.availability.sevenDayOccupancy(slug),
+      this.pageViews.sevenDaySummary(slug),
+      this.availability.sevenDayOccupancy(slug),
     ]);
     return { data: { periodDays: 7, views, occupancy } };
   }

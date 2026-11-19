@@ -7,7 +7,10 @@ import { VenuesService } from './venues.service';
 
 @Injectable()
 export class VenueCoverService {
-  constructor(@InjectModel(VenueCover.name) private readonly covers: Model<VenueCover>, private readonly venues: VenuesService) {}
+  constructor(
+    @InjectModel(VenueCover.name) private readonly covers: Model<VenueCover>,
+    private readonly venues: VenuesService,
+  ) {}
 
   async upload(slug: string, file: { buffer: Buffer; size: number } | undefined) {
     await this.venues.activeLocation(slug);

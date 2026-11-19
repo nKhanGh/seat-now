@@ -9,17 +9,24 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller()
 export class FollowsController {
-  constructor(private readonly follows: FollowsService, private readonly auth: AuthService) {}
+  constructor(
+    private readonly follows: FollowsService,
+    private readonly auth: AuthService,
+  ) {}
 
   private async userId(request: CookieRequest) {
     return (await this.auth.authenticate(getSessionToken(request))).id;
   }
 
   @Get('users/:id')
-  profile(@Param('id') id: string) { return this.follows.publicProfile(id); }
+  profile(@Param('id') id: string) {
+    return this.follows.publicProfile(id);
+  }
 
   @Get('me/follows')
-  async list(@Req() request: CookieRequest) { return this.follows.list(await this.userId(request)); }
+  async list(@Req() request: CookieRequest) {
+    return this.follows.list(await this.userId(request));
+  }
 
   @Get('me/follows/:id')
   async status(@Req() request: CookieRequest, @Param('id') id: string) {

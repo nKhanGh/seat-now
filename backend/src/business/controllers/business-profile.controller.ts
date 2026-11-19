@@ -11,11 +11,19 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller('business/venues')
 export class BusinessProfileController {
-  constructor(private readonly business: BusinessAccessService, private readonly venues: VenuesService, private readonly auth: AuthService) {}
+  constructor(
+    private readonly business: BusinessAccessService,
+    private readonly venues: VenuesService,
+    private readonly auth: AuthService,
+  ) {}
 
   @Put(':slug/profile')
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  async update(@Req() request: CookieRequest, @Param('slug') slug: string, @Body() input: UpdateBusinessProfileDto) {
+  async update(
+    @Req() request: CookieRequest,
+    @Param('slug') slug: string,
+    @Body() input: UpdateBusinessProfileDto,
+  ) {
     const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug);
     return this.venues.updateBusinessProfile(slug, input);

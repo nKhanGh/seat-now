@@ -4,10 +4,18 @@ import { AvailabilityStatus } from './AvailabilityStatus';
 import { VenueMapItem } from '../services/map.service';
 
 const base: VenueMapItem['availability'] = {
-  crowdLevel: 'QUIET', tablesAvailable: 4, tablesTotal: 10,
-  seatsAvailable: null, seatsTotal: null, estimatedWaitMinutes: 0,
-  acceptingGuests: true, source: 'DEMO', confidence: 0.8, version: 1,
-  capturedAt: '2026-11-19T00:00:00.000Z', expiresAt: '2026-11-19T00:05:00.000Z',
+  crowdLevel: 'QUIET',
+  tablesAvailable: 4,
+  tablesTotal: 10,
+  seatsAvailable: null,
+  seatsTotal: null,
+  estimatedWaitMinutes: 0,
+  acceptingGuests: true,
+  source: 'DEMO',
+  confidence: 0.8,
+  version: 1,
+  capturedAt: '2026-11-19T00:00:00.000Z',
+  expiresAt: '2026-11-19T00:05:00.000Z',
   freshness: 'FRESH',
 };
 
@@ -20,7 +28,11 @@ describe('availability presentation', () => {
   });
 
   it('shows unknown data without inventing zero free places', () => {
-    const html = renderToStaticMarkup(<AvailabilityStatus availability={{ ...base, freshness: 'UNKNOWN', tablesAvailable: null, tablesTotal: null }} />);
+    const html = renderToStaticMarkup(
+      <AvailabilityStatus
+        availability={{ ...base, freshness: 'UNKNOWN', tablesAvailable: null, tablesTotal: null }}
+      />,
+    );
     expect(html).toContain('Chưa có dữ liệu chỗ ngồi');
     expect(html).not.toContain('0/');
   });

@@ -6,5 +6,6 @@ export function assertIngestToken(authorization: string | undefined) {
   if (!secret) throw new ServiceUnavailableException('Availability ingestion is not configured');
   const expected = Buffer.from(`Bearer ${secret}`);
   const actual = Buffer.from(authorization ?? '');
-  if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) throw new UnauthorizedException();
+  if (actual.length !== expected.length || !timingSafeEqual(actual, expected))
+    throw new UnauthorizedException();
 }

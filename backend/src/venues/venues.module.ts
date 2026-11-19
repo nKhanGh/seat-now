@@ -13,13 +13,16 @@ import { VenueCover, VenueCoverSchema } from './schemas/venue-cover.schema';
 import { VenueCoverService } from './services/venue-cover.service';
 
 @Module({
-  imports: [AvailabilityModule, MongooseModule.forFeature([
-    { name: Venue.name, schema: VenueSchema },
-    { name: VenueMapView.name, schema: VenueMapViewSchema },
-    { name: VenueLogo.name, schema: VenueLogoSchema },
-    { name: VenuePageView.name, schema: VenuePageViewSchema },
-    { name: VenueCover.name, schema: VenueCoverSchema },
-  ])],
+  imports: [
+    AvailabilityModule,
+    MongooseModule.forFeature([
+      { name: Venue.name, schema: VenueSchema },
+      { name: VenueMapView.name, schema: VenueMapViewSchema },
+      { name: VenueLogo.name, schema: VenueLogoSchema },
+      { name: VenuePageView.name, schema: VenuePageViewSchema },
+      { name: VenueCover.name, schema: VenueCoverSchema },
+    ]),
+  ],
   controllers: [VenuesController],
   providers: [VenuesService, VenueLogoService, VenueCoverService, VenuePageViewService],
   exports: [VenuesService, VenueLogoService, VenueCoverService, VenuePageViewService],

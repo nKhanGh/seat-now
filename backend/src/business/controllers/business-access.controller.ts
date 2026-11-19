@@ -12,7 +12,10 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller()
 export class BusinessAccessController {
-  constructor(private readonly business: BusinessAccessService, private readonly auth: AuthService) {}
+  constructor(
+    private readonly business: BusinessAccessService,
+    private readonly auth: AuthService,
+  ) {}
 
   private async userId(request: CookieRequest) {
     return (await this.auth.authenticate(getSessionToken(request))).id;
@@ -20,7 +23,11 @@ export class BusinessAccessController {
 
   @Post('business/claims/:slug')
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
-  async requestClaim(@Req() request: CookieRequest, @Param('slug') slug: string, @Body() input: CreateClaimDto) {
+  async requestClaim(
+    @Req() request: CookieRequest,
+    @Param('slug') slug: string,
+    @Body() input: CreateClaimDto,
+  ) {
     return this.business.requestClaim(await this.userId(request), slug, input.evidence);
   }
 
@@ -53,7 +60,11 @@ export class BusinessAccessController {
   }
 
   @Put('internal/business/venues/:slug/plan')
-  setPlan(@Headers('authorization') authorization: string | undefined, @Param('slug') slug: string, @Body() input: SetBusinessPlanDto) {
+  setPlan(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('slug') slug: string,
+    @Body() input: SetBusinessPlanDto,
+  ) {
     assertBusinessAdminToken(authorization);
     return this.business.setPlan(slug, input);
   }

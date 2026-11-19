@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
 
-const toNumber = ({ value }: { value: unknown }) => value === undefined ? undefined : Number(value);
+const toNumber = ({ value }: { value: unknown }) => (value === undefined ? undefined : Number(value));
 
 export class ParkingQueryDto {
   @Transform(toNumber) @IsOptional() @IsNumber() @Min(-90) @Max(90) lat?: number;

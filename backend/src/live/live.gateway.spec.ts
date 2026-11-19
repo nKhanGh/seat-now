@@ -6,11 +6,18 @@ describe('LiveGateway', () => {
     const rooms = new Set(['socket-1', 'venue:old']);
     const client = {
       rooms,
-      leave: jest.fn((room: string) => { rooms.delete(room); }),
-      join: jest.fn((room: string) => { rooms.add(room); }),
+      leave: jest.fn((room: string) => {
+        rooms.delete(room);
+      }),
+      join: jest.fn((room: string) => {
+        rooms.add(room);
+      }),
     } as unknown as Socket;
     const gateway = new LiveGateway();
-    const result = gateway.watch(client, { venueSlugs: ['demo-cafe', 'demo-cafe', 'bad slug'], parkingSlugs: ['demo-parking'] });
+    const result = gateway.watch(client, {
+      venueSlugs: ['demo-cafe', 'demo-cafe', 'bad slug'],
+      parkingSlugs: ['demo-parking'],
+    });
     expect(result).toEqual({ venueCount: 1, parkingCount: 1 });
     expect([...rooms]).toEqual(['socket-1', 'venue:demo-cafe', 'parking:demo-parking']);
   });
@@ -23,6 +30,9 @@ describe('LiveGateway', () => {
     gateway.venueUpdated('demo-cafe', 12);
     gateway.parkingUpdated('demo-parking', 13);
     expect(to.mock.calls.map((call) => call[0])).toEqual(['venue:demo-cafe', 'parking:demo-parking']);
-    expect(emit.mock.calls.map((call) => call[0])).toEqual(['venue.availability.updated.v1', 'parking.availability.updated.v1']);
+    expect(emit.mock.calls.map((call) => call[0])).toEqual([
+      'venue.availability.updated.v1',
+      'parking.availability.updated.v1',
+    ]);
   });
 });

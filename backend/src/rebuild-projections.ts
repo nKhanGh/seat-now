@@ -3,7 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import mongoose from 'mongoose';
 import { Venue, VenueSchema } from './map/schemas/venue.schema';
 import { VenueMapView, VenueMapViewSchema } from './map/schemas/venue-map-view.schema';
-import { AvailabilityLatest, AvailabilityLatestSchema, AvailabilitySnapshot, AvailabilitySnapshotSchema } from './availability/schemas/availability-snapshot.schema';
+import {
+  AvailabilityLatest,
+  AvailabilityLatestSchema,
+  AvailabilitySnapshot,
+  AvailabilitySnapshotSchema,
+} from './availability/schemas/availability-snapshot.schema';
 import { ParkingFacility, ParkingFacilitySchema } from './parking/schemas/parking-facility.schema';
 import { ParkingSnapshot, ParkingSnapshotSchema } from './parking/schemas/parking-snapshot.schema';
 import { rebuildProjections } from './projections/rebuild-projections';
@@ -22,7 +27,12 @@ async function main() {
       parkingSnapshots: mongoose.model(ParkingSnapshot.name, ParkingSnapshotSchema),
     });
     console.log('Rebuilt projections', result);
-  } finally { await mongoose.disconnect(); }
+  } finally {
+    await mongoose.disconnect();
+  }
 }
 
-void main().catch((error: unknown) => { console.error(error); process.exitCode = 1; });
+void main().catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});

@@ -10,20 +10,48 @@ export type ParkingFacilityItem = {
   vehicleTypes: Array<'CAR' | 'MOTORBIKE'>;
   isOpenNow: boolean | null;
   entranceNote: string | null;
-  pricing: { kind: 'FREE' | 'FLAT' | 'HOURLY' | 'TIERED' | 'UNKNOWN'; amountMinor: number | null; currency: string | null; unit: string | null; note: string | null };
+  pricing: {
+    kind: 'FREE' | 'FLAT' | 'HOURLY' | 'TIERED' | 'UNKNOWN';
+    amountMinor: number | null;
+    currency: string | null;
+    unit: string | null;
+    note: string | null;
+  };
   availability: {
-    availableSpaces: number | null; totalSpaces: number | null;
-    freshness: 'FRESH' | 'STALE' | 'UNKNOWN'; source: string | null;
-    confidence: number | null; capturedAt: string | null; expiresAt: string | null;
+    availableSpaces: number | null;
+    totalSpaces: number | null;
+    freshness: 'FRESH' | 'STALE' | 'UNKNOWN';
+    source: string | null;
+    confidence: number | null;
+    capturedAt: string | null;
+    expiresAt: string | null;
     version: number | null;
   };
 };
 
-export type ParkingResponse = { data: ParkingFacilityItem[]; meta: { nextCursor: string | null; truncated: boolean; distanceType: 'STRAIGHT_LINE'; queryCenter: { lat: number; lng: number } } };
+export type ParkingResponse = {
+  data: ParkingFacilityItem[];
+  meta: {
+    nextCursor: string | null;
+    truncated: boolean;
+    distanceType: 'STRAIGHT_LINE';
+    queryCenter: { lat: number; lng: number };
+  };
+};
 
-export type ParkingFilters = { vehicleType: '' | 'CAR' | 'MOTORBIKE'; hasAvailability: boolean; open24h: boolean; freeOnly: boolean };
+export type ParkingFilters = {
+  vehicleType: '' | 'CAR' | 'MOTORBIKE';
+  hasAvailability: boolean;
+  open24h: boolean;
+  freeOnly: boolean;
+};
 
-export async function getParkingForVenue(slug: string, filters: ParkingFilters, cursor: string | null, signal?: AbortSignal): Promise<ParkingResponse> {
+export async function getParkingForVenue(
+  slug: string,
+  filters: ParkingFilters,
+  cursor: string | null,
+  signal?: AbortSignal,
+): Promise<ParkingResponse> {
   const params = new URLSearchParams();
   if (filters.vehicleType) params.set('vehicleType', filters.vehicleType);
   if (filters.hasAvailability) params.set('hasAvailability', 'true');

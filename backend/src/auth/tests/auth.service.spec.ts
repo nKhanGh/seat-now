@@ -26,9 +26,17 @@ describe('AuthService', () => {
   it('hashes the password and stores only a session verifier hash', async () => {
     users.create.mockImplementation(async (input: typeof user) => ({ ...user, ...input }));
     sessions.create.mockResolvedValue({});
-    const result = await service.register({ email: ' TEST@example.com ', password: 'long-secret-password', displayName: 'Test User' });
-    expect(users.create).toHaveBeenCalledWith(expect.objectContaining({ emailNormalized: 'test@example.com', passwordHash: expect.any(String) }));
-    expect(await argon2.verify(users.create.mock.calls[0][0].passwordHash, 'long-secret-password')).toBe(true);
+    const result = await service.register({
+      email: ' TEST@example.com ',
+      password: 'long-secret-password',
+      displayName: 'Test User',
+    });
+    expect(users.create).toHaveBeenCalledWith(
+      expect.objectContaining({ emailNormalized: 'test@example.com', passwordHash: expect.any(String) }),
+    );
+    expect(await argon2.verify(users.create.mock.calls[0][0].passwordHash, 'long-secret-password')).toBe(
+      true,
+    );
     expect(sessions.create.mock.calls[0][0].verifierHash).not.toBe(result.token.split('.')[1]);
     expect(result.user).not.toHaveProperty('passwordHash');
   });
@@ -41,7 +49,9 @@ describe('AuthService', () => {
       verifierHash: createHash('sha256').update(verifier).digest('hex'),
       expiresAt: new Date(Date.now() - 1000),
     });
-    await expect(service.authenticate(`${'b'.repeat(32)}.${verifier}`)).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(service.authenticate(`${'b'.repeat(32)}.${verifier}`)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
     expect(users.findById).not.toHaveBeenCalled();
   });
 

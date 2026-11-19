@@ -20,7 +20,10 @@ import { BusinessModule } from './business/business.module';
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({ uri: config.getOrThrow<string>('MONGODB_URI'), autoIndex: process.env.NODE_ENV !== 'production' }),
+      useFactory: (config: ConfigService) => ({
+        uri: config.getOrThrow<string>('MONGODB_URI'),
+        autoIndex: process.env.NODE_ENV !== 'production',
+      }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     LiveModule,

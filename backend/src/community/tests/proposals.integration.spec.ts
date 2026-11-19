@@ -12,8 +12,13 @@ const describeWithMongo = testUri ? describe : describe.skip;
 
 describeWithMongo('community venue proposals with MongoDB', () => {
   const dbName = `seatnow_test_${randomUUID().replaceAll('-', '')}`;
-  beforeAll(async () => { await mongoose.connect(testUri!, { dbName }); });
-  afterAll(async () => { await mongoose.connection.dropDatabase(); await mongoose.disconnect(); });
+  beforeAll(async () => {
+    await mongoose.connect(testUri!, { dbName });
+  });
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.disconnect();
+  });
 
   it('requires three other users and moderation before publishing to the map', async () => {
     const proposals = mongoose.model(VenueProposal.name, VenueProposalSchema);
@@ -24,9 +29,16 @@ describeWithMongo('community venue proposals with MongoDB', () => {
     const venueService = new VenuesService(venues, views, {} as never);
     const service = new ProposalsService(proposals, confirmations, venueService);
     const creator = new Types.ObjectId().toString();
-    const input = { name: 'Quán thử cộng đồng', category: 'CAFE' as const, cuisineTypes: ['COFFEE'],
-      description: 'Địa điểm hư cấu để kiểm tra đề xuất.', address: 'Đường thử nghiệm, Quận 1',
-      lat: 10.7769, lng: 106.7009, priceTier: 2 };
+    const input = {
+      name: 'Quán thử cộng đồng',
+      category: 'CAFE' as const,
+      cuisineTypes: ['COFFEE'],
+      description: 'Địa điểm hư cấu để kiểm tra đề xuất.',
+      address: 'Đường thử nghiệm, Quận 1',
+      lat: 10.7769,
+      lng: 106.7009,
+      priceTier: 2,
+    };
     const proposal = (await service.create(creator, input)).data;
     await expect(service.confirm(creator, proposal.id)).rejects.toThrow('Cannot confirm your own proposal');
     for (let i = 0; i < 3; i++) await service.confirm(new Types.ObjectId().toString(), proposal.id);

@@ -17,15 +17,26 @@ async function seedPremium() {
     const user = await users.findOne({ emailNormalized: email });
     if (!user) throw new Error('Demo user not found');
     const now = new Date();
-    await subscriptions.updateOne({ userId: user._id }, { $set: {
-      plan: 'PREMIUM', status: 'ACTIVE', currentPeriodStart: now,
-      currentPeriodEnd: new Date(now.getTime() + 30 * 24 * 60 * 60_000),
-      cancelAtPeriodEnd: false,
-    } }, { upsert: true });
+    await subscriptions.updateOne(
+      { userId: user._id },
+      {
+        $set: {
+          plan: 'PREMIUM',
+          status: 'ACTIVE',
+          currentPeriodStart: now,
+          currentPeriodEnd: new Date(now.getTime() + 30 * 24 * 60 * 60_000),
+          cancelAtPeriodEnd: false,
+        },
+      },
+      { upsert: true },
+    );
     console.log('Activated local Premium fixture for the selected demo user');
   } finally {
     await mongoose.disconnect();
   }
 }
 
-void seedPremium().catch((error: unknown) => { console.error(error); process.exitCode = 1; });
+void seedPremium().catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});

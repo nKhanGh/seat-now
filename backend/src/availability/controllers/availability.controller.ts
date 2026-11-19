@@ -8,10 +8,16 @@ export class AvailabilityController {
   constructor(private readonly availability: AvailabilityService) {}
 
   @Get('venues/:slug/availability')
-  get(@Param('slug') slug: string) { return this.availability.getBySlug(slug); }
+  get(@Param('slug') slug: string) {
+    return this.availability.getBySlug(slug);
+  }
 
   @Post('internal/venues/:slug/availability-snapshots')
-  ingest(@Param('slug') slug: string, @Headers('authorization') authorization: string | undefined, @Body() body: CreateAvailabilityDto) {
+  ingest(
+    @Param('slug') slug: string,
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: CreateAvailabilityDto,
+  ) {
     assertIngestToken(authorization);
     return this.availability.ingest(slug, body);
   }

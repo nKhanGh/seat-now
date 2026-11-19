@@ -12,15 +12,21 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller()
 export class BusinessLogoController {
-  constructor(private readonly business: BusinessAccessService, private readonly logos: VenueLogoService,
+  constructor(
+    private readonly business: BusinessAccessService,
+    private readonly logos: VenueLogoService,
     private readonly covers: VenueCoverService,
-    private readonly auth: AuthService) {}
+    private readonly auth: AuthService,
+  ) {}
 
   @Post('business/venues/:slug/logo')
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @UseInterceptors(FileInterceptor('logo', { limits: { files: 1, fileSize: 2_000_000 } }))
-  async upload(@Req() request: CookieRequest, @Param('slug') slug: string,
-    @UploadedFile() file: { buffer: Buffer; size: number } | undefined) {
+  async upload(
+    @Req() request: CookieRequest,
+    @Param('slug') slug: string,
+    @UploadedFile() file: { buffer: Buffer; size: number } | undefined,
+  ) {
     const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug);
     return this.logos.upload(slug, file);
@@ -35,8 +41,11 @@ export class BusinessLogoController {
   @Post('business/venues/:slug/cover')
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @UseInterceptors(FileInterceptor('cover', { limits: { files: 1, fileSize: 2_000_000 } }))
-  async uploadCover(@Req() request: CookieRequest, @Param('slug') slug: string,
-    @UploadedFile() file: { buffer: Buffer; size: number } | undefined) {
+  async uploadCover(
+    @Req() request: CookieRequest,
+    @Param('slug') slug: string,
+    @UploadedFile() file: { buffer: Buffer; size: number } | undefined,
+  ) {
     const user = await this.auth.authenticate(getSessionToken(request));
     await this.business.requireOwner(user.id, slug, true);
     return this.covers.upload(slug, file);

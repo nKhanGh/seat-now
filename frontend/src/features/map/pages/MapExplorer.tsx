@@ -17,121 +17,400 @@ import { ShareVenueButton } from '../../community/components/ShareVenueButton';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
-const readNumber = (value: string | null, fallback: number) => value !== null && Number.isFinite(Number(value)) ? Number(value) : fallback;
-const cuisineLabels = { VIETNAMESE: 'Món Việt', WESTERN: 'Món Âu', COFFEE: 'Cà phê', DESSERT: 'Tráng miệng' } as const;
+const readNumber = (value: string | null, fallback: number) =>
+  value !== null && Number.isFinite(Number(value)) ? Number(value) : fallback;
+const cuisineLabels = {
+  VIETNAMESE: 'Món Việt',
+  WESTERN: 'Món Âu',
+  COFFEE: 'Cà phê',
+  DESSERT: 'Tráng miệng',
+} as const;
 
 export function MapExplorer() {
   const [params, setParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectionSerial, setSelectionSerial] = useState(0);
   const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
-  const [parkingFilters, setParkingFilters] = useState<ParkingFilterValues>({ vehicleType: '', hasAvailability: false, open24h: false, freeOnly: false });
+  const [parkingFilters, setParkingFilters] = useState<ParkingFilterValues>({
+    vehicleType: '',
+    hasAvailability: false,
+    open24h: false,
+    freeOnly: false,
+  });
   const [locationMessage, setLocationMessage] = useState('');
   const auth = useCurrentUser();
   const logout = useLogout();
-  const filters = useMemo<MapFilters>(() => ({
-    lat: readNumber(params.get('lat'), DEFAULT_LAT),
-    lng: readNumber(params.get('lng'), DEFAULT_LNG),
-    radiusM: readNumber(params.get('radiusM'), 3000),
-    category: params.get('category') || undefined,
-    cuisine: params.get('cuisine') || undefined,
-    priceTier: Number(params.get('priceTier')) || undefined,
-    ratingGte: Number(params.get('ratingGte')) || undefined,
-    crowdLevel: params.get('crowdLevel') || undefined,
-    hasAvailability: params.get('hasAvailability') === 'true',
-  }), [params]);
+  const filters = useMemo<MapFilters>(
+    () => ({
+      lat: readNumber(params.get('lat'), DEFAULT_LAT),
+      lng: readNumber(params.get('lng'), DEFAULT_LNG),
+      radiusM: readNumber(params.get('radiusM'), 3000),
+      category: params.get('category') || undefined,
+      cuisine: params.get('cuisine') || undefined,
+      priceTier: Number(params.get('priceTier')) || undefined,
+      ratingGte: Number(params.get('ratingGte')) || undefined,
+      crowdLevel: params.get('crowdLevel') || undefined,
+      hasAvailability: params.get('hasAvailability') === 'true',
+    }),
+    [params],
+  );
   const venues = useNearbyVenues(filters);
   const venueItems = useMemo(() => venues.data?.pages.flatMap((page) => page.data) ?? [], [venues.data]);
-  const displayedVenues = useMemo(() => [...venueItems].sort((a, b) => Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) || a.distanceM - b.distanceM), [venueItems]);
+  const displayedVenues = useMemo(
+    () =>
+      [...venueItems].sort(
+        (a, b) =>
+          Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) ||
+          a.distanceM - b.distanceM,
+      ),
+    [venueItems],
+  );
   const selected = venueItems.find((item) => item.id === selectedId);
   const venueDetail = useVenueDetail(selected?.slug ?? null);
   const parking = useParkingForVenue(selected?.slug ?? null, parkingFilters);
   const parkingItems = useMemo(() => parking.data?.pages.flatMap((page) => page.data) ?? [], [parking.data]);
-  const updateParkingFilters = useCallback((next: ParkingFilterValues) => { setParkingFilters(next); setSelectedParkingSlug(null); }, []);
-  const liveStatus = useLiveUpdates(venueItems.map((item) => item.slug), parkingItems.map((item) => item.slug));
-  const selectVenue = useCallback((id: string) => {
-    setSelectedId(id); setSelectedParkingSlug(null); setSelectionSerial((current) => current + 1);
-    const slug = venueItems.find((item) => item.id === id)?.slug;
-    if (slug) setParams((current) => { const next = new URLSearchParams(current); next.set('venue', slug); return next; }, { replace: true });
-  }, [venueItems, setParams]);
+  const updateParkingFilters = useCallback((next: ParkingFilterValues) => {
+    setParkingFilters(next);
+    setSelectedParkingSlug(null);
+  }, []);
+  const liveStatus = useLiveUpdates(
+    venueItems.map((item) => item.slug),
+    parkingItems.map((item) => item.slug),
+  );
+  const selectVenue = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      setSelectedParkingSlug(null);
+      setSelectionSerial((current) => current + 1);
+      const slug = venueItems.find((item) => item.id === id)?.slug;
+      if (slug)
+        setParams(
+          (current) => {
+            const next = new URLSearchParams(current);
+            next.set('venue', slug);
+            return next;
+          },
+          { replace: true },
+        );
+    },
+    [venueItems, setParams],
+  );
   useEffect(() => {
     const requestedSlug = params.get('venue');
     const requested = venueItems.find((item) => item.slug === requestedSlug);
     if (requested && requested.id !== selectedId) {
-      setSelectedId(requested.id); setSelectionSerial((current) => current + 1);
+      setSelectedId(requested.id);
+      setSelectionSerial((current) => current + 1);
     }
   }, [params, venueItems, selectedId]);
-  const update = useCallback((patch: Record<string, string | null>) => {
-    setParams((current) => {
-      const next = new URLSearchParams(current);
-      for (const [key, value] of Object.entries(patch)) {
-        if (value) next.set(key, value);
-        else next.delete(key);
-      }
-      return next;
-    }, { replace: true });
-  }, [setParams]);
-  const onCenterChange = useCallback((lat: number, lng: number) => update({ lat: String(lat), lng: String(lng) }), [update]);
+  const update = useCallback(
+    (patch: Record<string, string | null>) => {
+      setParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          for (const [key, value] of Object.entries(patch)) {
+            if (value) next.set(key, value);
+            else next.delete(key);
+          }
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setParams],
+  );
+  const onCenterChange = useCallback(
+    (lat: number, lng: number) => update({ lat: String(lat), lng: String(lng) }),
+    [update],
+  );
 
   function locate() {
-    if (!navigator.geolocation) { setLocationMessage('Trình duyệt không hỗ trợ vị trí.'); return; }
+    if (!navigator.geolocation) {
+      setLocationMessage('Trình duyệt không hỗ trợ vị trí.');
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => { update({ lat: String(Number(coords.latitude.toFixed(5))), lng: String(Number(coords.longitude.toFixed(5))) }); setLocationMessage('Đã cập nhật vị trí.'); },
+      ({ coords }) => {
+        update({
+          lat: String(Number(coords.latitude.toFixed(5))),
+          lng: String(Number(coords.longitude.toFixed(5))),
+        });
+        setLocationMessage('Đã cập nhật vị trí.');
+      },
       () => setLocationMessage('Không lấy được vị trí. Bạn vẫn có thể khám phá khu vực mặc định.'),
       { timeout: 8000 },
     );
   }
 
-  return <main className="explorer">
-    <header className="explorer-header"><Link to="/" className="brand">SeatNow</Link><nav><span className="sync-status" role="status">{liveStatus === 'connected' ? 'Cập nhật trực tiếp' : liveStatus === 'offline' ? 'Đồng bộ định kỳ' : 'Đang kết nối'}</span><Link to="/plans">Gói người dùng</Link><Link to={`/proposals?lat=${filters.lat}&lng=${filters.lng}`}>Đề xuất quán</Link><Link to="/business">Chủ quán</Link>{auth.data ? <><Link to="/favorites">Quán đã lưu</Link><Link to="/following">Đang theo dõi</Link><span>Chào {auth.data.displayName}</span><button onClick={() => logout.mutate()} disabled={logout.isPending}>Đăng xuất</button></> : <><Link to="/login">Đăng nhập</Link><Link to="/register">Đăng ký</Link></>}</nav></header>
-    <section className="filterbar" aria-label="Bộ lọc địa điểm">
-      <select aria-label="Loại địa điểm" value={filters.category || ''} onChange={(event) => update({ category: event.target.value })}><option value="">Tất cả loại</option><option value="RESTAURANT">Nhà hàng</option><option value="CAFE">Cà phê</option><option value="CINEMA">Rạp phim</option></select>
-      <select aria-label="Loại món" value={filters.cuisine || ''} onChange={(event) => update({ cuisine: event.target.value })}><option value="">Tất cả món</option><option value="VIETNAMESE">Món Việt</option><option value="WESTERN">Món Âu</option><option value="COFFEE">Cà phê</option><option value="DESSERT">Tráng miệng</option></select>
-      <select aria-label="Bán kính" value={filters.radiusM} onChange={(event) => update({ radiusM: event.target.value })}><option value="1000">1 km</option><option value="3000">3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
-      <select aria-label="Mức giá" value={filters.priceTier || ''} onChange={(event) => update({ priceTier: event.target.value })}><option value="">Mọi mức giá</option><option value="1">₫</option><option value="2">₫₫</option><option value="3">₫₫₫</option><option value="4">₫₫₫₫</option></select>
-      <select aria-label="Đánh giá tối thiểu" value={filters.ratingGte || ''} onChange={(event) => update({ ratingGte: event.target.value })}><option value="">Mọi đánh giá</option><option value="4">Từ 4 sao</option><option value="4.5">Từ 4.5 sao</option></select>
-      <select aria-label="Độ đông" value={filters.crowdLevel || ''} onChange={(event) => update({ crowdLevel: event.target.value })}><option value="">Mọi độ đông</option><option value="QUIET">Vắng</option><option value="MODERATE">Vừa</option><option value="BUSY">Đông</option><option value="FULL">Đầy</option></select>
-      <label className="filter-check"><input type="checkbox" checked={filters.hasAvailability} onChange={(event) => update({ hasAvailability: event.target.checked ? 'true' : null })} /> Còn bàn</label>
-      <button onClick={locate}>Vị trí của tôi</button>
-    </section>
-    {locationMessage && <p role="status" className="location-message">{locationMessage}</p>}
-    <div className="explorer-body"><section className="venue-list" aria-label="Danh sách địa điểm">
-      <h1>Khám phá quanh bạn</h1><p className="small">Dữ liệu mẫu hư cấu tại Quận 1, TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.</p>
-      {venues.isPending && <p>Đang tìm địa điểm…</p>}
-      {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => void venues.refetch()}>Thử lại</button></p>}
-      {venues.data?.pages[0]?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
-      {displayedVenues.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
-        <span className="venue-category">{venue.promotion?.sponsored && <span className="sponsored-label">Được tài trợ · </span>}{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.logoUrl && <img className="venue-list-logo" src={venue.logoUrl} alt="" />}{venue.name} {venue.verified && <span className="verified-badge" aria-label="Chủ quán đã xác thực">✓</span>}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span>{venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}{venue.verified && venue.availability.freshness === 'FRESH' && venue.availability.acceptingGuests && venue.availability.crowdLevel === 'QUIET' && venue.availability.tablesTotal !== null && venue.availability.tablesTotal > 0 && venue.availability.tablesAvailable !== null && venue.availability.tablesAvailable / venue.availability.tablesTotal >= 0.5 && <span className="promotion-label">Còn nhiều bàn trống</span>}<AvailabilityStatus availability={venue.availability} compact />
-      </button>)}
-      {venues.hasNextPage && venueItems.length < 100 && <button className="load-more" onClick={() => void venues.fetchNextPage()} disabled={venues.isFetchingNextPage}>{venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}</button>}
-      {venues.hasNextPage && venueItems.length >= 100 && <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}
-    </section>
-    <div className="map-pane">
-      <VenueMap lat={filters.lat} lng={filters.lng} venues={venueItems} selectedId={selectedId}
-        selectionSerial={selectionSerial} parkingFacilities={parkingItems} selectedParkingSlug={selectedParkingSlug}
-        onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />
-      {selected && <div className="map-selected">
-        {venueDetail.data?.coverUrl && <img className="venue-cover" src={venueDetail.data.coverUrl} alt={`Ảnh bìa ${selected.name}`} />}
-        <div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => { setSelectedId(null); update({ venue: null }); }}>Đóng</button></div>
-        <span>{selected.address}</span>
-        {venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}
-        {venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}
-        {venueDetail.data?.openingHours && <span className="small">Giờ mở cửa: {venueDetail.data.openingHours}</span>}
-        {venueDetail.data?.menuSummary && <p className="small">Menu: {venueDetail.data.menuSummary}</p>}
-        {venueDetail.data?.promotion && <p className="promotion-label">{venueDetail.data.promotion.sponsored && 'Được tài trợ · '}{venueDetail.data.promotion.text}</p>}
-        <FavoriteButton slug={selected.slug} userId={auth.data?.id ?? null} />
-        <ShareVenueButton slug={selected.slug} lat={selected.location.coordinates[1]} lng={selected.location.coordinates[0]} />
-        <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
-        <AvailabilityStatus availability={selected.availability} />
-        <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />
-        <ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />
-        {parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}
-        {parking.isError && <p role="alert">{parking.error.message} <button onClick={() => void parking.refetch()}>Thử lại</button></p>}
-        {parking.data && <><ParkingList facilities={parkingItems} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />
-          {parking.hasNextPage && parkingItems.length < 100 && <button className="load-more" onClick={() => void parking.fetchNextPage()} disabled={parking.isFetchingNextPage}>{parking.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm bãi xe'}</button>}
-          {parking.hasNextPage && parkingItems.length >= 100 && <p className="small">Đã hiển thị 100 bãi xe. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}</>}
-        <ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
-      </div>}
-    </div></div>
-  </main>;
+  return (
+    <main className="explorer">
+      <header className="explorer-header">
+        <Link to="/" className="brand">
+          SeatNow
+        </Link>
+        <nav>
+          <span className="sync-status" role="status">
+            {liveStatus === 'connected'
+              ? 'Cập nhật trực tiếp'
+              : liveStatus === 'offline'
+                ? 'Đồng bộ định kỳ'
+                : 'Đang kết nối'}
+          </span>
+          <Link to="/plans">Gói người dùng</Link>
+          <Link to={`/proposals?lat=${filters.lat}&lng=${filters.lng}`}>Đề xuất quán</Link>
+          <Link to="/business">Chủ quán</Link>
+          {auth.data ? (
+            <>
+              <Link to="/favorites">Quán đã lưu</Link>
+              <Link to="/following">Đang theo dõi</Link>
+              <span>Chào {auth.data.displayName}</span>
+              <button onClick={() => logout.mutate()} disabled={logout.isPending}>
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">Đăng nhập</Link>
+              <Link to="/register">Đăng ký</Link>
+            </>
+          )}
+        </nav>
+      </header>
+      <section className="filterbar" aria-label="Bộ lọc địa điểm">
+        <select
+          aria-label="Loại địa điểm"
+          value={filters.category || ''}
+          onChange={(event) => update({ category: event.target.value })}
+        >
+          <option value="">Tất cả loại</option>
+          <option value="RESTAURANT">Nhà hàng</option>
+          <option value="CAFE">Cà phê</option>
+          <option value="CINEMA">Rạp phim</option>
+        </select>
+        <select
+          aria-label="Loại món"
+          value={filters.cuisine || ''}
+          onChange={(event) => update({ cuisine: event.target.value })}
+        >
+          <option value="">Tất cả món</option>
+          <option value="VIETNAMESE">Món Việt</option>
+          <option value="WESTERN">Món Âu</option>
+          <option value="COFFEE">Cà phê</option>
+          <option value="DESSERT">Tráng miệng</option>
+        </select>
+        <select
+          aria-label="Bán kính"
+          value={filters.radiusM}
+          onChange={(event) => update({ radiusM: event.target.value })}
+        >
+          <option value="1000">1 km</option>
+          <option value="3000">3 km</option>
+          <option value="5000">5 km</option>
+          <option value="10000">10 km</option>
+        </select>
+        <select
+          aria-label="Mức giá"
+          value={filters.priceTier || ''}
+          onChange={(event) => update({ priceTier: event.target.value })}
+        >
+          <option value="">Mọi mức giá</option>
+          <option value="1">₫</option>
+          <option value="2">₫₫</option>
+          <option value="3">₫₫₫</option>
+          <option value="4">₫₫₫₫</option>
+        </select>
+        <select
+          aria-label="Đánh giá tối thiểu"
+          value={filters.ratingGte || ''}
+          onChange={(event) => update({ ratingGte: event.target.value })}
+        >
+          <option value="">Mọi đánh giá</option>
+          <option value="4">Từ 4 sao</option>
+          <option value="4.5">Từ 4.5 sao</option>
+        </select>
+        <select
+          aria-label="Độ đông"
+          value={filters.crowdLevel || ''}
+          onChange={(event) => update({ crowdLevel: event.target.value })}
+        >
+          <option value="">Mọi độ đông</option>
+          <option value="QUIET">Vắng</option>
+          <option value="MODERATE">Vừa</option>
+          <option value="BUSY">Đông</option>
+          <option value="FULL">Đầy</option>
+        </select>
+        <label className="filter-check">
+          <input
+            type="checkbox"
+            checked={filters.hasAvailability}
+            onChange={(event) => update({ hasAvailability: event.target.checked ? 'true' : null })}
+          />{' '}
+          Còn bàn
+        </label>
+        <button onClick={locate}>Vị trí của tôi</button>
+      </section>
+      {locationMessage && (
+        <p role="status" className="location-message">
+          {locationMessage}
+        </p>
+      )}
+      <div className="explorer-body">
+        <section className="venue-list" aria-label="Danh sách địa điểm">
+          <h1>Khám phá quanh bạn</h1>
+          <p className="small">
+            Dữ liệu mẫu hư cấu tại Quận 1, TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.
+          </p>
+          {venues.isPending && <p>Đang tìm địa điểm…</p>}
+          {venues.isError && (
+            <p role="alert">
+              {venues.error.message} <button onClick={() => void venues.refetch()}>Thử lại</button>
+            </p>
+          )}
+          {venues.data?.pages[0]?.data.length === 0 && (
+            <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>
+          )}
+          {displayedVenues.map((venue) => (
+            <button
+              key={venue.id}
+              className={`venue-card${selectedId === venue.id ? ' selected' : ''}`}
+              onClick={() => selectVenue(venue.id)}
+            >
+              <span className="venue-category">
+                {venue.promotion?.sponsored && <span className="sponsored-label">Được tài trợ · </span>}
+                {venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}
+              </span>
+              <strong>
+                {venue.logoUrl && <img className="venue-list-logo" src={venue.logoUrl} alt="" />}
+                {venue.name}{' '}
+                {venue.verified && (
+                  <span className="verified-badge" aria-label="Chủ quán đã xác thực">
+                    ✓
+                  </span>
+                )}
+              </strong>
+              <span>{venue.address}</span>
+              <span>
+                ★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}
+              </span>
+              {venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}
+              {venue.verified &&
+                venue.availability.freshness === 'FRESH' &&
+                venue.availability.acceptingGuests &&
+                venue.availability.crowdLevel === 'QUIET' &&
+                venue.availability.tablesTotal !== null &&
+                venue.availability.tablesTotal > 0 &&
+                venue.availability.tablesAvailable !== null &&
+                venue.availability.tablesAvailable / venue.availability.tablesTotal >= 0.5 && (
+                  <span className="promotion-label">Còn nhiều bàn trống</span>
+                )}
+              <AvailabilityStatus availability={venue.availability} compact />
+            </button>
+          ))}
+          {venues.hasNextPage && venueItems.length < 100 && (
+            <button
+              className="load-more"
+              onClick={() => void venues.fetchNextPage()}
+              disabled={venues.isFetchingNextPage}
+            >
+              {venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}
+            </button>
+          )}
+          {venues.hasNextPage && venueItems.length >= 100 && (
+            <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>
+          )}
+        </section>
+        <div className="map-pane">
+          <VenueMap
+            lat={filters.lat}
+            lng={filters.lng}
+            venues={venueItems}
+            selectedId={selectedId}
+            selectionSerial={selectionSerial}
+            parkingFacilities={parkingItems}
+            selectedParkingSlug={selectedParkingSlug}
+            onCenterChange={onCenterChange}
+            onSelect={selectVenue}
+            onSelectParking={setSelectedParkingSlug}
+          />
+          {selected && (
+            <div className="map-selected">
+              {venueDetail.data?.coverUrl && (
+                <img
+                  className="venue-cover"
+                  src={venueDetail.data.coverUrl}
+                  alt={`Ảnh bìa ${selected.name}`}
+                />
+              )}
+              <div className="selected-heading">
+                <strong>{selected.name}</strong>
+                <button
+                  onClick={() => {
+                    setSelectedId(null);
+                    update({ venue: null });
+                  }}
+                >
+                  Đóng
+                </button>
+              </div>
+              <span>{selected.address}</span>
+              {venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}
+              {venueDetail.data?.cuisineTypes.length ? (
+                <span className="small">
+                  Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}
+                </span>
+              ) : null}
+              {venueDetail.data?.openingHours && (
+                <span className="small">Giờ mở cửa: {venueDetail.data.openingHours}</span>
+              )}
+              {venueDetail.data?.menuSummary && <p className="small">Menu: {venueDetail.data.menuSummary}</p>}
+              {venueDetail.data?.promotion && (
+                <p className="promotion-label">
+                  {venueDetail.data.promotion.sponsored && 'Được tài trợ · '}
+                  {venueDetail.data.promotion.text}
+                </p>
+              )}
+              <FavoriteButton slug={selected.slug} userId={auth.data?.id ?? null} />
+              <ShareVenueButton
+                slug={selected.slug}
+                lat={selected.location.coordinates[1]}
+                lng={selected.location.coordinates[0]}
+              />
+              <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
+              <AvailabilityStatus availability={selected.availability} />
+              <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />
+              <ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />
+              {parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}
+              {parking.isError && (
+                <p role="alert">
+                  {parking.error.message} <button onClick={() => void parking.refetch()}>Thử lại</button>
+                </p>
+              )}
+              {parking.data && (
+                <>
+                  <ParkingList
+                    facilities={parkingItems}
+                    selectedSlug={selectedParkingSlug}
+                    onSelect={setSelectedParkingSlug}
+                  />
+                  {parking.hasNextPage && parkingItems.length < 100 && (
+                    <button
+                      className="load-more"
+                      onClick={() => void parking.fetchNextPage()}
+                      disabled={parking.isFetchingNextPage}
+                    >
+                      {parking.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm bãi xe'}
+                    </button>
+                  )}
+                  {parking.hasNextPage && parkingItems.length >= 100 && (
+                    <p className="small">Đã hiển thị 100 bãi xe. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>
+                  )}
+                </>
+              )}
+              <ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
 }

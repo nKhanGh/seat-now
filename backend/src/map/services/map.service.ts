@@ -44,21 +44,46 @@ export class MapService {
   async findNearby(query: MapQueryDto) {
     const now = new Date();
     const limit = query.limit ?? 20;
-    const filterHash = createHash('sha256').update(JSON.stringify([
-      query.lat, query.lng, query.radiusM, query.category ?? null, query.cuisine ?? null,
-      query.priceTier ?? null, query.ratingGte ?? null, query.crowdLevel ?? null,
-      query.hasAvailability ?? null,
-    ])).digest('base64url').slice(0, 16);
+    const filterHash = createHash('sha256')
+      .update(
+        JSON.stringify([
+          query.lat,
+          query.lng,
+          query.radiusM,
+          query.category ?? null,
+          query.cuisine ?? null,
+          query.priceTier ?? null,
+          query.ratingGte ?? null,
+          query.crowdLevel ?? null,
+          query.hasAvailability ?? null,
+        ]),
+      )
+      .digest('base64url')
+      .slice(0, 16);
     let cursor: { sponsorRank: number; distanceM: number; id: string } | null = null;
     if (query.cursor) {
       try {
         if (!/^[A-Za-z0-9_-]+$/.test(query.cursor)) throw new Error('invalid characters');
-        const parsed = JSON.parse(Buffer.from(query.cursor, 'base64url').toString('utf8')) as { sponsorRank?: unknown; distanceM?: unknown; id?: unknown; filterHash?: unknown };
-        if (parsed.filterHash !== filterHash || typeof parsed.distanceM !== 'number' || !Number.isFinite(parsed.distanceM)
-          || parsed.distanceM < 0 || ![0, 1].includes(parsed.sponsorRank as number)
-          || typeof parsed.id !== 'string' || !/^[a-f0-9]{24}$/.test(parsed.id)) throw new Error('invalid cursor');
+        const parsed = JSON.parse(Buffer.from(query.cursor, 'base64url').toString('utf8')) as {
+          sponsorRank?: unknown;
+          distanceM?: unknown;
+          id?: unknown;
+          filterHash?: unknown;
+        };
+        if (
+          parsed.filterHash !== filterHash ||
+          typeof parsed.distanceM !== 'number' ||
+          !Number.isFinite(parsed.distanceM) ||
+          parsed.distanceM < 0 ||
+          ![0, 1].includes(parsed.sponsorRank as number) ||
+          typeof parsed.id !== 'string' ||
+          !/^[a-f0-9]{24}$/.test(parsed.id)
+        )
+          throw new Error('invalid cursor');
         cursor = { sponsorRank: parsed.sponsorRank as number, distanceM: parsed.distanceM, id: parsed.id };
-      } catch { throw new BadRequestException({ code: 'MAP_INVALID_CURSOR', message: 'Invalid map cursor' }); }
+      } catch {
+        throw new BadRequestException({ code: 'MAP_INVALID_CURSOR', message: 'Invalid map cursor' });
+      }
     }
     const match: Record<string, unknown> = { status: 'ACTIVE' };
     if (query.category) match.category = query.category;
@@ -75,37 +100,96 @@ export class MapService {
       match.$or = [{ tablesAvailable: { $gt: 0 } }, { seatsAvailable: { $gt: 0 } }];
     }
     const pipeline: PipelineStage[] = [
-      { $geoNear: { near: { type: 'Point', coordinates: [query.lng, query.lat] }, distanceField: 'distanceM', maxDistance: query.radiusM, spherical: true } },
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [query.lng, query.lat] },
+          distanceField: 'distanceM',
+          maxDistance: query.radiusM,
+          spherical: true,
+        },
+      },
       { $match: match },
-      { $addFields: { sponsorRank: { $cond: [{ $and: [
-        { $eq: ['$sponsored', true] }, { $lte: ['$promotionStartsAt', now] },
-        { $gt: ['$promotionEndsAt', now] }, { $gt: ['$businessPremiumExpiresAt', now] },
-      ] }, 1, 0] } } },
-      ...(cursor ? [{ $match: { $or: [
-        { sponsorRank: { $lt: cursor.sponsorRank } },
-        { sponsorRank: cursor.sponsorRank, distanceM: { $gt: cursor.distanceM } },
-        { sponsorRank: cursor.sponsorRank, distanceM: cursor.distanceM, _id: { $gt: new Types.ObjectId(cursor.id) } },
-      ] } } as PipelineStage] : []),
+      {
+        $addFields: {
+          sponsorRank: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ['$sponsored', true] },
+                  { $lte: ['$promotionStartsAt', now] },
+                  { $gt: ['$promotionEndsAt', now] },
+                  { $gt: ['$businessPremiumExpiresAt', now] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+      },
+      ...(cursor
+        ? [
+            {
+              $match: {
+                $or: [
+                  { sponsorRank: { $lt: cursor.sponsorRank } },
+                  { sponsorRank: cursor.sponsorRank, distanceM: { $gt: cursor.distanceM } },
+                  {
+                    sponsorRank: cursor.sponsorRank,
+                    distanceM: cursor.distanceM,
+                    _id: { $gt: new Types.ObjectId(cursor.id) },
+                  },
+                ],
+              },
+            } as PipelineStage,
+          ]
+        : []),
       { $sort: { sponsorRank: -1, distanceM: 1, _id: 1 } },
       { $limit: limit + 1 },
     ];
     const rows = await this.venues.aggregate<MapRow>(pipeline);
     const page = rows.slice(0, limit);
     const last = page.at(-1);
-    const nextCursor = rows.length > limit && last
-      ? Buffer.from(JSON.stringify({ sponsorRank: last.sponsorRank, distanceM: last.distanceM, id: last._id.toString(), filterHash })).toString('base64url')
-      : null;
+    const nextCursor =
+      rows.length > limit && last
+        ? Buffer.from(
+            JSON.stringify({
+              sponsorRank: last.sponsorRank,
+              distanceM: last.distanceM,
+              id: last._id.toString(),
+              filterHash,
+            }),
+          ).toString('base64url')
+        : null;
     return {
       data: page.map((row) => ({
-        id: row._id.toString(), name: row.name, slug: row.slug, address: row.address,
-        category: row.category, cuisineTypes: row.cuisineTypes ?? [], location: row.location, distanceM: Math.round(row.distanceM),
-        priceTier: row.priceTier, rating: row.rating,
+        id: row._id.toString(),
+        name: row.name,
+        slug: row.slug,
+        address: row.address,
+        category: row.category,
+        cuisineTypes: row.cuisineTypes ?? [],
+        location: row.location,
+        distanceM: Math.round(row.distanceM),
+        priceTier: row.priceTier,
+        rating: row.rating,
         verified: Boolean(row.businessPremiumExpiresAt && row.businessPremiumExpiresAt > now),
         logoUrl: row.hasLogo ? `/api/v1/venues/${encodeURIComponent(row.slug)}/logo` : null,
-        promotion: row.businessPremiumExpiresAt && row.businessPremiumExpiresAt > now
-          && row.promotionText && row.promotionStartsAt && row.promotionEndsAt
-          && row.promotionStartsAt <= now && row.promotionEndsAt > now
-          ? { text: row.promotionText, startsAt: row.promotionStartsAt, endsAt: row.promotionEndsAt, sponsored: row.sponsored } : null,
+        promotion:
+          row.businessPremiumExpiresAt &&
+          row.businessPremiumExpiresAt > now &&
+          row.promotionText &&
+          row.promotionStartsAt &&
+          row.promotionEndsAt &&
+          row.promotionStartsAt <= now &&
+          row.promotionEndsAt > now
+            ? {
+                text: row.promotionText,
+                startsAt: row.promotionStartsAt,
+                endsAt: row.promotionEndsAt,
+                sponsored: row.sponsored,
+              }
+            : null,
         availability: {
           crowdLevel: row.availabilityExpiresAt ? row.crowdLevel : 'UNKNOWN',
           tablesAvailable: row.tablesAvailable ?? null,
@@ -119,7 +203,11 @@ export class MapService {
           version: row.availabilityVersion ?? null,
           capturedAt: row.availabilityCapturedAt ?? null,
           expiresAt: row.availabilityExpiresAt ?? null,
-          freshness: !row.availabilityExpiresAt ? 'UNKNOWN' : row.availabilityExpiresAt > now ? 'FRESH' : 'STALE',
+          freshness: !row.availabilityExpiresAt
+            ? 'UNKNOWN'
+            : row.availabilityExpiresAt > now
+              ? 'FRESH'
+              : 'STALE',
         },
       })),
       meta: { nextCursor, truncated: rows.length > limit, queryCenter: { lat: query.lat, lng: query.lng } },

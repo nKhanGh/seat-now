@@ -7,7 +7,10 @@ import { EntitlementService } from './services/entitlement.service';
 import { UserSubscription, UserSubscriptionSchema } from './schemas/user-subscription.schema';
 
 @Module({
-  imports: [AuthModule, MongooseModule.forFeature([{ name: UserSubscription.name, schema: UserSubscriptionSchema }])],
+  imports: [
+    AuthModule,
+    MongooseModule.forFeature([{ name: UserSubscription.name, schema: UserSubscriptionSchema }]),
+  ],
   controllers: [SubscriptionController],
   providers: [EntitlementService, EntitlementGuard],
   exports: [EntitlementService, EntitlementGuard],

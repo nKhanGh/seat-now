@@ -9,10 +9,17 @@ export function useNearbyVenues(filters: MapFilters) {
     queryFn: ({ signal, pageParam }) => getNearbyVenues(filters, pageParam, signal),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
-    staleTime: 15_000, refetchInterval: 30_000, refetchOnWindowFocus: true,
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 }
 
 export function useVenueDetail(slug: string | null) {
-  return useQuery({ queryKey: ['venues', 'detail', slug], queryFn: ({ signal }) => getVenueDetail(slug!, signal), enabled: Boolean(slug), staleTime: 30_000 });
+  return useQuery({
+    queryKey: ['venues', 'detail', slug],
+    queryFn: ({ signal }) => getVenueDetail(slug!, signal),
+    enabled: Boolean(slug),
+    staleTime: 30_000,
+  });
 }

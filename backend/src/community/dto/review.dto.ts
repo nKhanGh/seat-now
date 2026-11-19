@@ -3,7 +3,10 @@ import { IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength } 
 
 export class UpsertReviewDto {
   @Transform(({ value }: { value: unknown }) => Number(value))
-  @IsInt() @Min(1) @Max(5) rating!: number;
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating!: number;
 
   @IsString() @MinLength(10) @MaxLength(500) body!: string;
 }

@@ -11,14 +11,19 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller()
 export class ProposalsController {
-  constructor(private readonly proposals: ProposalsService, private readonly auth: AuthService) {}
+  constructor(
+    private readonly proposals: ProposalsService,
+    private readonly auth: AuthService,
+  ) {}
 
   private async userId(request: CookieRequest) {
     return (await this.auth.authenticate(getSessionToken(request))).id;
   }
 
   @Get('community/proposals')
-  list(@Query() query: ProposalQueryDto) { return this.proposals.list(query.status); }
+  list(@Query() query: ProposalQueryDto) {
+    return this.proposals.list(query.status);
+  }
 
   @Post('community/proposals')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

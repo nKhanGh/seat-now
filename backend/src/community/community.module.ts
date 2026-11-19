@@ -22,17 +22,27 @@ import { ProposalsService } from './services/proposals.service';
 import { ProposalsController } from './controllers/proposals.controller';
 
 @Module({
-  imports: [AuthModule, VenuesModule, MongooseModule.forFeature([
-    { name: CheckIn.name, schema: CheckInSchema },
-    { name: Favorite.name, schema: FavoriteSchema },
-    { name: Review.name, schema: ReviewSchema },
-    { name: ReviewPhoto.name, schema: ReviewPhotoSchema },
-    { name: ReviewReport.name, schema: ReviewReportSchema },
-    { name: Follow.name, schema: FollowSchema },
-    { name: VenueProposal.name, schema: VenueProposalSchema },
-    { name: ProposalConfirmation.name, schema: ProposalConfirmationSchema },
-  ])],
-  controllers: [CheckInController, FavoritesController, ReviewsController, FollowsController, ProposalsController],
+  imports: [
+    AuthModule,
+    VenuesModule,
+    MongooseModule.forFeature([
+      { name: CheckIn.name, schema: CheckInSchema },
+      { name: Favorite.name, schema: FavoriteSchema },
+      { name: Review.name, schema: ReviewSchema },
+      { name: ReviewPhoto.name, schema: ReviewPhotoSchema },
+      { name: ReviewReport.name, schema: ReviewReportSchema },
+      { name: Follow.name, schema: FollowSchema },
+      { name: VenueProposal.name, schema: VenueProposalSchema },
+      { name: ProposalConfirmation.name, schema: ProposalConfirmationSchema },
+    ]),
+  ],
+  controllers: [
+    CheckInController,
+    FavoritesController,
+    ReviewsController,
+    FollowsController,
+    ProposalsController,
+  ],
   providers: [CheckInService, FavoritesService, ReviewsService, FollowsService, ProposalsService],
 })
 export class CommunityModule {}

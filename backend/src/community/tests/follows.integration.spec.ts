@@ -9,15 +9,26 @@ const describeWithMongo = testUri ? describe : describe.skip;
 
 describeWithMongo('follows with MongoDB', () => {
   const dbName = `seatnow_test_${randomUUID().replaceAll('-', '')}`;
-  beforeAll(async () => { await mongoose.connect(testUri!, { dbName }); });
-  afterAll(async () => { await mongoose.connection.dropDatabase(); await mongoose.disconnect(); });
+  beforeAll(async () => {
+    await mongoose.connect(testUri!, { dbName });
+  });
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.disconnect();
+  });
 
   it('prevents self-follow, deduplicates and isolates following lists', async () => {
     const model = mongoose.model(Follow.name, FollowSchema);
     await model.createIndexes();
     const auth = {
-      publicProfileById: jest.fn().mockImplementation(async (id: string) => ({ id, displayName: 'Demo User' })),
-      publicUsersByIds: jest.fn().mockImplementation(async (ids: Types.ObjectId[]) => ids.map((id) => ({ id: id.toString(), displayName: 'Demo User' }))),
+      publicProfileById: jest
+        .fn()
+        .mockImplementation(async (id: string) => ({ id, displayName: 'Demo User' })),
+      publicUsersByIds: jest
+        .fn()
+        .mockImplementation(async (ids: Types.ObjectId[]) =>
+          ids.map((id) => ({ id: id.toString(), displayName: 'Demo User' })),
+        ),
     } as unknown as AuthService;
     const service = new FollowsService(model, auth);
     const alice = new Types.ObjectId().toString();

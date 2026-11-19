@@ -11,8 +11,11 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller('business/venues')
 export class BusinessCampaignController {
-  constructor(private readonly business: BusinessAccessService, private readonly venues: VenuesService,
-    private readonly auth: AuthService) {}
+  constructor(
+    private readonly business: BusinessAccessService,
+    private readonly venues: VenuesService,
+    private readonly auth: AuthService,
+  ) {}
 
   private async requirePremium(request: CookieRequest, slug: string) {
     const user = await this.auth.authenticate(getSessionToken(request));

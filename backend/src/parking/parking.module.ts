@@ -7,11 +7,13 @@ import { ParkingService } from './services/parking.service';
 import { VenueMapView, VenueMapViewSchema } from '../map/schemas/venue-map-view.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([
-    { name: ParkingFacility.name, schema: ParkingFacilitySchema },
-    { name: ParkingSnapshot.name, schema: ParkingSnapshotSchema },
-    { name: VenueMapView.name, schema: VenueMapViewSchema },
-  ])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: ParkingFacility.name, schema: ParkingFacilitySchema },
+      { name: ParkingSnapshot.name, schema: ParkingSnapshotSchema },
+      { name: VenueMapView.name, schema: VenueMapViewSchema },
+    ]),
+  ],
   controllers: [ParkingController],
   providers: [ParkingService],
 })

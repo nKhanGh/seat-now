@@ -11,8 +11,13 @@ const describeWithMongo = testUri ? describe : describe.skip;
 
 describeWithMongo('business ownership with MongoDB', () => {
   const dbName = `seatnow_test_${randomUUID().replaceAll('-', '')}`;
-  beforeAll(async () => { await mongoose.connect(testUri!, { dbName }); });
-  afterAll(async () => { await mongoose.connection.dropDatabase(); await mongoose.disconnect(); });
+  beforeAll(async () => {
+    await mongoose.connect(testUri!, { dbName });
+  });
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.disconnect();
+  });
 
   it('requires operator approval and isolates venue management by owner', async () => {
     const claims = mongoose.model(BusinessClaim.name, BusinessClaimSchema);
@@ -23,28 +28,44 @@ describeWithMongo('business ownership with MongoDB', () => {
       publicProfilesBySlugs: jest.fn().mockResolvedValue([{ slug: 'demo-cafe', name: 'Demo Café' }]),
       setBusinessPremiumUntil: jest.fn().mockResolvedValue(undefined),
     } as unknown as VenuesService;
-    const auth = { publicProfileById: jest.fn().mockResolvedValue({ displayName: 'Owner' }) } as unknown as AuthService;
+    const auth = {
+      publicProfileById: jest.fn().mockResolvedValue({ displayName: 'Owner' }),
+    } as unknown as AuthService;
     const service = new BusinessAccessService(claims, access, venues, auth);
     const ownerId = new Types.ObjectId().toString();
     const otherId = new Types.ObjectId().toString();
     const claim = await service.requestClaim(ownerId, 'demo-cafe', 'Tôi có giấy tờ quản lý quán này.');
     expect(claim.data.status).toBe('PENDING');
     expect((await service.myVenues(ownerId)).data).toHaveLength(0);
-    await expect(service.requireOwner(ownerId, 'demo-cafe')).rejects.toThrow('Venue management access required');
-    await expect(service.requestClaim(ownerId, 'demo-cafe', 'Tôi có giấy tờ quản lý quán này.')).rejects.toThrow('Claim already submitted');
+    await expect(service.requireOwner(ownerId, 'demo-cafe')).rejects.toThrow(
+      'Venue management access required',
+    );
+    await expect(
+      service.requestClaim(ownerId, 'demo-cafe', 'Tôi có giấy tờ quản lý quán này.'),
+    ).rejects.toThrow('Claim already submitted');
     await service.approveClaim(claim.data.id);
     expect((await service.myClaims(ownerId)).data[0].status).toBe('APPROVED');
-    expect((await service.myVenues(ownerId)).data).toMatchObject([{ slug: 'demo-cafe', plan: 'FREE', verified: false }]);
+    expect((await service.myVenues(ownerId)).data).toMatchObject([
+      { slug: 'demo-cafe', plan: 'FREE', verified: false },
+    ]);
     await service.requireOwner(ownerId, 'demo-cafe');
-    await expect(service.requireOwner(otherId, 'demo-cafe')).rejects.toThrow('Venue management access required');
-    await expect(service.requireOwner(ownerId, 'demo-cafe', true)).rejects.toThrow('Premium business plan required');
-    await expect(service.requestClaim(otherId, 'demo-cafe', 'Tôi cũng có giấy tờ quản lý quán.')).rejects.toThrow('Venue already managed');
+    await expect(service.requireOwner(otherId, 'demo-cafe')).rejects.toThrow(
+      'Venue management access required',
+    );
+    await expect(service.requireOwner(ownerId, 'demo-cafe', true)).rejects.toThrow(
+      'Premium business plan required',
+    );
+    await expect(
+      service.requestClaim(otherId, 'demo-cafe', 'Tôi cũng có giấy tờ quản lý quán.'),
+    ).rejects.toThrow('Venue already managed');
     expect((await service.approveClaim(claim.data.id)).data.status).toBe('APPROVED');
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60_000).toISOString();
     await service.setPlan('demo-cafe', { plan: 'PREMIUM', premiumExpiresAt: expires });
     await service.requireOwner(ownerId, 'demo-cafe', true);
     expect((await service.myVenues(ownerId)).data).toMatchObject([{ plan: 'PREMIUM', verified: true }]);
     await service.setPlan('demo-cafe', { plan: 'FREE' });
-    await expect(service.requireOwner(ownerId, 'demo-cafe', true)).rejects.toThrow('Premium business plan required');
+    await expect(service.requireOwner(ownerId, 'demo-cafe', true)).rejects.toThrow(
+      'Premium business plan required',
+    );
   });
 });

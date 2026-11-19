@@ -27,8 +27,19 @@ describeWithMongo('EntitlementService with MongoDB', () => {
 
   it('returns free for a user without a record and premium only during an active period', async () => {
     expect((await service.entitlements(userId.toString(), now)).plan).toBe('FREE');
-    await subscriptions.create({ userId, plan: 'PREMIUM', status: 'ACTIVE', currentPeriodStart: new Date('2026-11-01'), currentPeriodEnd: new Date('2026-12-01'), cancelAtPeriodEnd: false });
+    await subscriptions.create({
+      userId,
+      plan: 'PREMIUM',
+      status: 'ACTIVE',
+      currentPeriodStart: new Date('2026-11-01'),
+      currentPeriodEnd: new Date('2026-12-01'),
+      cancelAtPeriodEnd: false,
+    });
     expect((await service.entitlements(userId.toString(), now)).entitlements['booking.priority']).toBe(true);
-    expect((await service.entitlements(userId.toString(), new Date('2026-12-01'))).entitlements['booking.priority']).toBe(false);
+    expect(
+      (await service.entitlements(userId.toString(), new Date('2026-12-01'))).entitlements[
+        'booking.priority'
+      ],
+    ).toBe(false);
   });
 });

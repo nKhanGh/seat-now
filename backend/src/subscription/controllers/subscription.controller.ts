@@ -8,7 +8,10 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller('me')
 export class SubscriptionController {
-  constructor(private readonly auth: AuthService, private readonly entitlements: EntitlementService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly entitlements: EntitlementService,
+  ) {}
 
   private async userId(request: CookieRequest) {
     return (await this.auth.authenticate(getSessionToken(request))).id;

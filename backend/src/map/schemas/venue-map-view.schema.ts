@@ -3,10 +3,13 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 export type VenueMapViewDocument = HydratedDocument<VenueMapView>;
 
-const PointSchema = new MongooseSchema({
-  type: { type: String, enum: ['Point'], required: true },
-  coordinates: { type: [Number], required: true },
-}, { _id: false });
+const PointSchema = new MongooseSchema(
+  {
+    type: { type: String, enum: ['Point'], required: true },
+    coordinates: { type: [Number], required: true },
+  },
+  { _id: false },
+);
 
 @Schema({ collection: 'venue_map_views', timestamps: true })
 export class VenueMapView {

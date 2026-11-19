@@ -14,11 +14,23 @@ import { BusinessClaim, BusinessClaimSchema } from './schemas/business-claim.sch
 import { BusinessAccessService } from './services/business-access.service';
 
 @Module({
-  imports: [AuthModule, VenuesModule, AvailabilityModule, MongooseModule.forFeature([
-    { name: BusinessClaim.name, schema: BusinessClaimSchema },
-    { name: BusinessAccess.name, schema: BusinessAccessSchema },
-  ])],
-  controllers: [BusinessAccessController, BusinessProfileController, BusinessAvailabilityController, BusinessLogoController, BusinessDashboardController, BusinessCampaignController],
+  imports: [
+    AuthModule,
+    VenuesModule,
+    AvailabilityModule,
+    MongooseModule.forFeature([
+      { name: BusinessClaim.name, schema: BusinessClaimSchema },
+      { name: BusinessAccess.name, schema: BusinessAccessSchema },
+    ]),
+  ],
+  controllers: [
+    BusinessAccessController,
+    BusinessProfileController,
+    BusinessAvailabilityController,
+    BusinessLogoController,
+    BusinessDashboardController,
+    BusinessCampaignController,
+  ],
   providers: [BusinessAccessService],
   exports: [BusinessAccessService],
 })

@@ -10,7 +10,11 @@ const active = {
 describe('user plan resolver', () => {
   it('defaults to free when no subscription exists', () => {
     expect(effectivePlan(null, now)).toBe('FREE');
-    expect(resolveEntitlements('FREE')).toMatchObject({ 'map.basic': true, 'parking.read': true, 'booking.priority': false });
+    expect(resolveEntitlements('FREE')).toMatchObject({
+      'map.basic': true,
+      'parking.read': true,
+      'booking.priority': false,
+    });
   });
 
   it('grants premium only inside an active paid period', () => {
@@ -18,7 +22,9 @@ describe('user plan resolver', () => {
     expect(effectivePlan({ ...active, status: 'CANCELED' }, now)).toBe('PREMIUM');
     expect(effectivePlan({ ...active, status: 'PAST_DUE' }, now)).toBe('FREE');
     expect(effectivePlan(active, active.currentPeriodEnd)).toBe('FREE');
-    expect(effectivePlan({ ...active, currentPeriodStart: new Date('2026-11-20T00:00:00.000Z') }, now)).toBe('FREE');
+    expect(effectivePlan({ ...active, currentPeriodStart: new Date('2026-11-20T00:00:00.000Z') }, now)).toBe(
+      'FREE',
+    );
   });
 
   it('keeps the entitlement contract complete', () => {

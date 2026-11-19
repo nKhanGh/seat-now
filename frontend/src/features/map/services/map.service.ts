@@ -14,12 +14,17 @@ export type VenueMapItem = {
   promotion: { text: string; startsAt: string; endsAt: string; sponsored: boolean } | null;
   availability: {
     crowdLevel: 'QUIET' | 'MODERATE' | 'BUSY' | 'FULL' | 'UNKNOWN';
-    tablesAvailable: number | null; tablesTotal: number | null;
-    seatsAvailable: number | null; seatsTotal: number | null;
-    estimatedWaitMinutes: number | null; acceptingGuests: boolean | null;
+    tablesAvailable: number | null;
+    tablesTotal: number | null;
+    seatsAvailable: number | null;
+    seatsTotal: number | null;
+    estimatedWaitMinutes: number | null;
+    acceptingGuests: boolean | null;
     source: 'DEMO' | 'OPERATOR' | 'POS' | null;
-    confidence: number | null; version: number | null;
-    capturedAt: string | null; expiresAt: string | null;
+    confidence: number | null;
+    version: number | null;
+    capturedAt: string | null;
+    expiresAt: string | null;
     freshness: 'FRESH' | 'STALE' | 'UNKNOWN';
   };
 };
@@ -36,12 +41,24 @@ export type MapFilters = {
   hasAvailability?: boolean;
 };
 
-export type MapResponse = { data: VenueMapItem[]; meta: { nextCursor: string | null; truncated: boolean; queryCenter: { lat: number; lng: number } } };
+export type MapResponse = {
+  data: VenueMapItem[];
+  meta: { nextCursor: string | null; truncated: boolean; queryCenter: { lat: number; lng: number } };
+};
 
 export type VenueDetail = {
-  id: string; slug: string; name: string; category: VenueMapItem['category'];
-  cuisineTypes: VenueMapItem['cuisineTypes']; description: string; openingHours: string; menuSummary: string; address: string;
-  location: VenueMapItem['location']; priceTier: number; rating: number;
+  id: string;
+  slug: string;
+  name: string;
+  category: VenueMapItem['category'];
+  cuisineTypes: VenueMapItem['cuisineTypes'];
+  description: string;
+  openingHours: string;
+  menuSummary: string;
+  address: string;
+  location: VenueMapItem['location'];
+  priceTier: number;
+  rating: number;
   verified: boolean;
   logoUrl: string | null;
   coverUrl: string | null;
@@ -51,12 +68,21 @@ export type VenueDetail = {
 export async function getVenueDetail(slug: string, signal?: AbortSignal): Promise<VenueDetail> {
   const response = await fetch(`/api/v1/venues/${encodeURIComponent(slug)}`, { signal });
   if (!response.ok) throw new Error(`Không tải được chi tiết địa điểm (${response.status}).`);
-  const body = await response.json() as { data: VenueDetail };
+  const body = (await response.json()) as { data: VenueDetail };
   return body.data;
 }
 
-export async function getNearbyVenues(filters: MapFilters, cursor: string | null, signal?: AbortSignal): Promise<MapResponse> {
-  const params = new URLSearchParams({ lat: String(filters.lat), lng: String(filters.lng), radiusM: String(filters.radiusM), limit: '20' });
+export async function getNearbyVenues(
+  filters: MapFilters,
+  cursor: string | null,
+  signal?: AbortSignal,
+): Promise<MapResponse> {
+  const params = new URLSearchParams({
+    lat: String(filters.lat),
+    lng: String(filters.lng),
+    radiusM: String(filters.radiusM),
+    limit: '20',
+  });
   if (filters.category) params.set('category', filters.category);
   if (filters.cuisine) params.set('cuisine', filters.cuisine);
   if (filters.priceTier) params.set('priceTier', String(filters.priceTier));

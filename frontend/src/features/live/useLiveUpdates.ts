@@ -21,10 +21,18 @@ export function useLiveUpdates(venueSlugs: string[], parkingSlugs: string[]) {
     });
     socket.on('disconnect', () => setStatus('offline'));
     socket.on('connect_error', () => setStatus('offline'));
-    socket.on('venue.availability.updated.v1', () => void queryClient.invalidateQueries({ queryKey: ['map'] }));
-    socket.on('parking.availability.updated.v1', () => void queryClient.invalidateQueries({ queryKey: ['parking'] }));
+    socket.on(
+      'venue.availability.updated.v1',
+      () => void queryClient.invalidateQueries({ queryKey: ['map'] }),
+    );
+    socket.on(
+      'parking.availability.updated.v1',
+      () => void queryClient.invalidateQueries({ queryKey: ['parking'] }),
+    );
     socket.connect();
-    return () => { socket.disconnect(); };
+    return () => {
+      socket.disconnect();
+    };
   }, [venueKey, parkingKey, queryClient]);
 
   return status;

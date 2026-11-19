@@ -5,10 +5,13 @@ export type AvailabilitySnapshotDocument = HydratedDocument<AvailabilitySnapshot
 
 export type Capacity = { total: number; available: number } | null;
 
-const CapacitySchema = new MongooseSchema({
-  total: { type: Number, required: true, min: 0 },
-  available: { type: Number, required: true, min: 0 },
-}, { _id: false });
+const CapacitySchema = new MongooseSchema(
+  {
+    total: { type: Number, required: true, min: 0 },
+    available: { type: Number, required: true, min: 0 },
+  },
+  { _id: false },
+);
 
 @Schema({ collection: 'availability_snapshots', timestamps: { createdAt: 'receivedAt', updatedAt: false } })
 export class AvailabilitySnapshot {

@@ -17,37 +17,81 @@ async function bootstrap() {
     throw new Error('PUBLIC_ORIGIN must use HTTPS in production');
   }
   app.setGlobalPrefix('api/v1');
-  const mapAssetOrigins = (process.env.MAP_ASSET_ORIGINS ?? 'https://tiles.openfreemap.org,https://assets.openfreemap.com').split(',').map((value) => value.trim()).filter(Boolean);
+  const mapAssetOrigins = (
+    process.env.MAP_ASSET_ORIGINS ?? 'https://tiles.openfreemap.org,https://assets.openfreemap.com'
+  )
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
   const socketOrigin = process.env.PUBLIC_ORIGIN.replace(/^http/, 'ws');
-  app.use(helmet({ contentSecurityPolicy: { directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: ["'self'"],
-    styleSrc: ["'self'", "'unsafe-inline'"],
-    imgSrc: ["'self'", 'data:', 'blob:', ...mapAssetOrigins],
-    connectSrc: ["'self'", socketOrigin, ...mapAssetOrigins],
-    workerSrc: ["'self'", 'blob:'],
-    fontSrc: ["'self'", 'data:', ...mapAssetOrigins],
-  } } }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'blob:', ...mapAssetOrigins],
+          connectSrc: ["'self'", socketOrigin, ...mapAssetOrigins],
+          workerSrc: ["'self'", 'blob:'],
+          fontSrc: ["'self'", 'data:', ...mapAssetOrigins],
+        },
+      },
+    }),
+  );
   app.use(cookieParser());
   app.enableCors({ origin: process.env.PUBLIC_ORIGIN, credentials: true });
-  app.use((request: { method: string; path: string; headers: Record<string, string | undefined> }, response: { status: (code: number) => { json: (body: object) => void } }, next: () => void) => {
-    if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method) && !request.path.startsWith('/api/v1/internal/') && request.headers.origin !== process.env.PUBLIC_ORIGIN) {
-      response.status(403).json({ statusCode: 403, code: 'INVALID_ORIGIN', message: ['Invalid origin'] });
-      return;
-    }
-    next();
-  });
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true, exceptionFactory: (errors) => new BadRequestException({ code: 'VALIDATION_ERROR', message: errors.map((error) => Object.values(error.constraints ?? {}).join(', ')) }) }));
-  const frontendDist = process.env.FRONTEND_DIST_PATH ?? join(__dirname, '..', '..', 'frontend', 'dist');
-  if (existsSync(join(frontendDist, 'index.html'))) {
-    app.useStaticAssets(frontendDist);
-    app.use((request: { method: string; path: string }, response: { sendFile: (path: string) => void }, next: () => void) => {
-      if (request.method === 'GET' && (['/login', '/register', '/plans', '/favorites', '/following', '/proposals', '/business'].includes(request.path) || /^\/users\/[a-f0-9]{24}$/.test(request.path))) {
-        response.sendFile(join(frontendDist, 'index.html'));
+  app.use(
+    (
+      request: { method: string; path: string; headers: Record<string, string | undefined> },
+      response: { status: (code: number) => { json: (body: object) => void } },
+      next: () => void,
+    ) => {
+      if (
+        ['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method) &&
+        !request.path.startsWith('/api/v1/internal/') &&
+        request.headers.origin !== process.env.PUBLIC_ORIGIN
+      ) {
+        response.status(403).json({ statusCode: 403, code: 'INVALID_ORIGIN', message: ['Invalid origin'] });
         return;
       }
       next();
-    });
+    },
+  );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      exceptionFactory: (errors) =>
+        new BadRequestException({
+          code: 'VALIDATION_ERROR',
+          message: errors.map((error) => Object.values(error.constraints ?? {}).join(', ')),
+        }),
+    }),
+  );
+  const frontendDist = process.env.FRONTEND_DIST_PATH ?? join(__dirname, '..', '..', 'frontend', 'dist');
+  if (existsSync(join(frontendDist, 'index.html'))) {
+    app.useStaticAssets(frontendDist);
+    app.use(
+      (
+        request: { method: string; path: string },
+        response: { sendFile: (path: string) => void },
+        next: () => void,
+      ) => {
+        if (
+          request.method === 'GET' &&
+          (['/login', '/register', '/plans', '/favorites', '/following', '/proposals', '/business'].includes(
+            request.path,
+          ) ||
+            /^\/users\/[a-f0-9]{24}$/.test(request.path))
+        ) {
+          response.sendFile(join(frontendDist, 'index.html'));
+          return;
+        }
+        next();
+      },
+    );
   }
   await app.listen(Number(process.env.PORT ?? 3000), '0.0.0.0');
 }

@@ -20,7 +20,18 @@ type Props = {
   onSelectParking: (slug: string) => void;
 };
 
-export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkingFacilities, selectedParkingSlug, onCenterChange, onSelect, onSelectParking }: Props) {
+export function VenueMap({
+  lat,
+  lng,
+  venues,
+  selectedId,
+  selectionSerial,
+  parkingFacilities,
+  selectedParkingSlug,
+  onCenterChange,
+  onSelect,
+  onSelectParking,
+}: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
@@ -34,8 +45,12 @@ export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkin
     const configuredStyle: unknown = import.meta.env.VITE_MAP_STYLE_URL as unknown;
     const instance = new Map({
       container: container.current,
-      style: typeof configuredStyle === 'string' && configuredStyle ? configuredStyle : 'https://tiles.openfreemap.org/styles/liberty',
-      center: [lng, lat], zoom: 13,
+      style:
+        typeof configuredStyle === 'string' && configuredStyle
+          ? configuredStyle
+          : 'https://tiles.openfreemap.org/styles/liberty',
+      center: [lng, lat],
+      zoom: 13,
     });
     instance.on('error', (event) => {
       const mapError: unknown = event.error;
@@ -48,13 +63,19 @@ export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkin
       onCenterChangeRef.current(Number(center.lat.toFixed(5)), Number(center.lng.toFixed(5)));
     });
     map.current = instance;
-    return () => { markers.current.forEach((marker) => marker.remove()); markers.current = []; instance.remove(); map.current = null; };
+    return () => {
+      markers.current.forEach((marker) => marker.remove());
+      markers.current = [];
+      instance.remove();
+      map.current = null;
+    };
   }, []);
 
   useEffect(() => {
     if (!map.current) return;
     const center = map.current.getCenter();
-    if (Math.abs(center.lat - lat) > 0.0002 || Math.abs(center.lng - lng) > 0.0002) map.current.flyTo({ center: [lng, lat] });
+    if (Math.abs(center.lat - lat) > 0.0002 || Math.abs(center.lng - lng) > 0.0002)
+      map.current.flyTo({ center: [lng, lat] });
   }, [lat, lng]);
 
   useEffect(() => {
@@ -86,7 +107,9 @@ export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkin
       } else button.textContent = venue.category === 'CAFE' ? '☕' : venue.category === 'CINEMA' ? '🎬' : '🍽';
       button.setAttribute('aria-label', venue.name);
       button.addEventListener('click', () => onSelect(venue.id));
-      markers.current.push(new Marker({ element: button }).setLngLat(venue.location.coordinates).addTo(map.current));
+      markers.current.push(
+        new Marker({ element: button }).setLngLat(venue.location.coordinates).addTo(map.current),
+      );
     }
     for (const facility of parkingFacilities) {
       const button = document.createElement('button');
@@ -95,12 +118,20 @@ export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkin
       button.textContent = 'P';
       button.setAttribute('aria-label', `Bãi đỗ xe ${facility.name}`);
       button.addEventListener('click', () => onSelectParking(facility.slug));
-      markers.current.push(new Marker({ element: button }).setLngLat(facility.location.coordinates).addTo(map.current));
+      markers.current.push(
+        new Marker({ element: button }).setLngLat(facility.location.coordinates).addTo(map.current),
+      );
     }
   }, [venues, selectedId, onSelect, parkingFacilities, selectedParkingSlug, onSelectParking]);
 
-  return <>
-    <div ref={container} className="venue-map" aria-label="Bản đồ địa điểm" />
-    {mapError && <div className="map-error" role="alert">Bản đồ nền chưa tải được. Danh sách địa điểm vẫn dùng được. <small>{mapError}</small></div>}
-  </>;
+  return (
+    <>
+      <div ref={container} className="venue-map" aria-label="Bản đồ địa điểm" />
+      {mapError && (
+        <div className="map-error" role="alert">
+          Bản đồ nền chưa tải được. Danh sách địa điểm vẫn dùng được. <small>{mapError}</small>
+        </div>
+      )}
+    </>
+  );
 }

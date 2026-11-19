@@ -13,4 +13,3 @@ export class BusinessAccess {
 
 export const BusinessAccessSchema = SchemaFactory.createForClass(BusinessAccess);
 BusinessAccessSchema.index({ userId: 1, venueSlug: 1 });
-

@@ -5,7 +5,12 @@ import { User, UserSchema } from './auth/schemas/user.schema';
 import { Session, SessionSchema } from './auth/schemas/session.schema';
 import { VenueMapView, VenueMapViewSchema } from './map/schemas/venue-map-view.schema';
 import { Venue, VenueSchema } from './map/schemas/venue.schema';
-import { AvailabilityLatest, AvailabilityLatestSchema, AvailabilitySnapshot, AvailabilitySnapshotSchema } from './availability/schemas/availability-snapshot.schema';
+import {
+  AvailabilityLatest,
+  AvailabilityLatestSchema,
+  AvailabilitySnapshot,
+  AvailabilitySnapshotSchema,
+} from './availability/schemas/availability-snapshot.schema';
 import { ParkingFacility, ParkingFacilitySchema } from './parking/schemas/parking-facility.schema';
 import { ParkingSnapshot, ParkingSnapshotSchema } from './parking/schemas/parking-snapshot.schema';
 import { UserSubscription, UserSubscriptionSchema } from './subscription/schemas/user-subscription.schema';
@@ -16,7 +21,10 @@ import { ReviewPhoto, ReviewPhotoSchema } from './community/schemas/review-photo
 import { ReviewReport, ReviewReportSchema } from './community/schemas/review-report.schema';
 import { Follow, FollowSchema } from './community/schemas/follow.schema';
 import { VenueProposal, VenueProposalSchema } from './community/schemas/venue-proposal.schema';
-import { ProposalConfirmation, ProposalConfirmationSchema } from './community/schemas/proposal-confirmation.schema';
+import {
+  ProposalConfirmation,
+  ProposalConfirmationSchema,
+} from './community/schemas/proposal-confirmation.schema';
 import { BusinessClaim, BusinessClaimSchema } from './business/schemas/business-claim.schema';
 import { BusinessAccess, BusinessAccessSchema } from './business/schemas/business-access.schema';
 import { VenueLogo, VenueLogoSchema } from './venues/schemas/venue-logo.schema';

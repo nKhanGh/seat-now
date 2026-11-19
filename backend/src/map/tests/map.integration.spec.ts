@@ -16,9 +16,46 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     await model.createIndexes();
     const expiresAt = new Date(Date.now() + 60_000);
     await model.insertMany([
-      { slug: 'near-cafe', name: 'Near café', category: 'CAFE', cuisineTypes: ['COFFEE'], address: 'Near', location: { type: 'Point', coordinates: [106.7009, 10.7769] }, priceTier: 1, rating: 4.5, crowdLevel: 'QUIET', tablesAvailable: 4, acceptingGuests: true, availabilityExpiresAt: expiresAt },
-      { slug: 'near-restaurant', name: 'Near restaurant', category: 'RESTAURANT', cuisineTypes: ['WESTERN'], address: 'Near', location: { type: 'Point', coordinates: [106.7011, 10.777] }, priceTier: 2, rating: 4, crowdLevel: 'BUSY', tablesAvailable: 0, availabilityExpiresAt: expiresAt },
-      { slug: 'far-cafe', name: 'Far café', category: 'CAFE', cuisineTypes: ['DESSERT'], address: 'Far', location: { type: 'Point', coordinates: [106.7319, 10.8025] }, priceTier: 1, rating: 5, crowdLevel: 'QUIET', tablesAvailable: 8, availabilityExpiresAt: expiresAt },
+      {
+        slug: 'near-cafe',
+        name: 'Near café',
+        category: 'CAFE',
+        cuisineTypes: ['COFFEE'],
+        address: 'Near',
+        location: { type: 'Point', coordinates: [106.7009, 10.7769] },
+        priceTier: 1,
+        rating: 4.5,
+        crowdLevel: 'QUIET',
+        tablesAvailable: 4,
+        acceptingGuests: true,
+        availabilityExpiresAt: expiresAt,
+      },
+      {
+        slug: 'near-restaurant',
+        name: 'Near restaurant',
+        category: 'RESTAURANT',
+        cuisineTypes: ['WESTERN'],
+        address: 'Near',
+        location: { type: 'Point', coordinates: [106.7011, 10.777] },
+        priceTier: 2,
+        rating: 4,
+        crowdLevel: 'BUSY',
+        tablesAvailable: 0,
+        availabilityExpiresAt: expiresAt,
+      },
+      {
+        slug: 'far-cafe',
+        name: 'Far café',
+        category: 'CAFE',
+        cuisineTypes: ['DESSERT'],
+        address: 'Far',
+        location: { type: 'Point', coordinates: [106.7319, 10.8025] },
+        priceTier: 1,
+        rating: 5,
+        crowdLevel: 'QUIET',
+        tablesAvailable: 8,
+        availabilityExpiresAt: expiresAt,
+      },
     ]);
     service = new MapService(model as never);
   });
@@ -36,21 +73,62 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
   });
 
   it('applies category and availability filters inside the geo query', async () => {
-    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, limit: 20, category: 'CAFE', hasAvailability: 'true' });
+    const result = await service.findNearby({
+      lat: 10.7769,
+      lng: 106.7009,
+      radiusM: 100,
+      limit: 20,
+      category: 'CAFE',
+      hasAvailability: 'true',
+    });
     expect(result.data.map((venue) => venue.slug)).toEqual(['near-cafe']);
     expect(result.data[0].availability.freshness).toBe('FRESH');
   });
 
   it('filters cuisine in MongoDB before applying the result limit', async () => {
-    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, limit: 20, cuisine: 'WESTERN' });
+    const result = await service.findNearby({
+      lat: 10.7769,
+      lng: 106.7009,
+      radiusM: 100,
+      limit: 20,
+      cuisine: 'WESTERN',
+    });
     expect(result.data.map((venue) => venue.slug)).toEqual(['near-restaurant']);
   });
 
   it('counts free seats when table counts are unavailable, but excludes closed intake', async () => {
     const model = mongoose.model(VenueMapView.name);
-    await model.create({ slug: 'seats-only', name: 'Seats only', category: 'CAFE', address: 'Near', location: { type: 'Point', coordinates: [106.701, 10.7769] }, priceTier: 1, rating: 4, seatsAvailable: 5, acceptingGuests: true, availabilityExpiresAt: new Date(Date.now() + 60_000) });
-    await model.create({ slug: 'not-accepting', name: 'Not accepting', category: 'CAFE', address: 'Near', location: { type: 'Point', coordinates: [106.701, 10.777] }, priceTier: 1, rating: 4, tablesAvailable: 8, acceptingGuests: false, availabilityExpiresAt: new Date(Date.now() + 60_000) });
-    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, limit: 20, hasAvailability: 'true' });
+    await model.create({
+      slug: 'seats-only',
+      name: 'Seats only',
+      category: 'CAFE',
+      address: 'Near',
+      location: { type: 'Point', coordinates: [106.701, 10.7769] },
+      priceTier: 1,
+      rating: 4,
+      seatsAvailable: 5,
+      acceptingGuests: true,
+      availabilityExpiresAt: new Date(Date.now() + 60_000),
+    });
+    await model.create({
+      slug: 'not-accepting',
+      name: 'Not accepting',
+      category: 'CAFE',
+      address: 'Near',
+      location: { type: 'Point', coordinates: [106.701, 10.777] },
+      priceTier: 1,
+      rating: 4,
+      tablesAvailable: 8,
+      acceptingGuests: false,
+      availabilityExpiresAt: new Date(Date.now() + 60_000),
+    });
+    const result = await service.findNearby({
+      lat: 10.7769,
+      lng: 106.7009,
+      radiusM: 100,
+      limit: 20,
+      hasAvailability: 'true',
+    });
     expect(result.data.map((venue) => venue.slug)).toEqual(['near-cafe', 'seats-only']);
     await model.deleteMany({ slug: { $in: ['seats-only', 'not-accepting'] } });
   });
@@ -60,24 +138,40 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     const first = await service.findNearby(query);
     const second = await service.findNearby({ ...query, cursor: first.meta.nextCursor! });
     const third = await service.findNearby({ ...query, cursor: second.meta.nextCursor! });
-    expect([first.data[0].slug, second.data[0].slug, third.data[0].slug]).toEqual(['near-cafe', 'near-restaurant', 'far-cafe']);
+    expect([first.data[0].slug, second.data[0].slug, third.data[0].slug]).toEqual([
+      'near-cafe',
+      'near-restaurant',
+      'far-cafe',
+    ]);
     expect(third.meta.nextCursor).toBeNull();
-    await expect(service.findNearby({ ...query, category: 'CAFE', cursor: first.meta.nextCursor! })).rejects.toThrow('Invalid map cursor');
+    await expect(
+      service.findNearby({ ...query, category: 'CAFE', cursor: first.meta.nextCursor! }),
+    ).rejects.toThrow('Invalid map cursor');
   });
 
   it('puts active labeled sponsorship before nearer organic results and pages correctly', async () => {
     const model = mongoose.model(VenueMapView.name);
-    await model.updateOne({ slug: 'far-cafe' }, { $set: {
-      sponsored: true, promotionText: 'Ưu đãi thử nghiệm giờ vắng',
-      promotionStartsAt: new Date(Date.now() - 60_000), promotionEndsAt: new Date(Date.now() + 60_000),
-      businessPremiumExpiresAt: new Date(Date.now() + 60_000),
-    } });
+    await model.updateOne(
+      { slug: 'far-cafe' },
+      {
+        $set: {
+          sponsored: true,
+          promotionText: 'Ưu đãi thử nghiệm giờ vắng',
+          promotionStartsAt: new Date(Date.now() - 60_000),
+          promotionEndsAt: new Date(Date.now() + 60_000),
+          businessPremiumExpiresAt: new Date(Date.now() + 60_000),
+        },
+      },
+    );
     const query = { lat: 10.7769, lng: 106.7009, radiusM: 10_000, limit: 1 };
     const first = await service.findNearby(query);
     const second = await service.findNearby({ ...query, cursor: first.meta.nextCursor! });
     expect(first.data[0]).toMatchObject({ slug: 'far-cafe', promotion: { sponsored: true } });
     expect(second.data[0].slug).toBe('near-cafe');
-    await model.updateOne({ slug: 'far-cafe' }, { $set: { businessPremiumExpiresAt: new Date(Date.now() - 60_000) } });
+    await model.updateOne(
+      { slug: 'far-cafe' },
+      { $set: { businessPremiumExpiresAt: new Date(Date.now() - 60_000) } },
+    );
     expect((await service.findNearby(query)).data[0].slug).toBe('near-cafe');
   });
 });

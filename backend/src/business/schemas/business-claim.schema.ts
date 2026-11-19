@@ -15,4 +15,3 @@ export class BusinessClaim {
 export const BusinessClaimSchema = SchemaFactory.createForClass(BusinessClaim);
 BusinessClaimSchema.index({ userId: 1, venueSlug: 1 }, { unique: true });
 BusinessClaimSchema.index({ status: 1, createdAt: 1 });
-

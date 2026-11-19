@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { AuthService } from '../../auth/services/auth.service';
@@ -32,23 +38,46 @@ export class BusinessAccessService {
   }
 
   async myClaims(userId: string) {
-    const claims = await this.claims.find({ userId: new Types.ObjectId(userId) }).sort({ createdAt: -1, _id: -1 }).limit(100).lean();
+    const claims = await this.claims
+      .find({ userId: new Types.ObjectId(userId) })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(100)
+      .lean();
     return { data: claims.map((claim) => this.publicClaim(claim)) };
   }
 
   async myVenues(userId: string) {
-    const rows = await this.access.find({ userId: new Types.ObjectId(userId) }).sort({ venueSlug: 1 }).limit(100).lean();
+    const rows = await this.access
+      .find({ userId: new Types.ObjectId(userId) })
+      .sort({ venueSlug: 1 })
+      .limit(100)
+      .lean();
     const profiles = await this.venues.publicProfilesBySlugs(rows.map((row) => row.venueSlug));
     const bySlug = new Map(profiles.map((profile) => [profile.slug, profile]));
-    return { data: rows.filter((row) => bySlug.has(row.venueSlug)).map((row) => ({
-      ...bySlug.get(row.venueSlug), plan: this.effectivePlan(row),
-      verified: this.effectivePlan(row) === 'PREMIUM',
-    })) };
+    return {
+      data: rows
+        .filter((row) => bySlug.has(row.venueSlug))
+        .map((row) => ({
+          ...bySlug.get(row.venueSlug),
+          plan: this.effectivePlan(row),
+          verified: this.effectivePlan(row) === 'PREMIUM',
+        })),
+    };
   }
 
   async pendingClaims() {
-    const rows = await this.claims.find({ status: 'PENDING' }).sort({ createdAt: 1, _id: 1 }).limit(100).lean();
-    return { data: rows.map((row) => ({ ...this.publicClaim(row), userId: row.userId.toString(), evidence: row.evidence })) };
+    const rows = await this.claims
+      .find({ status: 'PENDING' })
+      .sort({ createdAt: 1, _id: 1 })
+      .limit(100)
+      .lean();
+    return {
+      data: rows.map((row) => ({
+        ...this.publicClaim(row),
+        userId: row.userId.toString(),
+        evidence: row.evidence,
+      })),
+    };
   }
 
   async approveClaim(id: string) {
@@ -62,7 +91,8 @@ export class BusinessAccessService {
     } catch (error) {
       if (isDuplicate(error)) {
         const existing = await this.access.findOne({ venueSlug: claim.venueSlug }, { userId: 1 }).lean();
-        if (existing?.userId.toString() !== claim.userId.toString()) throw new ConflictException('Venue already managed');
+        if (existing?.userId.toString() !== claim.userId.toString())
+          throw new ConflictException('Venue already managed');
       } else throw error;
     }
     await this.claims.updateOne({ _id: claim._id, status: 'PENDING' }, { $set: { status: 'APPROVED' } });
@@ -79,7 +109,8 @@ export class BusinessAccessService {
   async requireOwner(userId: string, slug: string, premium = false) {
     const owner = await this.access.findOne({ userId: new Types.ObjectId(userId), venueSlug: slug }).lean();
     if (!owner) throw new ForbiddenException('Venue management access required');
-    if (premium && this.effectivePlan(owner) !== 'PREMIUM') throw new ForbiddenException('Premium business plan required');
+    if (premium && this.effectivePlan(owner) !== 'PREMIUM')
+      throw new ForbiddenException('Premium business plan required');
     return owner;
   }
 
@@ -87,18 +118,28 @@ export class BusinessAccessService {
     const owner = await this.access.findOne({ venueSlug: slug });
     if (!owner) throw new NotFoundException('Managed venue not found');
     await this.venues.activeLocation(slug);
-    const expiresAt = input.plan === 'PREMIUM' && input.premiumExpiresAt ? new Date(input.premiumExpiresAt) : null;
-    if (input.plan === 'PREMIUM' && (!expiresAt || expiresAt.getTime() <= Date.now()
-      || expiresAt.getTime() > Date.now() + 366 * 24 * 60 * 60_000)) {
+    const expiresAt =
+      input.plan === 'PREMIUM' && input.premiumExpiresAt ? new Date(input.premiumExpiresAt) : null;
+    if (
+      input.plan === 'PREMIUM' &&
+      (!expiresAt ||
+        expiresAt.getTime() <= Date.now() ||
+        expiresAt.getTime() > Date.now() + 366 * 24 * 60 * 60_000)
+    ) {
       throw new BadRequestException('Premium expiration must be within the next year');
     }
-    await this.access.updateOne({ _id: owner._id }, { $set: { plan: input.plan, premiumExpiresAt: expiresAt } });
+    await this.access.updateOne(
+      { _id: owner._id },
+      { $set: { plan: input.plan, premiumExpiresAt: expiresAt } },
+    );
     await this.venues.setBusinessPremiumUntil(slug, expiresAt);
     return { data: { slug, plan: input.plan, premiumExpiresAt: expiresAt } };
   }
 
   private effectivePlan(access: BusinessAccess): 'FREE' | 'PREMIUM' {
-    return access.plan === 'PREMIUM' && access.premiumExpiresAt && access.premiumExpiresAt > new Date() ? 'PREMIUM' : 'FREE';
+    return access.plan === 'PREMIUM' && access.premiumExpiresAt && access.premiumExpiresAt > new Date()
+      ? 'PREMIUM'
+      : 'FREE';
   }
 
   private async findClaim(id: string) {
@@ -109,7 +150,12 @@ export class BusinessAccessService {
   }
 
   private publicClaim(claim: BusinessClaim & { _id: Types.ObjectId }) {
-    return { id: claim._id.toString(), venueSlug: claim.venueSlug, status: claim.status, createdAt: claim.createdAt };
+    return {
+      id: claim._id.toString(),
+      venueSlug: claim.venueSlug,
+      status: claim.status,
+      createdAt: claim.createdAt,
+    };
   }
 }
 

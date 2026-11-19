@@ -13,7 +13,9 @@ function distanceM(latA: number, lngA: number, latB: number, lngB: number): numb
   const radians = Math.PI / 180;
   const deltaLat = (latB - latA) * radians;
   const deltaLng = (lngB - lngA) * radians;
-  const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(latA * radians) * Math.cos(latB * radians) * Math.sin(deltaLng / 2) ** 2;
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(latA * radians) * Math.cos(latB * radians) * Math.sin(deltaLng / 2) ** 2;
   return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
@@ -26,15 +28,27 @@ export class CheckInService {
 
   async checkIn(userId: string, slug: string, input: CheckInDto) {
     const [venueLng, venueLat] = await this.venues.activeLocation(slug);
-    if (input.accuracyM > 100) throw new BadRequestException({ code: 'CHECK_IN_LOW_ACCURACY', message: 'Location accuracy is too low' });
+    if (input.accuracyM > 100)
+      throw new BadRequestException({
+        code: 'CHECK_IN_LOW_ACCURACY',
+        message: 'Location accuracy is too low',
+      });
     if (distanceM(input.lat, input.lng, venueLat, venueLng) > CHECK_IN_RADIUS_M) {
-      throw new ForbiddenException({ code: 'CHECK_IN_TOO_FAR', message: 'Move closer to the venue to check in' });
+      throw new ForbiddenException({
+        code: 'CHECK_IN_TOO_FAR',
+        message: 'Move closer to the venue to check in',
+      });
     }
     const now = new Date();
     const windowStart = new Date(Math.floor(now.getTime() / CHECK_IN_WINDOW_MS) * CHECK_IN_WINDOW_MS);
     let duplicate = false;
     try {
-      await this.checkIns.create({ userId: new Types.ObjectId(userId), venueSlug: slug, checkedAt: now, windowStart });
+      await this.checkIns.create({
+        userId: new Types.ObjectId(userId),
+        venueSlug: slug,
+        checkedAt: now,
+        windowStart,
+      });
     } catch (error) {
       if (!isDuplicate(error)) throw error;
       duplicate = true;
@@ -51,9 +65,16 @@ export class CheckInService {
         { $group: { _id: '$userId' } },
         { $count: 'count' },
       ]),
-      this.checkIns.findOne({ venueSlug: slug, checkedAt: { $gte: since } }, { checkedAt: 1 }).sort({ checkedAt: -1 }).lean(),
+      this.checkIns
+        .findOne({ venueSlug: slug, checkedAt: { $gte: since } }, { checkedAt: 1 })
+        .sort({ checkedAt: -1 })
+        .lean(),
     ]);
-    return { lastHourUsers: counts[0]?.count ?? 0, latestAt: newest?.checkedAt ?? null, source: 'SELF_REPORTED' as const };
+    return {
+      lastHourUsers: counts[0]?.count ?? 0,
+      latestAt: newest?.checkedAt ?? null,
+      source: 'SELF_REPORTED' as const,
+    };
   }
 }
 

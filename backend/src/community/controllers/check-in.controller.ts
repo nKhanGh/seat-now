@@ -10,10 +10,15 @@ type CookieRequest = Request & { cookies?: Record<string, string> };
 
 @Controller('venues/:slug/check-ins')
 export class CheckInController {
-  constructor(private readonly checkIns: CheckInService, private readonly auth: AuthService) {}
+  constructor(
+    private readonly checkIns: CheckInService,
+    private readonly auth: AuthService,
+  ) {}
 
   @Get()
-  async summary(@Param('slug') slug: string) { return { data: await this.checkIns.summary(slug) }; }
+  async summary(@Param('slug') slug: string) {
+    return { data: await this.checkIns.summary(slug) };
+  }
 
   @Post()
   @HttpCode(200)

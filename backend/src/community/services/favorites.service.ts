@@ -12,21 +12,27 @@ export class FavoritesService {
   ) {}
 
   async list(userId: string) {
-    const rows = await this.favorites.find({ userId: new Types.ObjectId(userId) })
-      .sort({ createdAt: -1, _id: -1 }).limit(100).lean();
+    const rows = await this.favorites
+      .find({ userId: new Types.ObjectId(userId) })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(100)
+      .lean();
     const profiles = await this.venues.publicProfilesBySlugs(rows.map((row) => row.venueSlug));
     const bySlug = new Map(profiles.map((profile) => [profile.slug, profile]));
-    return { data: rows.flatMap((row) => {
-      const profile = bySlug.get(row.venueSlug);
-      return profile ? [{ ...profile, savedAt: row.createdAt }] : [];
-    }) };
+    return {
+      data: rows.flatMap((row) => {
+        const profile = bySlug.get(row.venueSlug);
+        return profile ? [{ ...profile, savedAt: row.createdAt }] : [];
+      }),
+    };
   }
 
   async save(userId: string, slug: string) {
     await this.venues.activeLocation(slug);
     await this.favorites.updateOne(
       { userId: new Types.ObjectId(userId), venueSlug: slug },
-      { $setOnInsert: { createdAt: new Date() } }, { upsert: true },
+      { $setOnInsert: { createdAt: new Date() } },
+      { upsert: true },
     );
     return { data: { saved: true } };
   }

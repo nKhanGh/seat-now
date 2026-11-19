@@ -4,7 +4,10 @@ import { VenuePageViewService } from '../services/venue-page-view.service';
 
 @Controller('venues')
 export class VenuesController {
-  constructor(private readonly venues: VenuesService, private readonly pageViews: VenuePageViewService) {}
+  constructor(
+    private readonly venues: VenuesService,
+    private readonly pageViews: VenuePageViewService,
+  ) {}
 
   @Get(':slug')
   async getBySlug(@Param('slug') slug: string) {

@@ -10,15 +10,30 @@ const describeWithMongo = testUri ? describe : describe.skip;
 describeWithMongo('favorites with MongoDB', () => {
   const dbName = `seatnow_test_${randomUUID().replaceAll('-', '')}`;
 
-  beforeAll(async () => { await mongoose.connect(testUri!, { dbName }); });
-  afterAll(async () => { await mongoose.connection.dropDatabase(); await mongoose.disconnect(); });
+  beforeAll(async () => {
+    await mongoose.connect(testUri!, { dbName });
+  });
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.disconnect();
+  });
 
   it('is idempotent and isolates one user’s saved venues from another', async () => {
     const model = mongoose.model(Favorite.name, FavoriteSchema);
     await model.createIndexes();
     const venues = {
       activeLocation: jest.fn().mockResolvedValue([106.7, 10.77]),
-      publicProfilesBySlugs: jest.fn().mockResolvedValue([{ slug: 'demo-cafe', name: 'Demo café', category: 'CAFE', address: 'Test', location: { type: 'Point', coordinates: [106.7, 10.77] }, priceTier: 1, rating: 4 }]),
+      publicProfilesBySlugs: jest.fn().mockResolvedValue([
+        {
+          slug: 'demo-cafe',
+          name: 'Demo café',
+          category: 'CAFE',
+          address: 'Test',
+          location: { type: 'Point', coordinates: [106.7, 10.77] },
+          priceTier: 1,
+          rating: 4,
+        },
+      ]),
     } as unknown as VenuesService;
     const service = new FavoritesService(model, venues);
     const alice = new Types.ObjectId().toString();
