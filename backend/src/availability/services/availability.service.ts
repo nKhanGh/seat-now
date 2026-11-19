@@ -35,8 +35,12 @@ export class AvailabilityService {
   async getBySlug(slug: string) {
     const venue = await this.venues.exists({ slug });
     if (!venue) throw new NotFoundException('Venue not found');
+    return { data: await this.summaryForSlug(slug) };
+  }
+
+  async summaryForSlug(slug: string) {
     const record = await this.latest.findOne({ slug }).lean();
-    return { data: publicAvailability(record) };
+    return publicAvailability(record);
   }
 
   async ingest(slug: string, dto: CreateAvailabilityDto) {

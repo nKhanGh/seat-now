@@ -16,9 +16,9 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     await model.createIndexes();
     const expiresAt = new Date(Date.now() + 60_000);
     await model.insertMany([
-      { slug: 'near-cafe', name: 'Near café', category: 'CAFE', address: 'Near', location: { type: 'Point', coordinates: [106.7009, 10.7769] }, priceTier: 1, rating: 4.5, crowdLevel: 'QUIET', tablesAvailable: 4, availabilityExpiresAt: expiresAt },
-      { slug: 'near-restaurant', name: 'Near restaurant', category: 'RESTAURANT', address: 'Near', location: { type: 'Point', coordinates: [106.7011, 10.777] }, priceTier: 2, rating: 4, crowdLevel: 'BUSY', tablesAvailable: 0, availabilityExpiresAt: expiresAt },
-      { slug: 'far-cafe', name: 'Far café', category: 'CAFE', address: 'Far', location: { type: 'Point', coordinates: [106.7319, 10.8025] }, priceTier: 1, rating: 5, crowdLevel: 'QUIET', tablesAvailable: 8, availabilityExpiresAt: expiresAt },
+      { slug: 'near-cafe', name: 'Near café', category: 'CAFE', cuisineTypes: ['COFFEE'], address: 'Near', location: { type: 'Point', coordinates: [106.7009, 10.7769] }, priceTier: 1, rating: 4.5, crowdLevel: 'QUIET', tablesAvailable: 4, availabilityExpiresAt: expiresAt },
+      { slug: 'near-restaurant', name: 'Near restaurant', category: 'RESTAURANT', cuisineTypes: ['WESTERN'], address: 'Near', location: { type: 'Point', coordinates: [106.7011, 10.777] }, priceTier: 2, rating: 4, crowdLevel: 'BUSY', tablesAvailable: 0, availabilityExpiresAt: expiresAt },
+      { slug: 'far-cafe', name: 'Far café', category: 'CAFE', cuisineTypes: ['DESSERT'], address: 'Far', location: { type: 'Point', coordinates: [106.7319, 10.8025] }, priceTier: 1, rating: 5, crowdLevel: 'QUIET', tablesAvailable: 8, availabilityExpiresAt: expiresAt },
     ]);
     service = new MapService(model as never);
   });
@@ -39,5 +39,10 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, category: 'CAFE', hasAvailability: 'true' });
     expect(result.data.map((venue) => venue.slug)).toEqual(['near-cafe']);
     expect(result.data[0].availability.freshness).toBe('FRESH');
+  });
+
+  it('filters cuisine in MongoDB before applying the result limit', async () => {
+    const result = await service.findNearby({ lat: 10.7769, lng: 106.7009, radiusM: 100, cuisine: 'WESTERN' });
+    expect(result.data.map((venue) => venue.slug)).toEqual(['near-restaurant']);
   });
 });

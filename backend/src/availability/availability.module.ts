@@ -13,5 +13,6 @@ import { VenueMapView, VenueMapViewSchema } from '../map/schemas/venue-map-view.
   ])],
   controllers: [AvailabilityController],
   providers: [AvailabilityService],
+  exports: [AvailabilityService],
 })
 export class AvailabilityModule {}

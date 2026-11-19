@@ -16,6 +16,9 @@ export class MapQueryDto {
   @IsOptional() @IsEnum(['RESTAURANT', 'CAFE', 'CINEMA'])
   category?: 'RESTAURANT' | 'CAFE' | 'CINEMA';
 
+  @IsOptional() @IsEnum(['VIETNAMESE', 'WESTERN', 'COFFEE', 'DESSERT'])
+  cuisine?: 'VIETNAMESE' | 'WESTERN' | 'COFFEE' | 'DESSERT';
+
   @Transform(toNumber) @IsOptional() @IsInt() @Min(1) @Max(4)
   priceTier?: number;
 

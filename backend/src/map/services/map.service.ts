@@ -10,6 +10,7 @@ type MapRow = {
   slug: string;
   address: string;
   category: string;
+  cuisineTypes: string[];
   location: { type: 'Point'; coordinates: [number, number] };
   priceTier: number;
   rating: number;
@@ -36,6 +37,7 @@ export class MapService {
     const now = new Date();
     const match: Record<string, unknown> = {};
     if (query.category) match.category = query.category;
+    if (query.cuisine) match.cuisineTypes = query.cuisine;
     if (query.priceTier) match.priceTier = query.priceTier;
     if (query.ratingGte !== undefined) match.rating = { $gte: query.ratingGte };
     if (query.crowdLevel) {
@@ -56,7 +58,7 @@ export class MapService {
     return {
       data: rows.slice(0, 50).map((row) => ({
         id: row._id.toString(), name: row.name, slug: row.slug, address: row.address,
-        category: row.category, location: row.location, distanceM: Math.round(row.distanceM),
+        category: row.category, cuisineTypes: row.cuisineTypes ?? [], location: row.location, distanceM: Math.round(row.distanceM),
         priceTier: row.priceTier, rating: row.rating,
         availability: {
           crowdLevel: row.availabilityExpiresAt ? row.crowdLevel : 'UNKNOWN',

@@ -10,6 +10,7 @@ import { AvailabilityModule } from './availability/availability.module';
 import { ParkingModule } from './parking/parking.module';
 import { LiveModule } from './live/live.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { VenuesModule } from './venues/venues.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     AvailabilityModule,
     ParkingModule,
     SubscriptionModule,
+    VenuesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

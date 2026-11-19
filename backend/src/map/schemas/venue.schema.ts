@@ -13,6 +13,8 @@ export class Venue {
   @Prop({ required: true, unique: true }) slug!: string;
   @Prop({ required: true }) name!: string;
   @Prop({ required: true }) category!: string;
+  @Prop({ type: [String], default: [] }) cuisineTypes!: string[];
+  @Prop({ type: String, default: '' }) description!: string;
   @Prop({ required: true, type: PointSchema }) location!: { type: 'Point'; coordinates: [number, number] };
   @Prop({ required: true }) address!: string;
   @Prop({ required: true }) priceTier!: number;

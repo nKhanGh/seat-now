@@ -19,6 +19,8 @@ export class VenueMapView {
   @Prop({ required: true, enum: ['RESTAURANT', 'CAFE', 'CINEMA'] })
   category!: 'RESTAURANT' | 'CAFE' | 'CINEMA';
 
+  @Prop({ type: [String], default: [] }) cuisineTypes!: string[];
+
   @Prop({ required: true, type: PointSchema })
   location!: { type: 'Point'; coordinates: [number, number] };
 
