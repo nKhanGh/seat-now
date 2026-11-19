@@ -40,6 +40,7 @@ p { line-height: 1.55; }
 .venue-card strong { font-size: 1.04rem; }
 .venue-card span { font-size: .9rem; }
 .venue-card .venue-category { color: #17654d; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.load-more { display: block; width: 100%; padding: 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #17654d; font-weight: 700; }
 .map-pane { position: relative; min-height: 540px; }
 .venue-map { position: absolute; inset: 0; }
 .venue-pin { border: 2px solid #fff; background: #17654d; color: white; border-radius: 50%; width: 42px; height: 42px; box-shadow: 0 3px 10px #0004; font-size: 1.1rem; }

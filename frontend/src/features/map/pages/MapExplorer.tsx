@@ -37,11 +37,12 @@ export function MapExplorer() {
     hasAvailability: params.get('hasAvailability') === 'true',
   }), [params]);
   const venues = useNearbyVenues(filters);
-  const selected = venues.data?.data.find((item) => item.id === selectedId);
+  const venueItems = useMemo(() => venues.data?.pages.flatMap((page) => page.data) ?? [], [venues.data]);
+  const selected = venueItems.find((item) => item.id === selectedId);
   const venueDetail = useVenueDetail(selected?.slug ?? null);
   const parking = useParkingForVenue(selected?.slug ?? null, parkingFilters);
   const updateParkingFilters = useCallback((next: ParkingFilterValues) => { setParkingFilters(next); setSelectedParkingSlug(null); }, []);
-  const liveStatus = useLiveUpdates(venues.data?.data.map((item) => item.slug) ?? [], parking.data?.data.map((item) => item.slug) ?? []);
+  const liveStatus = useLiveUpdates(venueItems.map((item) => item.slug), parking.data?.data.map((item) => item.slug) ?? []);
   const selectVenue = useCallback((id: string) => { setSelectedId(id); setSelectedParkingSlug(null); setSelectionSerial((current) => current + 1); }, []);
   const update = useCallback((patch: Record<string, string | null>) => {
     setParams((current) => {
@@ -78,11 +79,12 @@ export function MapExplorer() {
       <h1>Khám phá quanh bạn</h1><p className="small">Dữ liệu mẫu hư cấu tại Quận 1, TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.</p>
       {venues.isPending && <p>Đang tìm địa điểm…</p>}
       {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => venues.refetch()}>Thử lại</button></p>}
-      {venues.data?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
-      {venues.data?.data.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
+      {venues.data?.pages[0]?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
+      {venueItems.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
         <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.name}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
       </button>)}
-      {venues.data?.meta.truncated && <p>Hãy thu nhỏ khu vực tìm kiếm để xem thêm địa điểm.</p>}
-    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parking.data?.data || []} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}<AvailabilityStatus availability={selected.availability} /><ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <ParkingList facilities={parking.data.data} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />}</div>}</div></div>
+      {venues.hasNextPage && venueItems.length < 100 && <button className="load-more" onClick={() => void venues.fetchNextPage()} disabled={venues.isFetchingNextPage}>{venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}</button>}
+      {venues.hasNextPage && venueItems.length >= 100 && <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}
+    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venueItems} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parking.data?.data || []} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}<AvailabilityStatus availability={selected.availability} /><ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <ParkingList facilities={parking.data.data} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />}</div>}</div></div>
   </main>;
 }

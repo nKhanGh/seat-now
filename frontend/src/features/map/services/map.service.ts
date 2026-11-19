@@ -33,7 +33,7 @@ export type MapFilters = {
   hasAvailability?: boolean;
 };
 
-export type MapResponse = { data: VenueMapItem[]; meta: { truncated: boolean; queryCenter: { lat: number; lng: number } } };
+export type MapResponse = { data: VenueMapItem[]; meta: { nextCursor: string | null; truncated: boolean; queryCenter: { lat: number; lng: number } } };
 
 export type VenueDetail = {
   id: string; slug: string; name: string; category: VenueMapItem['category'];
@@ -48,14 +48,15 @@ export async function getVenueDetail(slug: string, signal?: AbortSignal): Promis
   return body.data;
 }
 
-export async function getNearbyVenues(filters: MapFilters, signal?: AbortSignal): Promise<MapResponse> {
-  const params = new URLSearchParams({ lat: String(filters.lat), lng: String(filters.lng), radiusM: String(filters.radiusM) });
+export async function getNearbyVenues(filters: MapFilters, cursor: string | null, signal?: AbortSignal): Promise<MapResponse> {
+  const params = new URLSearchParams({ lat: String(filters.lat), lng: String(filters.lng), radiusM: String(filters.radiusM), limit: '20' });
   if (filters.category) params.set('category', filters.category);
   if (filters.cuisine) params.set('cuisine', filters.cuisine);
   if (filters.priceTier) params.set('priceTier', String(filters.priceTier));
   if (filters.ratingGte) params.set('ratingGte', String(filters.ratingGte));
   if (filters.crowdLevel) params.set('crowdLevel', filters.crowdLevel);
   if (filters.hasAvailability) params.set('hasAvailability', 'true');
+  if (cursor) params.set('cursor', cursor);
   const response = await fetch(`/api/v1/map/venues?${params}`, { signal });
   if (!response.ok) throw new Error(`Không tải được địa điểm (${response.status}).`);
   return response.json() as Promise<MapResponse>;
