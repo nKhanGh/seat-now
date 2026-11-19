@@ -8,6 +8,12 @@ import { Venue } from '../../map/schemas/venue.schema';
 export class VenuesService {
   constructor(@InjectModel(Venue.name) private readonly venues: Model<Venue>, private readonly availability: AvailabilityService) {}
 
+  async activeLocation(slug: string): Promise<[number, number]> {
+    const venue = await this.venues.findOne({ slug, status: 'ACTIVE' }, { location: 1 }).lean();
+    if (!venue) throw new NotFoundException('Venue not found');
+    return venue.location.coordinates;
+  }
+
   async getBySlug(slug: string) {
     const venue = await this.venues.findOne({ slug, status: 'ACTIVE' }).lean();
     if (!venue) throw new NotFoundException('Venue not found');

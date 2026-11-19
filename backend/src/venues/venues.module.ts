@@ -9,5 +9,6 @@ import { VenuesService } from './services/venues.service';
   imports: [AvailabilityModule, MongooseModule.forFeature([{ name: Venue.name, schema: VenueSchema }])],
   controllers: [VenuesController],
   providers: [VenuesService],
+  exports: [VenuesService],
 })
 export class VenuesModule {}
