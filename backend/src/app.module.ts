@@ -11,6 +11,7 @@ import { ParkingModule } from './parking/parking.module';
 import { LiveModule } from './live/live.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { VenuesModule } from './venues/venues.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -29,5 +30,6 @@ import { VenuesModule } from './venues/venues.module';
     VenuesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  controllers: [HealthController],
 })
 export class AppModule {}
