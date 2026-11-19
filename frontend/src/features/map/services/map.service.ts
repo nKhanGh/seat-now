@@ -76,12 +76,13 @@ export async function getNearbyVenues(
   filters: MapFilters,
   cursor: string | null,
   signal?: AbortSignal,
+  limit = 20,
 ): Promise<MapResponse> {
   const params = new URLSearchParams({
     lat: String(filters.lat),
     lng: String(filters.lng),
     radiusM: String(filters.radiusM),
-    limit: '20',
+    limit: String(limit),
   });
   if (filters.category) params.set('category', filters.category);
   if (filters.cuisine) params.set('cuisine', filters.cuisine);

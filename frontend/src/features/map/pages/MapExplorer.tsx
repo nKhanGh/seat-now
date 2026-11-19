@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
-import { useNearbyVenues, useVenueDetail } from '../api/mapQueries';
+import { useHcmVenuePins, useNearbyVenues, useVenueDetail } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
-import { MapFilters } from '../services/map.service';
+import { MapFilters, VenueMapItem } from '../services/map.service';
 import { useParkingForVenue } from '../../parking/api/parkingQueries';
 import { ParkingList } from '../../parking/components/ParkingList';
 import { ParkingFilters } from '../../parking/components/ParkingFilters';
@@ -39,6 +39,10 @@ export function MapExplorer() {
     freeOnly: false,
   });
   const [locationMessage, setLocationMessage] = useState('');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; accuracyM: number } | null>(
+    null,
+  );
+  const [seenVenues, setSeenVenues] = useState<VenueMapItem[]>([]);
   const auth = useCurrentUser();
   const logout = useLogout();
   const filters = useMemo<MapFilters>(
@@ -56,7 +60,26 @@ export function MapExplorer() {
     [params],
   );
   const venues = useNearbyVenues(filters);
+  const catalog = useHcmVenuePins(filters);
   const venueItems = useMemo(() => venues.data?.pages.flatMap((page) => page.data) ?? [], [venues.data]);
+  const filterSignature = JSON.stringify([
+    filters.category,
+    filters.cuisine,
+    filters.priceTier,
+    filters.ratingGte,
+    filters.crowdLevel,
+    filters.hasAvailability,
+  ]);
+  const lastFilterSignature = useRef(filterSignature);
+  useEffect(() => {
+    const changed = lastFilterSignature.current !== filterSignature;
+    lastFilterSignature.current = filterSignature;
+    setSeenVenues((current) => {
+      const bySlug = new Map((changed ? [] : current).map((venue) => [venue.slug, venue]));
+      for (const venue of [...(catalog.data ?? []), ...venueItems]) bySlug.set(venue.slug, venue);
+      return [...bySlug.values()].slice(-500);
+    });
+  }, [catalog.data, venueItems, filterSignature]);
   const displayedVenues = useMemo(
     () =>
       [...venueItems].sort(
@@ -66,7 +89,7 @@ export function MapExplorer() {
       ),
     [venueItems],
   );
-  const selected = venueItems.find((item) => item.id === selectedId);
+  const selected = seenVenues.find((item) => item.id === selectedId);
   const venueDetail = useVenueDetail(selected?.slug ?? null);
   const parking = useParkingForVenue(selected?.slug ?? null, parkingFilters);
   const parkingItems = useMemo(() => parking.data?.pages.flatMap((page) => page.data) ?? [], [parking.data]);
@@ -83,7 +106,7 @@ export function MapExplorer() {
       setSelectedId(id);
       setSelectedParkingSlug(null);
       setSelectionSerial((current) => current + 1);
-      const slug = venueItems.find((item) => item.id === id)?.slug;
+      const slug = seenVenues.find((item) => item.id === id)?.slug;
       if (slug)
         setParams(
           (current) => {
@@ -94,16 +117,16 @@ export function MapExplorer() {
           { replace: true },
         );
     },
-    [venueItems, setParams],
+    [seenVenues, setParams],
   );
   useEffect(() => {
     const requestedSlug = params.get('venue');
-    const requested = venueItems.find((item) => item.slug === requestedSlug);
+    const requested = seenVenues.find((item) => item.slug === requestedSlug);
     if (requested && requested.id !== selectedId) {
       setSelectedId(requested.id);
       setSelectionSerial((current) => current + 1);
     }
-  }, [params, venueItems, selectedId]);
+  }, [params, seenVenues, selectedId]);
   const update = useCallback(
     (patch: Record<string, string | null>) => {
       setParams(
@@ -132,13 +155,23 @@ export function MapExplorer() {
     }
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        setUserLocation({ lat: coords.latitude, lng: coords.longitude, accuracyM: coords.accuracy });
         update({
           lat: String(Number(coords.latitude.toFixed(5))),
           lng: String(Number(coords.longitude.toFixed(5))),
         });
-        setLocationMessage('Đã cập nhật vị trí.');
+        setLocationMessage(
+          `Đã đánh dấu vị trí của bạn (độ chính xác khoảng ${Math.round(coords.accuracy)} m).`,
+        );
       },
-      () => setLocationMessage('Không lấy được vị trí. Bạn vẫn có thể khám phá khu vực mặc định.'),
+      (error) =>
+        setLocationMessage(
+          error.code === error.PERMISSION_DENIED
+            ? 'Bạn chưa cấp quyền vị trí. Hãy cho phép vị trí cho trang này rồi thử lại.'
+            : error.code === error.TIMEOUT
+              ? 'Hết thời gian lấy vị trí. Hãy thử lại khi thiết bị có tín hiệu tốt hơn.'
+              : 'Không lấy được vị trí. Hãy mở trang bằng localhost hoặc HTTPS và thử lại.',
+        ),
       { timeout: 8000 },
     );
   }
@@ -260,7 +293,7 @@ export function MapExplorer() {
         <section className="venue-list" aria-label="Danh sách địa điểm">
           <h1>Khám phá quanh bạn</h1>
           <p className="small">
-            Dữ liệu mẫu hư cấu tại Quận 1, TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.
+            Dữ liệu mẫu hư cấu tại nhiều khu vực TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.
           </p>
           {venues.isPending && <p>Đang tìm địa điểm…</p>}
           {venues.isError && (
@@ -325,7 +358,8 @@ export function MapExplorer() {
           <VenueMap
             lat={filters.lat}
             lng={filters.lng}
-            venues={venueItems}
+            venues={seenVenues}
+            userLocation={userLocation}
             selectedId={selectedId}
             selectionSerial={selectionSerial}
             parkingFacilities={parkingItems}

@@ -11,6 +11,7 @@ type Props = {
   lat: number;
   lng: number;
   venues: VenueMapItem[];
+  userLocation: { lat: number; lng: number; accuracyM: number } | null;
   selectedId: string | null;
   selectionSerial: number;
   parkingFacilities: ParkingFacilityItem[];
@@ -24,6 +25,7 @@ export function VenueMap({
   lat,
   lng,
   venues,
+  userLocation,
   selectedId,
   selectionSerial,
   parkingFacilities,
@@ -35,6 +37,7 @@ export function VenueMap({
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
+  const locationMarker = useRef<Marker | null>(null);
   const lastSelectionSerial = useRef(0);
   const [mapError, setMapError] = useState<string | null>(null);
   const onCenterChangeRef = useRef(onCenterChange);
@@ -66,6 +69,7 @@ export function VenueMap({
     return () => {
       markers.current.forEach((marker) => marker.remove());
       markers.current = [];
+      locationMarker.current?.remove();
       instance.remove();
       map.current = null;
     };
@@ -123,6 +127,24 @@ export function VenueMap({
       );
     }
   }, [venues, selectedId, onSelect, parkingFacilities, selectedParkingSlug, onSelectParking]);
+
+  useEffect(() => {
+    locationMarker.current?.remove();
+    locationMarker.current = null;
+    if (!map.current || !userLocation) return;
+    const dot = document.createElement('div');
+    dot.className = 'user-location-dot';
+    dot.setAttribute('role', 'img');
+    dot.setAttribute('aria-label', 'Vị trí của tôi');
+    dot.title = `Vị trí của tôi · chính xác khoảng ${Math.round(userLocation.accuracyM)} m`;
+    locationMarker.current = new Marker({ element: dot, anchor: 'center' })
+      .setLngLat([userLocation.lng, userLocation.lat])
+      .addTo(map.current);
+    return () => {
+      locationMarker.current?.remove();
+      locationMarker.current = null;
+    };
+  }, [userLocation]);
 
   return (
     <>
