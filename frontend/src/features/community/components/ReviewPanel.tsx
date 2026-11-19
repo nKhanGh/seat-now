@@ -19,10 +19,12 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
   const [body, setBody] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState('');
+  const [success, setSuccess] = useState('');
   const items = reviews.data?.pages.flatMap((page) => page.data) ?? [];
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSuccess('');
     const form = event.currentTarget;
     try {
       await save.mutateAsync({ slug, rating, body: body.trim() });
@@ -30,6 +32,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
       setBody('');
       setFile(null);
       form.reset();
+      setSuccess('Đã đăng đánh giá. Điểm của quán đã được cập nhật.');
     } catch {
       /* Mutation error is rendered below. */
     }
@@ -51,14 +54,8 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
             </select>
           </label>
           <label>
-            Nhận xét ngắn{' '}
-            <textarea
-              value={body}
-              onChange={(event) => setBody(event.target.value)}
-              minLength={10}
-              maxLength={500}
-              required
-            />
+            Nhận xét (không bắt buộc){' '}
+            <textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={500} />
           </label>
           <label>
             Ảnh thực tế (JPEG, PNG, WebP; tối đa 2 MB)
@@ -72,14 +69,13 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
               }}
             />
           </label>
-          <button
-            disabled={save.isPending || upload.isPending || Boolean(fileError) || body.trim().length < 10}
-          >
-            {save.isPending || upload.isPending ? 'Đang lưu…' : 'Đăng review'}
+          <button disabled={save.isPending || upload.isPending || Boolean(fileError)}>
+            {save.isPending || upload.isPending ? 'Đang lưu…' : 'Gửi đánh giá'}
           </button>
           {save.isError && <p role="alert">{save.error.message}</p>}
           {upload.isError && <p role="alert">Review đã lưu nhưng ảnh chưa tải lên: {upload.error.message}</p>}
           {fileError && <p role="alert">{fileError}</p>}
+          {success && <p role="status">{success}</p>}
         </form>
       ) : (
         <p>
@@ -97,7 +93,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
         <article key={review.id} className="review-card">
           <Link to={`/users/${review.author.id}`}>{review.author.displayName}</Link>
           <span> · {'★'.repeat(review.rating)}</span>
-          <p>{review.body}</p>
+          {review.body && <p>{review.body}</p>}
           {review.photoUrl && (
             <img
               className="review-photo"

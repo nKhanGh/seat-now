@@ -29,6 +29,7 @@ describeWithMongo('reviews with MongoDB', () => {
     await Promise.all([model.createIndexes(), photos.createIndexes(), reports.createIndexes()]);
     const venues = {
       activeLocation: jest.fn().mockResolvedValue([106.7, 10.77]),
+      updateCommunityRating: jest.fn().mockResolvedValue(undefined),
     } as unknown as VenuesService;
     const auth = {
       publicUsersByIds: jest
@@ -41,6 +42,7 @@ describeWithMongo('reviews with MongoDB', () => {
     const authorId = new Types.ObjectId().toString();
     await service.upsert(authorId, 'demo-cafe', { rating: 4, body: 'Không gian thoải mái.' });
     await service.upsert(authorId, 'demo-cafe', { rating: 5, body: 'Dịch vụ rất tốt hôm nay.' });
+    expect(venues.updateCommunityRating).toHaveBeenLastCalledWith('demo-cafe', 5);
     expect(await model.countDocuments({ userId: new Types.ObjectId(authorId) })).toBe(1);
     await model.insertMany(
       Array.from({ length: 21 }, (_, index) => ({
@@ -99,5 +101,8 @@ describeWithMongo('reviews with MongoDB', () => {
       service.upsert(authorId, 'demo-cafe', { rating: 5, body: 'Vẫn không thể đăng lại.' }),
     ).rejects.toThrow('Review is hidden');
     await expect(service.getPhoto(first.data[0].id)).rejects.toThrow('Photo not found');
+    const starsOnly = new Types.ObjectId().toString();
+    await service.upsert(starsOnly, 'demo-cafe', { rating: 4 });
+    expect((await model.findOne({ userId: new Types.ObjectId(starsOnly) }).lean())?.body).toBe('');
   });
 });

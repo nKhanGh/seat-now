@@ -6,7 +6,7 @@ export class Review {
   @Prop({ type: Types.ObjectId, required: true }) userId!: Types.ObjectId;
   @Prop({ required: true }) venueSlug!: string;
   @Prop({ required: true, min: 1, max: 5 }) rating!: number;
-  @Prop({ required: true, maxlength: 500 }) body!: string;
+  @Prop({ default: '', maxlength: 500 }) body!: string;
   @Prop({ default: 'PUBLISHED', enum: ['PUBLISHED', 'HIDDEN'] }) status!: 'PUBLISHED' | 'HIDDEN';
   @Prop() createdAt!: Date;
   @Prop() updatedAt!: Date;

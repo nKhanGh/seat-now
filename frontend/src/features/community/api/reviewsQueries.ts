@@ -23,7 +23,13 @@ export function useSaveReview() {
   return useMutation({
     mutationFn: ({ slug, rating, body }: { slug: string; rating: number; body: string }) =>
       saveReview(slug, { rating, body }),
-    onSuccess: (_, { slug }) => client.invalidateQueries({ queryKey: reviewsKey(slug) }),
+    onSuccess: (_, { slug }) =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: reviewsKey(slug) }),
+        client.invalidateQueries({ queryKey: ['map', 'nearby'] }),
+        client.invalidateQueries({ queryKey: ['map', 'hcm-pins'] }),
+        client.invalidateQueries({ queryKey: ['venues', 'detail', slug] }),
+      ]),
   });
 }
 
@@ -31,7 +37,13 @@ export function useRemoveReview() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (slug: string) => removeReview(slug),
-    onSuccess: (_, slug) => client.invalidateQueries({ queryKey: reviewsKey(slug) }),
+    onSuccess: (_, slug) =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: reviewsKey(slug) }),
+        client.invalidateQueries({ queryKey: ['map', 'nearby'] }),
+        client.invalidateQueries({ queryKey: ['map', 'hcm-pins'] }),
+        client.invalidateQueries({ queryKey: ['venues', 'detail', slug] }),
+      ]),
   });
 }
 

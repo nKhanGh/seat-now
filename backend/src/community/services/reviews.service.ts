@@ -95,9 +95,7 @@ export class ReviewsService {
 
   async upsert(userId: string, slug: string, input: UpsertReviewDto) {
     await this.venues.activeLocation(slug);
-    const body = input.body.trim();
-    if (body.length < 10)
-      throw new BadRequestException({ code: 'REVIEW_TOO_SHORT', message: 'Review is too short' });
+    const body = input.body?.trim() ?? '';
     const existing = await this.reviews
       .findOne({ userId: new Types.ObjectId(userId), venueSlug: slug }, { status: 1 })
       .lean();
@@ -110,6 +108,7 @@ export class ReviewsService {
         { upsert: true, new: true },
       )
       .lean();
+    await this.refreshRating(slug);
     return {
       data: {
         id: review._id.toString(),
@@ -138,6 +137,7 @@ export class ReviewsService {
         this.photos.deleteOne({ reviewId: review._id }),
         this.reports.deleteMany({ reviewId: review._id }),
       ]);
+    if (review) await this.refreshRating(slug);
     return { data: { deleted: true } };
   }
 
@@ -188,7 +188,16 @@ export class ReviewsService {
     if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Review not found');
     const review = await this.reviews.findByIdAndUpdate(id, { $set: { status: 'HIDDEN' } }, { new: true });
     if (!review) throw new NotFoundException('Review not found');
+    await this.refreshRating(review.venueSlug);
     return { data: { id, status: 'HIDDEN' } };
+  }
+
+  private async refreshRating(slug: string) {
+    const [summary] = await this.reviews.aggregate<{ average: number }>([
+      { $match: { venueSlug: slug, status: 'PUBLISHED' } },
+      { $group: { _id: null, average: { $avg: '$rating' } } },
+    ]);
+    await this.venues.updateCommunityRating(slug, summary ? Math.round(summary.average * 10) / 10 : 0);
   }
 
   async uploadPhoto(userId: string, slug: string, file: { buffer: Buffer; size: number } | undefined) {
