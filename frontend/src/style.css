@@ -59,6 +59,13 @@ p { line-height: 1.55; }
 .favorite-card { margin: 12px 0; max-width: 620px; }
 .favorite-card h2 { margin: 0 0 8px; }
 .favorite-actions { display: flex; gap: 16px; align-items: center; }
+.review-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
+.review-panel h2 { font-size: 1rem; margin: 4px 0 8px; }
+.review-panel form, .review-panel label { display: flex; flex-direction: column; gap: 6px; }
+.review-panel form { margin-bottom: 12px; }
+.review-panel textarea { min-height: 78px; resize: vertical; }
+.review-card { border-top: 1px solid #edf2ed; padding: 10px 0; }
+.review-card p { margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .availability-fresh { color: #17654d; }
 .parking-list { border-top: 1px solid #deebe1; padding-top: 8px; }
 .parking-list h2 { font-size: 1rem; margin: 4px 0; }
