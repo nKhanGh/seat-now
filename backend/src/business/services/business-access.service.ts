@@ -61,6 +61,7 @@ export class BusinessAccessService {
           ...bySlug.get(row.venueSlug),
           plan: this.effectivePlan(row),
           verified: this.effectivePlan(row) === 'PREMIUM',
+          bookingEnabled: row.bookingEnabled ?? false,
         })),
     };
   }
@@ -112,6 +113,30 @@ export class BusinessAccessService {
     if (premium && this.effectivePlan(owner) !== 'PREMIUM')
       throw new ForbiddenException('Premium business plan required');
     return owner;
+  }
+
+  async bookingStatus(slug: string) {
+    if ((await this.venues.activeCategory(slug)) === 'CINEMA') return { data: { enabled: false } };
+    const access = await this.access.findOne({ venueSlug: slug }, { bookingEnabled: 1 }).lean();
+    return { data: { enabled: access?.bookingEnabled ?? false } };
+  }
+
+  async requireBookingEnabled(slug: string) {
+    if ((await this.venues.activeCategory(slug)) === 'CINEMA')
+      throw new ConflictException('Booking requests are not available for cinemas');
+    if (!(await this.access.exists({ venueSlug: slug, bookingEnabled: true })))
+      throw new ConflictException('Venue is not accepting booking requests');
+  }
+
+  async setBookingEnabled(userId: string, slug: string, enabled: boolean) {
+    await this.requireOwner(userId, slug);
+    if ((await this.venues.activeCategory(slug)) === 'CINEMA')
+      throw new ConflictException('Booking requests are not available for cinemas');
+    await this.access.updateOne(
+      { userId: new Types.ObjectId(userId), venueSlug: slug },
+      { $set: { bookingEnabled: enabled } },
+    );
+    return { data: { enabled } };
   }
 
   async setPlan(slug: string, input: SetBusinessPlanDto) {

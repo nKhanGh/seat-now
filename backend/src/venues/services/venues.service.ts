@@ -51,6 +51,12 @@ export class VenuesService {
     return venue.location.coordinates;
   }
 
+  async activeCategory(slug: string): Promise<Venue['category']> {
+    const venue = await this.venues.findOne({ slug, status: 'ACTIVE' }, { category: 1 }).lean();
+    if (!venue) throw new NotFoundException('Venue not found');
+    return venue.category;
+  }
+
   async updateBusinessProfile(slug: string, input: UpdateBusinessProfileDto) {
     const profile = {
       name: input.name.trim(),

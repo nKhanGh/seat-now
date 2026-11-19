@@ -7,6 +7,7 @@ export class BusinessAccess {
   @Prop({ required: true, unique: true }) venueSlug!: string;
   @Prop({ required: true, enum: ['FREE', 'PREMIUM'], default: 'FREE' }) plan!: 'FREE' | 'PREMIUM';
   @Prop({ type: Date, default: null }) premiumExpiresAt!: Date | null;
+  @Prop({ default: false }) bookingEnabled!: boolean;
   @Prop() createdAt!: Date;
   @Prop() updatedAt!: Date;
 }

@@ -14,6 +14,7 @@ import { VenuesModule } from './venues/venues.module';
 import { HealthController } from './health.controller';
 import { CommunityModule } from './community/community.module';
 import { BusinessModule } from './business/business.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { BusinessModule } from './business/business.module';
     VenuesModule,
     CommunityModule,
     BusinessModule,
+    BookingModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
   controllers: [HealthController],
