@@ -58,6 +58,32 @@ export class AvailabilityService {
     });
   }
 
+  async sevenDayOccupancy(slug: string) {
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60_000);
+    const rows = await this.snapshots.find({ slug, capturedAt: { $gte: since } },
+      { tables: 1, seats: 1, source: 1, capturedAt: 1 }).sort({ capturedAt: -1 }).limit(2001).lean();
+    const byHour = Array.from({ length: 24 }, (_, hour) => ({ hourUtc: hour, totalPercent: 0, samples: 0 }));
+    const sourceCounts = { DEMO: 0, OPERATOR: 0, POS: 0 };
+    let totalPercent = 0;
+    let samples = 0;
+    for (const row of rows.slice(0, 2000)) {
+      const capacity = row.seats?.total ? row.seats : row.tables?.total ? row.tables : null;
+      if (!capacity) continue;
+      const percent = Math.round((1 - capacity.available / capacity.total) * 100);
+      totalPercent += percent; samples++;
+      if (row.source in sourceCounts) sourceCounts[row.source as keyof typeof sourceCounts]++;
+      const hour = byHour[row.capturedAt.getUTCHours()];
+      hour.totalPercent += percent; hour.samples++;
+    }
+    return {
+      averagePercent: samples ? Math.round(totalPercent / samples) : null,
+      samples, sourceCounts, truncated: rows.length > 2000,
+      peakHours: byHour.filter((hour) => hour.samples > 0)
+        .map((hour) => ({ hourUtc: hour.hourUtc, averagePercent: Math.round(hour.totalPercent / hour.samples), samples: hour.samples }))
+        .sort((a, b) => b.averagePercent - a.averagePercent || b.samples - a.samples || a.hourUtc - b.hourUtc).slice(0, 3),
+    };
+  }
+
   async ingest(slug: string, dto: CreateAvailabilityDto) {
     const venue = await this.venues.exists({ slug, status: 'ACTIVE' });
     if (!venue) throw new NotFoundException('Venue not found');

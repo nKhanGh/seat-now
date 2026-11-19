@@ -74,6 +74,10 @@ describeWithMongo('AvailabilityService with MongoDB', () => {
     expect(result.data).toMatchObject({ source: 'OPERATOR', crowdLevel: 'MODERATE', tables: { total: 20, available: 6 }, freshness: 'FRESH' });
     expect((new Date(result.data.expiresAt!).getTime() - new Date(result.data.capturedAt!).getTime()) / 60_000).toBe(10);
     expect((await views.findOne({ slug: 'test-cafe' }))?.tablesAvailable).toBe(6);
+    const dashboard = await service.sevenDayOccupancy('test-cafe');
+    expect(dashboard.samples).toBeGreaterThan(0);
+    expect(dashboard.sourceCounts.OPERATOR).toBe(1);
+    expect(dashboard.peakHours[0].averagePercent).toBeGreaterThanOrEqual(0);
     await expect(service.operatorUpdate('test-cafe', { tables: { total: 2, available: 3 },
       crowdLevel: 'QUIET', acceptingGuests: true })).rejects.toThrow('Available capacity exceeds total');
   });

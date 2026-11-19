@@ -30,6 +30,7 @@ export class AvailabilitySnapshot {
 export const AvailabilitySnapshotSchema = SchemaFactory.createForClass(AvailabilitySnapshot);
 AvailabilitySnapshotSchema.index({ slug: 1, version: 1 }, { unique: true });
 AvailabilitySnapshotSchema.index({ source: 1, sourceRecordId: 1 }, { unique: true });
+AvailabilitySnapshotSchema.index({ slug: 1, capturedAt: -1 });
 
 @Schema({ collection: 'availability_latest' })
 export class AvailabilityLatest {
