@@ -12,7 +12,9 @@ export function ProposalsPage() {
   const confirm = useConfirmProposal();
   const [form, setForm] = useState<ProposalInput>({
     name: '', category: 'RESTAURANT', cuisineTypes: [], description: '', address: '',
-    lat: Number(params.get('lat')) || 10.7769, lng: Number(params.get('lng')) || 106.7009, priceTier: 2,
+    lat: params.get('lat') === null ? 10.7769 : Number(params.get('lat')),
+    lng: params.get('lng') === null ? 106.7009 : Number(params.get('lng')),
+    priceTier: 2,
   });
   const [message, setMessage] = useState('');
 
