@@ -18,7 +18,7 @@ export function FavoritesPage() {
       <h2>{venue.name}</h2><p>{venue.address}</p>
       <p>★ {venue.rating.toFixed(1)} · {'₫'.repeat(venue.priceTier)}</p>
       <div className="favorite-actions">
-        <Link to={`/?lat=${venue.location.coordinates[1]}&lng=${venue.location.coordinates[0]}`}>Xem trên bản đồ</Link>
+        <Link to={`/?lat=${venue.location.coordinates[1]}&lng=${venue.location.coordinates[0]}&venue=${encodeURIComponent(venue.slug)}`}>Xem trên bản đồ</Link>
         <button disabled={update.isPending} onClick={() => update.mutate({ slug: venue.slug, saved: false })}>Bỏ lưu</button>
       </div>
     </article>)}

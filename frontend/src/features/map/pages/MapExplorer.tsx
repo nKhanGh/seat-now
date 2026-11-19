@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
 import { useNearbyVenues, useVenueDetail } from '../api/mapQueries';
@@ -13,6 +13,7 @@ import { useLiveUpdates } from '../../live/useLiveUpdates';
 import { CheckInPanel } from '../../community/components/CheckInPanel';
 import { FavoriteButton } from '../../community/components/FavoriteButton';
 import { ReviewPanel } from '../../community/components/ReviewPanel';
+import { ShareVenueButton } from '../../community/components/ShareVenueButton';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -47,7 +48,18 @@ export function MapExplorer() {
   const parkingItems = useMemo(() => parking.data?.pages.flatMap((page) => page.data) ?? [], [parking.data]);
   const updateParkingFilters = useCallback((next: ParkingFilterValues) => { setParkingFilters(next); setSelectedParkingSlug(null); }, []);
   const liveStatus = useLiveUpdates(venueItems.map((item) => item.slug), parkingItems.map((item) => item.slug));
-  const selectVenue = useCallback((id: string) => { setSelectedId(id); setSelectedParkingSlug(null); setSelectionSerial((current) => current + 1); }, []);
+  const selectVenue = useCallback((id: string) => {
+    setSelectedId(id); setSelectedParkingSlug(null); setSelectionSerial((current) => current + 1);
+    const slug = venueItems.find((item) => item.id === id)?.slug;
+    if (slug) setParams((current) => { const next = new URLSearchParams(current); next.set('venue', slug); return next; }, { replace: true });
+  }, [venueItems, setParams]);
+  useEffect(() => {
+    const requestedSlug = params.get('venue');
+    const requested = venueItems.find((item) => item.slug === requestedSlug);
+    if (requested && requested.id !== selectedId) {
+      setSelectedId(requested.id); setSelectionSerial((current) => current + 1);
+    }
+  }, [params, venueItems, selectedId]);
   const update = useCallback((patch: Record<string, string | null>) => {
     setParams((current) => {
       const next = new URLSearchParams(current);
@@ -89,6 +101,6 @@ export function MapExplorer() {
       </button>)}
       {venues.hasNextPage && venueItems.length < 100 && <button className="load-more" onClick={() => void venues.fetchNextPage()} disabled={venues.isFetchingNextPage}>{venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}</button>}
       {venues.hasNextPage && venueItems.length >= 100 && <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}
-    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venueItems} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parkingItems} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}<FavoriteButton slug={selected.slug} userId={auth.data?.id ?? null} /><AvailabilityStatus availability={selected.availability} /><CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} /><ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <><ParkingList facilities={parkingItems} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />{parking.hasNextPage && parkingItems.length < 100 && <button className="load-more" onClick={() => void parking.fetchNextPage()} disabled={parking.isFetchingNextPage}>{parking.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm bãi xe'}</button>}{parking.hasNextPage && parkingItems.length >= 100 && <p className="small">Đã hiển thị 100 bãi xe. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}</>}<ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} /></div>}</div></div>
+    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venueItems} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parkingItems} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => { setSelectedId(null); update({ venue: null }); }}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}<FavoriteButton slug={selected.slug} userId={auth.data?.id ?? null} /><ShareVenueButton slug={selected.slug} lat={selected.location.coordinates[1]} lng={selected.location.coordinates[0]} /><AvailabilityStatus availability={selected.availability} /><CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} /><ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <><ParkingList facilities={parkingItems} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />{parking.hasNextPage && parkingItems.length < 100 && <button className="load-more" onClick={() => void parking.fetchNextPage()} disabled={parking.isFetchingNextPage}>{parking.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm bãi xe'}</button>}{parking.hasNextPage && parkingItems.length >= 100 && <p className="small">Đã hiển thị 100 bãi xe. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}</>}<ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} /></div>}</div></div>
   </main>;
 }
