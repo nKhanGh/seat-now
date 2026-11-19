@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { useLogin, useRegister } from '../features/auth/api/authQueries';
 import { MapExplorer } from '../features/map/pages/MapExplorer';
@@ -16,10 +17,18 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const register = useRegister();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState('');
   const [displayName, setDisplayName] = useState('');
   const mutation = mode === 'login' ? login : register;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError('');
+    if (mode === 'register' && password !== confirmPassword) {
+      setFormError('Mật khẩu xác nhận chưa khớp.');
+      return;
+    }
     try {
       if (mode === 'login') await login.mutateAsync({ email, password });
       else await register.mutateAsync({ email, password, displayName });
@@ -61,15 +70,42 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         </label>
         <label>
           Mật khẩu
-          <input
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            type="password"
-            minLength={mode === 'register' ? 12 : undefined}
-            required
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-          />
+          <span className="password-field">
+            <input
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              type={showPassword ? 'text' : 'password'}
+              minLength={mode === 'register' ? 12 : undefined}
+              required
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              onClick={() => setShowPassword((visible) => !visible)}
+            >
+              {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+            </button>
+          </span>
         </label>
+        {mode === 'register' && (
+          <label>
+            Xác nhận mật khẩu
+            <input
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              type={showPassword ? 'text' : 'password'}
+              minLength={12}
+              required
+              autoComplete="new-password"
+            />
+          </label>
+        )}
+        {formError && (
+          <p role="alert" className="error">
+            {formError}
+          </p>
+        )}
         {mutation.error && (
           <p role="alert" className="error">
             {mutation.error.message}

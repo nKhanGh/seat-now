@@ -23,10 +23,20 @@ p { line-height: 1.55; }
 .card label { display: block; margin: 18px 0; font-weight: 650; }
 .card input { width: 100%; display: block; margin-top: 7px; padding: 12px; border: 1px solid #b8cfc2; border-radius: 9px; }
 .card input:focus { outline: 2px solid #2b8e68; }
+.password-field { display: block; position: relative; }
+.password-field input { padding-right: 48px; }
+.card .password-field button { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #17654d; }
+.card .password-field button:hover { background: #e3f6e8; }
+.card .password-field button:focus-visible { outline: 2px solid #17654d; }
 .card button { width: 100%; }
 .error { color: #a32929; background: #fff0ef; padding: 10px; border-radius: 8px; }
 .explorer { min-height: 100vh; display: flex; flex-direction: column; }
 .explorer-header { padding: 16px 24px; background: white; border-bottom: 1px solid #deebe1; }
+.explorer-header nav { gap: 8px; flex-wrap: wrap; }
+.explorer-header nav a, .explorer-header nav button { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 12px; border: 1px solid #17654d; border-radius: 9px; background: #17654d; color: white; text-decoration: none; font-weight: 650; transition: background .18s ease, transform .18s ease, box-shadow .18s ease; }
+.explorer-header nav a:hover, .explorer-header nav button:hover { background: #0e4d39; box-shadow: 0 4px 12px #17654d38; transform: translateY(-1px); }
+.explorer-header nav a:focus-visible, .explorer-header nav button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
+.explorer-header nav button:disabled { opacity: .55; cursor: wait; }
 .filterbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: white; border-bottom: 1px solid #deebe1; }
 .filterbar select, .filterbar button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 9px 12px; color: #152520; }
 .filter-check { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
@@ -45,6 +55,7 @@ p { line-height: 1.55; }
 .venue-map { position: absolute; inset: 0; }
 .venue-pin { border: 2px solid #fff; background: #17654d; color: white; border-radius: 50%; width: 42px; height: 42px; box-shadow: 0 3px 10px #0004; font-size: 1.1rem; }
 .venue-pin.selected { background: #d35c31; width: 49px; height: 49px; }
+.user-location-dot { width: 20px; height: 20px; border: 4px solid white; border-radius: 50%; background: #2878d5; box-shadow: 0 0 0 8px #2878d544, 0 2px 10px #173b2a66; }
 .venue-pin-logo { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .venue-pin.sponsored { box-shadow: 0 0 0 4px #d99b28, 0 3px 10px #0004; }
 .venue-list-logo { width: 24px; height: 24px; object-fit: cover; border-radius: 50%; vertical-align: middle; margin-right: 7px; }
