@@ -2,6 +2,7 @@ export type VenueReview = {
   id: string; rating: number; body: string;
   author: { id: string; displayName: string };
   createdAt: string; updatedAt: string;
+  photoUrl: string | null;
 };
 export type ReviewsPage = { data: VenueReview[]; meta: { nextCursor: string | null } };
 
@@ -23,4 +24,13 @@ export async function saveReview(slug: string, input: { rating: number; body: st
 export async function removeReview(slug: string): Promise<void> {
   const response = await fetch(`/api/v1/me/reviews/${encodeURIComponent(slug)}`, { method: 'DELETE', credentials: 'same-origin' });
   if (!response.ok) throw new Error(`Không xóa được review (${response.status}).`);
+}
+
+export async function uploadReviewPhoto(slug: string, file: File): Promise<void> {
+  const form = new FormData();
+  form.set('photo', file);
+  const response = await fetch(`/api/v1/me/reviews/${encodeURIComponent(slug)}/photo`, {
+    method: 'POST', credentials: 'same-origin', body: form,
+  });
+  if (!response.ok) throw new Error(`Không tải được ảnh review (${response.status}). Chỉ nhận JPEG, PNG hoặc WebP tối đa 2 MB.`);
 }

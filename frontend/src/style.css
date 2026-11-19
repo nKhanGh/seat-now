@@ -66,6 +66,7 @@ p { line-height: 1.55; }
 .review-panel textarea { min-height: 78px; resize: vertical; }
 .review-card { border-top: 1px solid #edf2ed; padding: 10px 0; }
 .review-card p { margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.review-photo { display: block; width: min(100%, 280px); max-height: 220px; object-fit: cover; border-radius: 8px; margin: 8px 0; }
 .availability-fresh { color: #17654d; }
 .parking-list { border-top: 1px solid #deebe1; padding-top: 8px; }
 .parking-list h2 { font-size: 1rem; margin: 4px 0; }
