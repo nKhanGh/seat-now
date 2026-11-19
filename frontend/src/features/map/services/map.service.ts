@@ -11,6 +11,7 @@ export type VenueMapItem = {
   rating: number;
   verified: boolean;
   logoUrl: string | null;
+  promotion: { text: string; startsAt: string; endsAt: string; sponsored: boolean } | null;
   availability: {
     crowdLevel: 'QUIET' | 'MODERATE' | 'BUSY' | 'FULL' | 'UNKNOWN';
     tablesAvailable: number | null; tablesTotal: number | null;
@@ -43,6 +44,8 @@ export type VenueDetail = {
   location: VenueMapItem['location']; priceTier: number; rating: number;
   verified: boolean;
   logoUrl: string | null;
+  coverUrl: string | null;
+  promotion: VenueMapItem['promotion'];
 };
 
 export async function getVenueDetail(slug: string, signal?: AbortSignal): Promise<VenueDetail> {

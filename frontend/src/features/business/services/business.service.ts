@@ -1,8 +1,10 @@
 export type BusinessClaim = { id: string; venueSlug: string; status: 'PENDING' | 'APPROVED' | 'REJECTED'; createdAt: string };
 export type BusinessVenue = {
   slug: string; name: string; category: 'RESTAURANT' | 'CAFE' | 'CINEMA'; address: string; description: string; openingHours: string;
-  menuSummary: string; priceTier: number; plan: 'FREE' | 'PREMIUM'; verified: boolean; logoUrl: string | null;
+  menuSummary: string; priceTier: number; plan: 'FREE' | 'PREMIUM'; verified: boolean; logoUrl: string | null; coverUrl: string | null;
+  promotion: { text: string; startsAt: string; endsAt: string; sponsored: boolean } | null;
 };
+export type CampaignInput = { promotionText: string; startsAt: string; endsAt: string; sponsored: boolean };
 export type BusinessProfileInput = Pick<BusinessVenue, 'name' | 'address' | 'description' | 'openingHours' | 'menuSummary' | 'priceTier'>;
 export type ManualAvailabilityInput = {
   tables?: { total: number; available: number };
@@ -55,8 +57,27 @@ export async function uploadBusinessLogo(slug: string, file: File): Promise<void
   }));
 }
 
+export async function uploadBusinessCover(slug: string, file: File): Promise<void> {
+  const form = new FormData(); form.set('cover', file);
+  await readData(await fetch(`/api/v1/business/venues/${encodeURIComponent(slug)}/cover`, {
+    method: 'POST', credentials: 'same-origin', body: form,
+  }));
+}
+
 export async function getBusinessDashboard(slug: string, signal?: AbortSignal): Promise<BusinessDashboard> {
   return readData<BusinessDashboard>(await fetch(`/api/v1/business/venues/${encodeURIComponent(slug)}/dashboard`, {
     credentials: 'same-origin', signal,
+  }));
+}
+
+export async function updateCampaign(slug: string, input: CampaignInput): Promise<void> {
+  await readData(await fetch(`/api/v1/business/venues/${encodeURIComponent(slug)}/campaign`, {
+    method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input),
+  }));
+}
+
+export async function clearCampaign(slug: string): Promise<void> {
+  await readData(await fetch(`/api/v1/business/venues/${encodeURIComponent(slug)}/campaign`, {
+    method: 'DELETE', credentials: 'same-origin',
   }));
 }

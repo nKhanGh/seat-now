@@ -1,8 +1,38 @@
 import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '../../auth/api/authQueries';
-import { useBusinessClaims, useBusinessDashboard, useBusinessVenues, useManualAvailability, useRequestBusinessClaim, useUpdateBusinessProfile, useUploadBusinessLogo } from '../api/businessQueries';
+import { useBusinessCampaign, useBusinessClaims, useBusinessDashboard, useBusinessVenues, useManualAvailability, useRequestBusinessClaim, useUpdateBusinessProfile, useUploadBusinessCover, useUploadBusinessLogo } from '../api/businessQueries';
 import { BusinessProfileInput, BusinessVenue, ManualAvailabilityInput } from '../services/business.service';
+
+function CampaignEditor({ venue, userId }: { venue: BusinessVenue; userId: string }) {
+  const campaign = useBusinessCampaign(userId);
+  const localDateTime = (time: number) => new Date(time - new Date(time).getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+  const [text, setText] = useState(venue.promotion?.text ?? 'Ưu đãi giờ vắng tại quán');
+  const [startsAt, setStartsAt] = useState(localDateTime(Date.now()));
+  const [endsAt, setEndsAt] = useState(localDateTime(Date.now() + 60 * 60_000));
+  const [sponsored, setSponsored] = useState(false);
+  const [message, setMessage] = useState('');
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setMessage('');
+    try { await campaign.save.mutateAsync({ slug: venue.slug, input: {
+      promotionText: text.trim(), startsAt: new Date(startsAt).toISOString(), endsAt: new Date(endsAt).toISOString(), sponsored,
+    } }); setMessage('Đã hẹn giờ ưu đãi.'); }
+    catch { /* Error is shown below. */ }
+  }
+  return <form className="card business-form" onSubmit={(event) => void submit(event)}>
+    <h3>Ưu đãi giờ vắng · {venue.name}</h3>
+    <p>Ưu đãi xuất hiện trong app theo lịch. Quảng cáo được gắn nhãn “Được tài trợ”.</p>
+    <label>Nội dung ưu đãi<input value={text} onChange={(event) => setText(event.target.value)} minLength={10} maxLength={200} required /></label>
+    <label>Bắt đầu<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required /></label>
+    <label>Kết thúc<input type="datetime-local" value={endsAt} onChange={(event) => setEndsAt(event.target.value)} required /></label>
+    <label><input type="checkbox" checked={sponsored} onChange={(event) => setSponsored(event.target.checked)} /> Đẩy lên đầu danh sách được tài trợ</label>
+    <button className="primary" disabled={campaign.save.isPending}>{campaign.save.isPending ? 'Đang lưu…' : 'Lên lịch ưu đãi'}</button>
+    {venue.promotion && <button type="button" disabled={campaign.remove.isPending} onClick={() => campaign.remove.mutate(venue.slug)}>Tắt ưu đãi hiện tại</button>}
+    {campaign.save.isError && <p role="alert">{campaign.save.error.message}</p>}
+    {campaign.remove.isError && <p role="alert">{campaign.remove.error.message}</p>}
+    {message && <p role="status">{message}</p>}
+  </form>;
+}
 
 function Dashboard({ venue, userId }: { venue: BusinessVenue; userId: string }) {
   const dashboard = useBusinessDashboard(venue.slug, userId);
@@ -62,7 +92,9 @@ function AvailabilityEditor({ venue }: { venue: BusinessVenue }) {
 function ProfileEditor({ venue, userId }: { venue: BusinessVenue; userId: string }) {
   const save = useUpdateBusinessProfile(userId);
   const upload = useUploadBusinessLogo(userId);
+  const uploadCover = useUploadBusinessCover(userId);
   const [logo, setLogo] = useState<File | null>(null);
+  const [cover, setCover] = useState<File | null>(null);
   const [form, setForm] = useState<BusinessProfileInput>({
     name: venue.name, address: venue.address, description: venue.description,
     openingHours: venue.openingHours, menuSummary: venue.menuSummary, priceTier: venue.priceTier,
@@ -96,6 +128,16 @@ function ProfileEditor({ venue, userId }: { venue: BusinessVenue; userId: string
     {logo && logo.size > 2_000_000 && <p role="alert">Logo vượt quá 2 MB.</p>}
     {upload.isError && <p role="alert">{upload.error.message}</p>}
     {venue.logoUrl && <img className="business-logo-preview" src={venue.logoUrl} alt={`Logo ${venue.name}`} />}
+    {venue.plan === 'PREMIUM' && <>
+      <label>Ảnh bìa (JPEG, PNG, WebP; tối đa 2 MB)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setCover(event.target.files?.[0] ?? null)} /></label>
+      <button type="button" disabled={!cover || cover.size > 2_000_000 || uploadCover.isPending}
+        onClick={() => cover && uploadCover.mutate({ slug: venue.slug, file: cover }, { onSuccess: () => setCover(null) })}>
+        {uploadCover.isPending ? 'Đang tải…' : 'Cập nhật ảnh bìa'}
+      </button>
+      {cover && cover.size > 2_000_000 && <p role="alert">Ảnh bìa vượt quá 2 MB.</p>}
+      {uploadCover.isError && <p role="alert">{uploadCover.error.message}</p>}
+      {venue.coverUrl && <img className="business-cover-preview" src={venue.coverUrl} alt={`Ảnh bìa ${venue.name}`} />}
+    </>}
   </form>;
 }
 
@@ -135,7 +177,7 @@ export function BusinessPage() {
       {venues.isPending && <p>Đang tải địa điểm…</p>}{venues.isError && <p role="alert">{venues.error.message}</p>}
       {venues.data?.length === 0 && <p>Chưa có địa điểm được duyệt.</p>}
       {venues.data?.map((venue) => <div key={venue.slug}><ProfileEditor venue={venue} userId={userId} />
-        {venue.plan === 'PREMIUM' && <><AvailabilityEditor venue={venue} /><Dashboard venue={venue} userId={userId} /></>}</div>)}
+        {venue.plan === 'PREMIUM' && <><AvailabilityEditor venue={venue} /><Dashboard venue={venue} userId={userId} /><CampaignEditor venue={venue} userId={userId} /></>}</div>)}
     </>}
   </main>;
 }

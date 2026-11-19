@@ -74,7 +74,7 @@ export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkin
     for (const venue of venues) {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = `venue-pin${venue.id === selectedId ? ' selected' : ''}`;
+      button.className = `venue-pin${venue.id === selectedId ? ' selected' : ''}${venue.promotion?.sponsored ? ' sponsored' : ''}`;
       if (venue.logoUrl) {
         const logo = document.createElement('img');
         logo.src = venue.logoUrl;

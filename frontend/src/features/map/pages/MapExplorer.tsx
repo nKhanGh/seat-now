@@ -42,6 +42,7 @@ export function MapExplorer() {
   }), [params]);
   const venues = useNearbyVenues(filters);
   const venueItems = useMemo(() => venues.data?.pages.flatMap((page) => page.data) ?? [], [venues.data]);
+  const displayedVenues = useMemo(() => [...venueItems].sort((a, b) => Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) || a.distanceM - b.distanceM), [venueItems]);
   const selected = venueItems.find((item) => item.id === selectedId);
   const venueDetail = useVenueDetail(selected?.slug ?? null);
   const parking = useParkingForVenue(selected?.slug ?? null, parkingFilters);
@@ -96,11 +97,38 @@ export function MapExplorer() {
       {venues.isPending && <p>Đang tìm địa điểm…</p>}
       {venues.isError && <p role="alert">{venues.error.message} <button onClick={() => venues.refetch()}>Thử lại</button></p>}
       {venues.data?.pages[0]?.data.length === 0 && <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>}
-      {venueItems.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
-        <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.logoUrl && <img className="venue-list-logo" src={venue.logoUrl} alt="" />}{venue.name} {venue.verified && <span className="verified-badge" aria-label="Chủ quán đã xác thực">✓</span>}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
+      {displayedVenues.map((venue) => <button key={venue.id} className={`venue-card${selectedId === venue.id ? ' selected' : ''}`} onClick={() => selectVenue(venue.id)}>
+        <span className="venue-category">{venue.promotion?.sponsored && <span className="sponsored-label">Được tài trợ · </span>}{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.logoUrl && <img className="venue-list-logo" src={venue.logoUrl} alt="" />}{venue.name} {venue.verified && <span className="verified-badge" aria-label="Chủ quán đã xác thực">✓</span>}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span>{venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}{venue.verified && venue.availability.freshness === 'FRESH' && venue.availability.acceptingGuests && venue.availability.crowdLevel === 'QUIET' && venue.availability.tablesTotal !== null && venue.availability.tablesTotal > 0 && venue.availability.tablesAvailable !== null && venue.availability.tablesAvailable / venue.availability.tablesTotal >= 0.5 && <span className="promotion-label">Còn nhiều bàn trống</span>}<AvailabilityStatus availability={venue.availability} compact />
       </button>)}
       {venues.hasNextPage && venueItems.length < 100 && <button className="load-more" onClick={() => void venues.fetchNextPage()} disabled={venues.isFetchingNextPage}>{venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}</button>}
       {venues.hasNextPage && venueItems.length >= 100 && <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}
-    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venueItems} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parkingItems} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => { setSelectedId(null); update({ venue: null }); }}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}{venueDetail.data?.openingHours && <span className="small">Giờ mở cửa: {venueDetail.data.openingHours}</span>}{venueDetail.data?.menuSummary && <p className="small">Menu: {venueDetail.data.menuSummary}</p>}<FavoriteButton slug={selected.slug} userId={auth.data?.id ?? null} /><ShareVenueButton slug={selected.slug} lat={selected.location.coordinates[1]} lng={selected.location.coordinates[0]} /><Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link><AvailabilityStatus availability={selected.availability} /><CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} /><ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <><ParkingList facilities={parkingItems} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />{parking.hasNextPage && parkingItems.length < 100 && <button className="load-more" onClick={() => void parking.fetchNextPage()} disabled={parking.isFetchingNextPage}>{parking.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm bãi xe'}</button>}{parking.hasNextPage && parkingItems.length >= 100 && <p className="small">Đã hiển thị 100 bãi xe. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}</>}<ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} /></div>}</div></div>
+    </section>
+    <div className="map-pane">
+      <VenueMap lat={filters.lat} lng={filters.lng} venues={venueItems} selectedId={selectedId}
+        selectionSerial={selectionSerial} parkingFacilities={parkingItems} selectedParkingSlug={selectedParkingSlug}
+        onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />
+      {selected && <div className="map-selected">
+        {venueDetail.data?.coverUrl && <img className="venue-cover" src={venueDetail.data.coverUrl} alt={`Ảnh bìa ${selected.name}`} />}
+        <div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => { setSelectedId(null); update({ venue: null }); }}>Đóng</button></div>
+        <span>{selected.address}</span>
+        {venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}
+        {venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}
+        {venueDetail.data?.openingHours && <span className="small">Giờ mở cửa: {venueDetail.data.openingHours}</span>}
+        {venueDetail.data?.menuSummary && <p className="small">Menu: {venueDetail.data.menuSummary}</p>}
+        {venueDetail.data?.promotion && <p className="promotion-label">{venueDetail.data.promotion.sponsored && 'Được tài trợ · '}{venueDetail.data.promotion.text}</p>}
+        <FavoriteButton slug={selected.slug} userId={auth.data?.id ?? null} />
+        <ShareVenueButton slug={selected.slug} lat={selected.location.coordinates[1]} lng={selected.location.coordinates[0]} />
+        <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
+        <AvailabilityStatus availability={selected.availability} />
+        <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />
+        <ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />
+        {parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}
+        {parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}
+        {parking.data && <><ParkingList facilities={parkingItems} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />
+          {parking.hasNextPage && parkingItems.length < 100 && <button className="load-more" onClick={() => void parking.fetchNextPage()} disabled={parking.isFetchingNextPage}>{parking.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm bãi xe'}</button>}
+          {parking.hasNextPage && parkingItems.length >= 100 && <p className="small">Đã hiển thị 100 bãi xe. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>}</>}
+        <ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
+      </div>}
+    </div></div>
   </main>;
 }
