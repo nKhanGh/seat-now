@@ -7,6 +7,8 @@ import { AvailabilityStatus } from '../components/AvailabilityStatus';
 import { MapFilters } from '../services/map.service';
 import { useParkingForVenue } from '../../parking/api/parkingQueries';
 import { ParkingList } from '../../parking/components/ParkingList';
+import { ParkingFilters } from '../../parking/components/ParkingFilters';
+import { ParkingFilters as ParkingFilterValues } from '../../parking/services/parking.service';
 import { useLiveUpdates } from '../../live/useLiveUpdates';
 
 const DEFAULT_LAT = 10.7769;
@@ -19,6 +21,7 @@ export function MapExplorer() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectionSerial, setSelectionSerial] = useState(0);
   const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
+  const [parkingFilters, setParkingFilters] = useState<ParkingFilterValues>({ vehicleType: '', hasAvailability: false, open24h: false, freeOnly: false });
   const [locationMessage, setLocationMessage] = useState('');
   const auth = useCurrentUser();
   const logout = useLogout();
@@ -36,7 +39,8 @@ export function MapExplorer() {
   const venues = useNearbyVenues(filters);
   const selected = venues.data?.data.find((item) => item.id === selectedId);
   const venueDetail = useVenueDetail(selected?.slug ?? null);
-  const parking = useParkingForVenue(selected?.slug ?? null);
+  const parking = useParkingForVenue(selected?.slug ?? null, parkingFilters);
+  const updateParkingFilters = useCallback((next: ParkingFilterValues) => { setParkingFilters(next); setSelectedParkingSlug(null); }, []);
   const liveStatus = useLiveUpdates(venues.data?.data.map((item) => item.slug) ?? [], parking.data?.data.map((item) => item.slug) ?? []);
   const selectVenue = useCallback((id: string) => { setSelectedId(id); setSelectedParkingSlug(null); setSelectionSerial((current) => current + 1); }, []);
   const update = useCallback((patch: Record<string, string | null>) => {
@@ -79,6 +83,6 @@ export function MapExplorer() {
         <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.name}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
       </button>)}
       {venues.data?.meta.truncated && <p>Hãy thu nhỏ khu vực tìm kiếm để xem thêm địa điểm.</p>}
-    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parking.data?.data || []} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}<AvailabilityStatus availability={selected.availability} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <ParkingList facilities={parking.data.data} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />}</div>}</div></div>
+    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parking.data?.data || []} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}<AvailabilityStatus availability={selected.availability} /><ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <ParkingList facilities={parking.data.data} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />}</div>}</div></div>
   </main>;
 }

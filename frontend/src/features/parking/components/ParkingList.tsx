@@ -20,7 +20,7 @@ function availabilityLabel(availability: ParkingFacilityItem['availability']) {
 
 export function ParkingList({ facilities, selectedSlug, onSelect }: { facilities: ParkingFacilityItem[]; selectedSlug: string | null; onSelect: (slug: string) => void }) {
   const [showAll, setShowAll] = useState(false);
-  if (facilities.length === 0) return <p className="small">Không có bãi đỗ xe trong bán kính 1,5 km.</p>;
+  if (facilities.length === 0) return <p className="small">Không có bãi đỗ xe phù hợp trong bán kính 1,5 km.</p>;
   return <section className="parking-list" aria-label="Bãi đỗ xe gần địa điểm">
     <h2>Bãi đỗ xe gần đây</h2>
     <p className="small">Khoảng cách đường chim bay, chưa tính quãng đường đi thực tế.</p>
