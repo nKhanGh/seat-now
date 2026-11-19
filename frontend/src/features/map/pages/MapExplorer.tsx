@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
-import { useNearbyVenues } from '../api/mapQueries';
+import { useNearbyVenues, useVenueDetail } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
 import { MapFilters } from '../services/map.service';
@@ -12,10 +12,12 @@ import { useLiveUpdates } from '../../live/useLiveUpdates';
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
 const readNumber = (value: string | null, fallback: number) => value !== null && Number.isFinite(Number(value)) ? Number(value) : fallback;
+const cuisineLabels = { VIETNAMESE: 'Món Việt', WESTERN: 'Món Âu', COFFEE: 'Cà phê', DESSERT: 'Tráng miệng' } as const;
 
 export function MapExplorer() {
   const [params, setParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectionSerial, setSelectionSerial] = useState(0);
   const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
   const [locationMessage, setLocationMessage] = useState('');
   const auth = useCurrentUser();
@@ -25,6 +27,7 @@ export function MapExplorer() {
     lng: readNumber(params.get('lng'), DEFAULT_LNG),
     radiusM: readNumber(params.get('radiusM'), 3000),
     category: params.get('category') || undefined,
+    cuisine: params.get('cuisine') || undefined,
     priceTier: Number(params.get('priceTier')) || undefined,
     ratingGte: Number(params.get('ratingGte')) || undefined,
     crowdLevel: params.get('crowdLevel') || undefined,
@@ -32,9 +35,10 @@ export function MapExplorer() {
   }), [params]);
   const venues = useNearbyVenues(filters);
   const selected = venues.data?.data.find((item) => item.id === selectedId);
+  const venueDetail = useVenueDetail(selected?.slug ?? null);
   const parking = useParkingForVenue(selected?.slug ?? null);
   const liveStatus = useLiveUpdates(venues.data?.data.map((item) => item.slug) ?? [], parking.data?.data.map((item) => item.slug) ?? []);
-  const selectVenue = useCallback((id: string) => { setSelectedId(id); setSelectedParkingSlug(null); }, []);
+  const selectVenue = useCallback((id: string) => { setSelectedId(id); setSelectedParkingSlug(null); setSelectionSerial((current) => current + 1); }, []);
   const update = useCallback((patch: Record<string, string | null>) => {
     setParams((current) => {
       const next = new URLSearchParams(current);
@@ -57,6 +61,7 @@ export function MapExplorer() {
     <header className="explorer-header"><Link to="/" className="brand">SeatNow</Link><nav><span className="sync-status" role="status">{liveStatus === 'connected' ? 'Cập nhật trực tiếp' : liveStatus === 'offline' ? 'Đồng bộ định kỳ' : 'Đang kết nối'}</span><Link to="/plans">Gói người dùng</Link>{auth.data ? <><span>Chào {auth.data.displayName}</span><button onClick={() => logout.mutate()} disabled={logout.isPending}>Đăng xuất</button></> : <><Link to="/login">Đăng nhập</Link><Link to="/register">Đăng ký</Link></>}</nav></header>
     <section className="filterbar" aria-label="Bộ lọc địa điểm">
       <select aria-label="Loại địa điểm" value={filters.category || ''} onChange={(event) => update({ category: event.target.value })}><option value="">Tất cả loại</option><option value="RESTAURANT">Nhà hàng</option><option value="CAFE">Cà phê</option><option value="CINEMA">Rạp phim</option></select>
+      <select aria-label="Loại món" value={filters.cuisine || ''} onChange={(event) => update({ cuisine: event.target.value })}><option value="">Tất cả món</option><option value="VIETNAMESE">Món Việt</option><option value="WESTERN">Món Âu</option><option value="COFFEE">Cà phê</option><option value="DESSERT">Tráng miệng</option></select>
       <select aria-label="Bán kính" value={filters.radiusM} onChange={(event) => update({ radiusM: event.target.value })}><option value="1000">1 km</option><option value="3000">3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
       <select aria-label="Mức giá" value={filters.priceTier || ''} onChange={(event) => update({ priceTier: event.target.value })}><option value="">Mọi mức giá</option><option value="1">₫</option><option value="2">₫₫</option><option value="3">₫₫₫</option><option value="4">₫₫₫₫</option></select>
       <select aria-label="Đánh giá tối thiểu" value={filters.ratingGte || ''} onChange={(event) => update({ ratingGte: event.target.value })}><option value="">Mọi đánh giá</option><option value="4">Từ 4 sao</option><option value="4.5">Từ 4.5 sao</option></select>
@@ -74,6 +79,6 @@ export function MapExplorer() {
         <span className="venue-category">{venue.category === 'CAFE' ? 'Cà phê' : venue.category === 'CINEMA' ? 'Rạp phim' : 'Nhà hàng'}</span><strong>{venue.name}</strong><span>{venue.address}</span><span>★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}</span><AvailabilityStatus availability={venue.availability} compact />
       </button>)}
       {venues.data?.meta.truncated && <p>Hãy thu nhỏ khu vực tìm kiếm để xem thêm địa điểm.</p>}
-    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} parkingFacilities={parking.data?.data || []} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span><AvailabilityStatus availability={selected.availability} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <ParkingList facilities={parking.data.data} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />}</div>}</div></div>
+    </section><div className="map-pane"><VenueMap lat={filters.lat} lng={filters.lng} venues={venues.data?.data || []} selectedId={selectedId} selectionSerial={selectionSerial} parkingFacilities={parking.data?.data || []} selectedParkingSlug={selectedParkingSlug} onCenterChange={onCenterChange} onSelect={selectVenue} onSelectParking={setSelectedParkingSlug} />{selected && <div className="map-selected"><div className="selected-heading"><strong>{selected.name}</strong><button onClick={() => setSelectedId(null)}>Đóng</button></div><span>{selected.address}</span>{venueDetail.data?.description && <p className="small">{venueDetail.data.description}</p>}{venueDetail.data?.cuisineTypes.length ? <span className="small">Loại món: {venueDetail.data.cuisineTypes.map((type) => cuisineLabels[type]).join(', ')}</span> : null}<AvailabilityStatus availability={selected.availability} />{parking.isPending && <p className="small">Đang tìm bãi đỗ xe…</p>}{parking.isError && <p role="alert">{parking.error.message} <button onClick={() => parking.refetch()}>Thử lại</button></p>}{parking.data && <ParkingList facilities={parking.data.data} selectedSlug={selectedParkingSlug} onSelect={setSelectedParkingSlug} />}</div>}</div></div>
   </main>;
 }

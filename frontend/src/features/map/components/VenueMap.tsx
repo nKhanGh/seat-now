@@ -12,6 +12,7 @@ type Props = {
   lng: number;
   venues: VenueMapItem[];
   selectedId: string | null;
+  selectionSerial: number;
   parkingFacilities: ParkingFacilityItem[];
   selectedParkingSlug: string | null;
   onCenterChange: (lat: number, lng: number) => void;
@@ -19,10 +20,11 @@ type Props = {
   onSelectParking: (slug: string) => void;
 };
 
-export function VenueMap({ lat, lng, venues, selectedId, parkingFacilities, selectedParkingSlug, onCenterChange, onSelect, onSelectParking }: Props) {
+export function VenueMap({ lat, lng, venues, selectedId, selectionSerial, parkingFacilities, selectedParkingSlug, onCenterChange, onSelect, onSelectParking }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
+  const lastSelectionSerial = useRef(0);
   const [mapError, setMapError] = useState<string | null>(null);
   const onCenterChangeRef = useRef(onCenterChange);
   onCenterChangeRef.current = onCenterChange;
@@ -52,6 +54,18 @@ export function VenueMap({ lat, lng, venues, selectedId, parkingFacilities, sele
     const center = map.current.getCenter();
     if (Math.abs(center.lat - lat) > 0.0002 || Math.abs(center.lng - lng) > 0.0002) map.current.flyTo({ center: [lng, lat] });
   }, [lat, lng]);
+
+  useEffect(() => {
+    if (selectionSerial === lastSelectionSerial.current) return;
+    lastSelectionSerial.current = selectionSerial;
+    const selected = venues.find((venue) => venue.id === selectedId);
+    if (!selected || !map.current) return;
+    const [selectedLng, selectedLat] = selected.location.coordinates;
+    const center = map.current.getCenter();
+    if (Math.abs(center.lat - selectedLat) > 0.0005 || Math.abs(center.lng - selectedLng) > 0.0005) {
+      map.current.flyTo({ center: [selectedLng, selectedLat], zoom: Math.max(map.current.getZoom(), 14) });
+    }
+  }, [selectedId, selectionSerial, venues]);
 
   useEffect(() => {
     markers.current.forEach((marker) => marker.remove());
