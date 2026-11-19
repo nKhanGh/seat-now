@@ -60,6 +60,12 @@ p { line-height: 1.55; }
 .favorite-card { margin: 12px 0; max-width: 620px; }
 .favorite-card h2 { margin: 0 0 8px; }
 .profile-card { max-width: 620px; margin-top: 18px; }
+.proposal-form { max-width: 700px; display: grid; gap: 12px; margin: 20px 0; }
+.proposal-form label { display: grid; gap: 5px; }
+.proposal-form textarea { min-height: 86px; resize: vertical; }
+.proposal-coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.proposal-card { max-width: 700px; margin: 12px 0; }
+.proposal-card h3 { margin: 0 0 8px; }
 .favorite-actions { display: flex; gap: 16px; align-items: center; }
 .review-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
 .review-panel h2 { font-size: 1rem; margin: 4px 0 8px; }
