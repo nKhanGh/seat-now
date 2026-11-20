@@ -46,6 +46,11 @@ export class ReviewsController {
     return this.reviews.listByUser(id, query.cursor);
   }
 
+  @Get('me/reviews/:slug')
+  async mine(@Req() request: CookieRequest, @Param('slug') slug: string) {
+    return this.reviews.mine(await this.userId(request), slug);
+  }
+
   @Put('me/reviews/:slug')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async upsert(@Req() request: CookieRequest, @Param('slug') slug: string, @Body() input: UpsertReviewDto) {

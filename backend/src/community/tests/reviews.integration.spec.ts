@@ -56,6 +56,9 @@ describeWithMongo('reviews with MongoDB', () => {
     const authorId = new Types.ObjectId().toString();
     await service.upsert(authorId, 'demo-cafe', { rating: 4, body: 'Không gian thoải mái.' });
     await service.upsert(authorId, 'demo-cafe', { rating: 5, body: 'Dịch vụ rất tốt hôm nay.' });
+    expect(await service.mine(authorId, 'demo-cafe')).toMatchObject({
+      data: { rating: 5, body: 'Dịch vụ rất tốt hôm nay.', photoUrl: null },
+    });
     expect(venues.updateCommunityRating).toHaveBeenLastCalledWith('demo-cafe', 5);
     expect(await model.countDocuments({ userId: new Types.ObjectId(authorId) })).toBe(1);
     await model.insertMany(
@@ -83,6 +86,7 @@ describeWithMongo('reviews with MongoDB', () => {
       .jpeg()
       .toBuffer();
     await service.uploadPhoto(authorId, 'demo-cafe', { buffer: image, size: image.length });
+    expect((await service.mine(authorId, 'demo-cafe')).data?.photoUrl).toContain('/photo');
     const photo = await service.getPhoto(first.data[0].id);
     expect((await sharp(photo).metadata()).format).toBe('webp');
     expect((await service.list('demo-cafe')).data[0].photoUrl).toContain('/photo');
@@ -105,6 +109,7 @@ describeWithMongo('reviews with MongoDB', () => {
       'Cannot report your own review',
     );
     await service.hide(first.data[0].id);
+    expect(await service.mine(authorId, 'demo-cafe')).toEqual({ data: null });
     expect((await service.listByUser(authorId)).data).toHaveLength(0);
     expect((await service.list('demo-cafe')).data.some((review) => review.id === first.data[0].id)).toBe(
       false,

@@ -1,8 +1,9 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthLink } from '../../auth/components/AuthLink';
 import {
   useRemoveReview,
+  useMyReview,
   useReportReview,
   useReviews,
   useSaveReview,
@@ -11,6 +12,7 @@ import {
 
 export function ReviewPanel({ slug, userId }: { slug: string; userId: string | null }) {
   const reviews = useReviews(slug);
+  const myReview = useMyReview(slug, userId);
   const save = useSaveReview();
   const remove = useRemoveReview();
   const upload = useUploadReviewPhoto();
@@ -21,7 +23,14 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState('');
   const [success, setSuccess] = useState('');
+  const [dirty, setDirty] = useState(false);
   const items = reviews.data?.pages.flatMap((page) => page.data) ?? [];
+
+  useEffect(() => {
+    if (myReview.data === undefined || dirty) return;
+    setRating(myReview.data?.rating ?? 5);
+    setBody(myReview.data?.body ?? '');
+  }, [myReview.data, dirty]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,10 +39,12 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
     try {
       await save.mutateAsync({ slug, rating, body: body.trim() });
       if (file) await upload.mutateAsync({ slug, file });
-      setBody('');
       setFile(null);
+      setDirty(false);
       form.reset();
-      setSuccess('Đã đăng đánh giá. Điểm của quán đã được cập nhật.');
+      setSuccess(
+        myReview.data ? 'Đã cập nhật đánh giá.' : 'Đã đăng đánh giá. Điểm của quán đã được cập nhật.',
+      );
     } catch {
       /* Mutation error is rendered below. */
     }
@@ -42,11 +53,23 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
   return (
     <section className="review-panel" aria-label="Review địa điểm">
       <h2>Review cộng đồng</h2>
-      {userId ? (
+      {userId && myReview.isPending && <p>Đang tải đánh giá của bạn…</p>}
+      {userId && myReview.isError && (
+        <p role="alert">
+          {myReview.error.message} <button onClick={() => void myReview.refetch()}>Thử lại</button>
+        </p>
+      )}
+      {userId && !myReview.isPending && !myReview.isError ? (
         <form onSubmit={(event) => void submit(event)}>
           <label>
             Đánh giá{' '}
-            <select value={rating} onChange={(event) => setRating(Number(event.target.value))}>
+            <select
+              value={rating}
+              onChange={(event) => {
+                setRating(Number(event.target.value));
+                setDirty(true);
+              }}
+            >
               {[5, 4, 3, 2, 1].map((value) => (
                 <option key={value} value={value}>
                   {value} sao
@@ -56,8 +79,26 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
           </label>
           <label>
             Nhận xét (không bắt buộc){' '}
-            <textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={500} />
+            <textarea
+              value={body}
+              onChange={(event) => {
+                setBody(event.target.value);
+                setDirty(true);
+              }}
+              maxLength={500}
+            />
           </label>
+          {myReview.data?.photoUrl && (
+            <p className="small">
+              Ảnh hiện tại:
+              <img
+                className="review-photo"
+                src={myReview.data.photoUrl}
+                alt="Ảnh đánh giá hiện tại của bạn"
+              />
+              Chọn ảnh mới bên dưới nếu muốn thay ảnh.
+            </p>
+          )}
           <label>
             Ảnh thực tế (JPEG, PNG, WebP; tối đa 2 MB)
             <input
@@ -71,18 +112,22 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
             />
           </label>
           <button className="primary" disabled={save.isPending || upload.isPending || Boolean(fileError)}>
-            {save.isPending || upload.isPending ? 'Đang lưu…' : 'Gửi đánh giá'}
+            {save.isPending || upload.isPending
+              ? 'Đang lưu…'
+              : myReview.data
+                ? 'Cập nhật đánh giá'
+                : 'Gửi đánh giá'}
           </button>
           {save.isError && <p role="alert">{save.error.message}</p>}
           {upload.isError && <p role="alert">Review đã lưu nhưng ảnh chưa tải lên: {upload.error.message}</p>}
           {fileError && <p role="alert">{fileError}</p>}
           {success && <p role="status">{success}</p>}
         </form>
-      ) : (
+      ) : !userId ? (
         <p>
           <AuthLink>Đăng nhập</AuthLink> để viết review.
         </p>
-      )}
+      ) : null}
       {reviews.isPending && <p>Đang tải review…</p>}
       {reviews.isError && (
         <p role="alert">
@@ -105,7 +150,18 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
           )}
           <small>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</small>
           {userId === review.author.id && (
-            <button onClick={() => remove.mutate(slug)} disabled={remove.isPending}>
+            <button
+              onClick={() =>
+                remove.mutate(slug, {
+                  onSuccess: () => {
+                    setRating(5);
+                    setBody('');
+                    setDirty(false);
+                  },
+                })
+              }
+              disabled={remove.isPending}
+            >
               Xóa review của tôi
             </button>
           )}

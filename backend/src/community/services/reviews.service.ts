@@ -164,6 +164,22 @@ export class ReviewsService {
     };
   }
 
+  async mine(userId: string, slug: string) {
+    const review = await this.reviews
+      .findOne({ userId: new Types.ObjectId(userId), venueSlug: slug, status: 'PUBLISHED' })
+      .lean();
+    if (!review) return { data: null };
+    const photo = await this.photos.exists({ reviewId: review._id });
+    return {
+      data: {
+        id: review._id.toString(),
+        rating: review.rating,
+        body: review.body,
+        photoUrl: photo ? `/api/v1/reviews/${review._id.toString()}/photo` : null,
+      },
+    };
+  }
+
   async upsert(userId: string, slug: string, input: UpsertReviewDto) {
     await this.venues.activeLocation(slug);
     const body = input.body?.trim() ?? '';

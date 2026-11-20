@@ -14,6 +14,7 @@
     },
     "/venues/{slug}/reviews": { "get": { "summary": "Read public reviews by newest first", "parameters": [{ "$ref": "#/components/parameters/slug" }, { "$ref": "#/components/parameters/cursor" }], "responses": { "200": { "description": "20 reviews with meta.nextCursor" }, "400": { "description": "Invalid cursor" } } } },
     "/me/reviews/{slug}": {
+      "get": { "summary": "Read the signed-in user's published review at a venue, or null", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Own rating, body and optional photo URL" }, "401": { "description": "Login required" } } },
       "put": { "summary": "Create or update one review per user and venue", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewInput" } } } }, "responses": { "200": { "description": "Review saved" } } },
       "delete": { "summary": "Delete the author's review and photo", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Deleted" } } }
     },

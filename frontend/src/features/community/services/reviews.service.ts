@@ -14,6 +14,16 @@ export type UserReview = Pick<VenueReview, 'id' | 'rating' | 'body' | 'createdAt
   venueLocation: { type: 'Point'; coordinates: [number, number] } | null;
 };
 export type UserReviewsPage = { data: UserReview[]; meta: { nextCursor: string | null } };
+export type MyReview = Pick<VenueReview, 'id' | 'rating' | 'body' | 'photoUrl'>;
+
+export async function getMyReview(slug: string, signal?: AbortSignal): Promise<MyReview | null> {
+  const response = await fetch(`/api/v1/me/reviews/${encodeURIComponent(slug)}`, {
+    signal,
+    credentials: 'same-origin',
+  });
+  if (!response.ok) throw new Error(`Không tải được đánh giá của bạn (${response.status}).`);
+  return ((await response.json()) as { data: MyReview | null }).data;
+}
 
 export async function getReviews(
   slug: string,
