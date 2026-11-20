@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ParkingFacilityItem } from '../services/parking.service';
-import { Coordinates, directionsUrl } from '../../map/services/directions';
+import { directionsUrl } from '../../map/services/directions';
+import { Coordinates } from '../../map/services/geo';
 
 const relationLabels: Record<ParkingFacilityItem['relation'], string> = {
   VENUE: 'Bãi của địa điểm',

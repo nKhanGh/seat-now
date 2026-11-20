@@ -22,6 +22,8 @@ import { NearbySuggestions } from '../components/NearbySuggestions';
 import { nearbySuggestions } from '../services/nearbySuggestions';
 import { searchVenues } from '../services/venueSearch';
 import { directionsUrl } from '../services/directions';
+import { distanceMeters } from '../services/geo';
+import { sortVenues, VenueSort } from '../services/sortVenues';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -90,6 +92,9 @@ export function MapExplorer() {
   }, [catalog.data, venueItems, filterSignature]);
   const searchText = params.get('q') ?? '';
   const searching = Boolean(searchText.trim());
+  const requestedSort = params.get('sort');
+  const sortOrder: VenueSort =
+    requestedSort === 'rating' || requestedSort === 'price' ? requestedSort : 'distance';
   const savedRequested = params.get('saved') === 'true';
   const savedOnly = savedRequested && Boolean(auth.data);
   const favoriteSlugs = useMemo(
@@ -99,6 +104,7 @@ export function MapExplorer() {
   const hasActiveFilters =
     searching ||
     savedRequested ||
+    sortOrder !== 'distance' ||
     filters.radiusM !== 3000 ||
     Boolean(
       filters.category ||
@@ -111,17 +117,20 @@ export function MapExplorer() {
   const { query: publishedSearch, activeQuery } = usePublishedVenueSearch(searchText);
   const remoteReady = searching && activeQuery === searchText.trim();
   const displayedVenues = useMemo(() => {
-    const candidates = searching
-      ? searchVenues(seenVenues, searchText)
-      : savedOnly
-        ? seenVenues
-        : [...venueItems].sort(
-            (a, b) =>
-              Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) ||
-              a.distanceM - b.distanceM,
-          );
-    return savedOnly ? candidates.filter((venue) => favoriteSlugs.has(venue.slug)) : candidates;
-  }, [searching, searchText, savedOnly, seenVenues, venueItems, favoriteSlugs]);
+    const candidates = searching ? searchVenues(seenVenues, searchText) : savedOnly ? seenVenues : venueItems;
+    const filtered = savedOnly ? candidates.filter((venue) => favoriteSlugs.has(venue.slug)) : candidates;
+    return searching ? filtered : sortVenues(filtered, sortOrder, [filters.lng, filters.lat]);
+  }, [
+    searching,
+    searchText,
+    savedOnly,
+    seenVenues,
+    venueItems,
+    favoriteSlugs,
+    sortOrder,
+    filters.lng,
+    filters.lat,
+  ]);
   const mapVenues = useMemo(
     () =>
       savedOnly
@@ -357,6 +366,18 @@ export function MapExplorer() {
           <option value="BUSY">Đông</option>
           <option value="FULL">Đầy</option>
         </select>
+        <select
+          aria-label="Sắp xếp danh sách"
+          value={sortOrder}
+          onChange={(event) =>
+            update({ sort: event.target.value === 'distance' ? null : event.target.value })
+          }
+          disabled={searching}
+        >
+          <option value="distance">Gần nhất</option>
+          <option value="rating">Đánh giá cao</option>
+          <option value="price">Giá thấp</option>
+        </select>
         <label className="filter-check">
           <input
             type="checkbox"
@@ -391,6 +412,7 @@ export function MapExplorer() {
                 crowdLevel: null,
                 hasAvailability: null,
                 saved: null,
+                sort: null,
               })
             }
           >
@@ -411,6 +433,9 @@ export function MapExplorer() {
           </p>
           {searching && (
             <p className="small">Tìm trong các địa điểm đã tải · {displayedVenues.length} kết quả.</p>
+          )}
+          {!searching && sortOrder !== 'distance' && (
+            <p className="small">Sắp xếp các địa điểm đã tải; bấm Xem thêm để bổ sung kết quả.</p>
           )}
           {savedOnly && favorites.isPending && <p>Đang tải quán đã lưu…</p>}
           {savedOnly && favorites.isError && (
@@ -464,8 +489,10 @@ export function MapExplorer() {
               <span>{venue.address}</span>
               <span>
                 ★ {venue.rating.toFixed(1)} ·{' '}
-                {searching || savedOnly ? 'Xem trên bản đồ' : `${venue.distanceM} m`} ·{' '}
-                {'₫'.repeat(venue.priceTier)}
+                {searching
+                  ? 'Xem trên bản đồ'
+                  : `${distanceMeters([filters.lng, filters.lat], venue.location.coordinates)} m`}{' '}
+                · {'₫'.repeat(venue.priceTier)}
               </span>
               {venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}
               {venue.verified &&

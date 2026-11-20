@@ -1,4 +1,4 @@
-export type Coordinates = [lng: number, lat: number];
+import { Coordinates } from './geo';
 
 function validCoordinate([lng, lat]: Coordinates) {
   return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
