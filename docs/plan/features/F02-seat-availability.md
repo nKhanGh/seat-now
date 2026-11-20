@@ -85,7 +85,7 @@ Public response hiện có `freshness`, `capturedAt`, `expiresAt`, `source`, `co
 
 Event `venue.availability.updated.v1` cần tiếp tục được chuẩn hóa theo envelope ở COMMON khi mở rộng tích hợp.
 
-Hiện tại event chỉ chứa `eventId`, `slug`, `version`; client refetch REST sau khi nhận event. WebSocket namespace `/live`, client gửi `watch` với `venueSlugs[]`. Lệnh `npm run rebuild:projections` phục hồi latest/map từ snapshot. History API chỉ trả tối đa 10 snapshot trong 24 giờ của quán công khai, kèm cờ `truncated`; UI tải khi người dùng mở mục lịch sử. Chưa có POS connector. `sourceRecordId` trong body là khóa idempotency.
+Hiện tại event chỉ chứa `eventId`, `slug`, `version`; client refetch REST sau khi nhận event. WebSocket namespace `/live`, client gửi `watch` với `venueSlugs[]`. Lệnh `npm run rebuild:projections` phục hồi latest/map từ snapshot. History API chỉ trả tối đa 10 snapshot trong 24 giờ của quán công khai, kèm cờ `truncated`; UI tải khi người dùng mở mục lịch sử và làm mới khi có event mới cho quán đó. Chưa có POS connector. `sourceRecordId` trong body là khóa idempotency.
 
 ## 5. UI
 
