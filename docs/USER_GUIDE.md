@@ -8,6 +8,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 2. Chọn **Đăng ký**, nhập tên hiển thị, email, mật khẩu ít nhất 12 ký tự và xác nhận mật khẩu. Biểu tượng mắt dùng để hiện hoặc ẩn mật khẩu.
 3. Nếu đã có tài khoản, chọn **Đăng nhập**. Các thao tác xem bản đồ, chỗ ngồi, bãi xe và gói dịch vụ dùng được khi chưa đăng nhập.
 4. Dùng **Đăng xuất** ở thanh đầu trang khi muốn kết thúc phiên.
+5. Nếu chọn **Đăng nhập** từ một quán, review, đặt bàn hoặc danh sách cá nhân, sau đăng nhập/đăng ký app quay lại đúng màn hình và quán đang xem.
 
 ## 2. Tìm và xem địa điểm
 

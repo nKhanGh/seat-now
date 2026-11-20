@@ -1,6 +1,6 @@
 # F00 — Đăng nhập và phiên người dùng
 
-Ưu tiên: **P0 cho gói người dùng**. Trạng thái: **PARTIAL — backend register/login/me/logout và React form đã code; MongoDB integration/E2E và public-launch flow chưa xong**.
+Ưu tiên: **P0 cho gói người dùng**. Trạng thái: **MVP demo chạy được — backend register/login/me/logout, React form và MongoDB integration test đã có; public-launch flow chưa xong**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md) · [ADR 002](../../adr/002-first-party-auth.md)
 
@@ -39,6 +39,8 @@ POST /api/v1/auth/logout
 ```
 
 Request register: `{ email, password, displayName }`. Giao diện yêu cầu xác nhận mật khẩu trước khi gửi. Login: `{ email, password }`. Thành công trả public user DTO, server set JWT cookie. `/me` trả `{ id, email, displayName, emailVerified }`; chưa đăng nhập trả 401. Logout revoke session server-side, clear cookie và trả 204.
+
+Liên kết đăng nhập/đăng ký trong app giữ đường dẫn nội bộ hiện tại bằng router state. Sau khi xác thực, người dùng quay lại màn hình và quán đã chọn; client từ chối đích ngoài origin hoặc quay vòng vào trang auth. Luồng này đã được kiểm tra trên browser local bằng tài khoản thử rồi dọn tài khoản đó.
 
 Email trùng và credential sai dùng response an toàn, không lộ password hash hay chi tiết nội bộ. Nếu bật public registration có email verification, response đăng ký không tiết lộ email đã tồn tại; demo seed flow có thể trả lỗi email trùng rõ cho nhóm phát triển nhưng phải thay trước public launch.
 
