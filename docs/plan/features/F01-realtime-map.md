@@ -21,7 +21,7 @@ Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ 
 
 Ô tìm theo tên/địa chỉ lọc tức thì danh sách đã tải ở client và lưu từ khóa trong URL. Sau 300 ms, `GET /map/search` tìm thêm trong toàn bộ projection địa điểm công khai bằng so khớp không phân biệt dấu/chữ hoa; mỗi lần trả tối đa 12 kết quả và cờ `truncated`. Chọn kết quả ngoài vùng sẽ đưa bản đồ tới tọa độ quán và bỏ các bộ lọc loại/giá/chỗ trống có thể che quán. Truy vấn regex phù hợp dataset demo; cần index tìm kiếm chuyên dụng trước khi tăng quy mô dữ liệu.
 
-Ngoài scope: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, route navigation và booking.
+Ngoài scope F01: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, điều hướng từng chặng trong app và booking. Chi tiết hiện có liên kết ra Google Maps đến tọa độ quán.
 
 ## 2. Màn hình và hành vi
 
@@ -37,7 +37,7 @@ Desktop:
 └────────────────────────────────────┴──────────────────────────────┘
 ```
 
-Mobile: map toàn màn hình, filter chips ở trên, result/detail trong bottom sheet. Danh sách là alternative bắt buộc cho accessibility, không chỉ có marker.
+Mobile demo: thanh điều hướng cuộn ngang, bộ lọc phía trên, rồi bản đồ, chi tiết và danh sách xếp dọc. Khi chọn một thẻ/ghim, trang cuộn đến chi tiết; danh sách vẫn là cách chọn quán bằng bàn phím mà không cần tương tác với ghim.
 
 State bắt buộc:
 

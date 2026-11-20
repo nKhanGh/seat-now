@@ -17,6 +17,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 - Khi đã đăng nhập và lưu quán, bật **Chỉ quán đã lưu** để xem nhanh các quán yêu thích trong dữ liệu bản đồ đã tải. Mở **Quán đã lưu** để xem toàn bộ danh sách, kể cả quán ngoài vùng đang tải.
 - Kéo bản đồ để đổi khu vực tìm kiếm. Chọn **Vị trí của tôi** để xin quyền vị trí và hiển thị chấm xanh. Nếu từ chối quyền, bản đồ vẫn sử dụng được với tâm hiện tại.
 - Chọn thẻ trong danh sách hoặc ghim trên bản đồ để mở chi tiết. Trong đó có địa chỉ, thông tin bàn/ghế, thời gian chờ, bãi xe, đánh giá và gợi ý địa điểm gần đó. Chọn **Đóng** một lần để đóng chi tiết.
+- Trên điện thoại, thanh liên kết ở đầu trang cuộn ngang. Khi chọn quán, trang tự đưa phần chi tiết vào tầm nhìn; kéo trong khung chi tiết để xem bãi xe và review.
 - Trong chi tiết, chọn **Chỉ đường đến địa điểm** để mở Google Maps ở tab mới. Nếu đã dùng **Vị trí của tôi**, tọa độ đó được dùng làm điểm bắt đầu; nếu chưa, Google Maps sẽ tự hỏi điểm bắt đầu.
 - Chọn **Xem thêm địa điểm** để tải trang kết quả tiếp theo. Ghim của các địa điểm đã tải vẫn còn khi kéo bản đồ.
 - Ở mức thu nhỏ, các quán gần nhau được gom thành vòng tròn có số lượng; chọn vòng tròn để phóng gần. Khi phóng gần hơn, từng ghim quán và logo (nếu có) sẽ hiện riêng.
