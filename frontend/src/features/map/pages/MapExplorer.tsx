@@ -13,6 +13,7 @@ import { ParkingFilters as ParkingFilterValues } from '../../parking/services/pa
 import { useLiveUpdates } from '../../live/useLiveUpdates';
 import { CheckInPanel } from '../../community/components/CheckInPanel';
 import { FavoriteButton } from '../../community/components/FavoriteButton';
+import { useFavorites } from '../../community/api/favoritesQueries';
 import { ReviewPanel } from '../../community/components/ReviewPanel';
 import { ShareVenueButton } from '../../community/components/ShareVenueButton';
 import { BookingPanel } from '../../booking/components/BookingPanel';
@@ -47,6 +48,7 @@ export function MapExplorer() {
   );
   const [seenVenues, setSeenVenues] = useState<VenueMapItem[]>([]);
   const auth = useCurrentUser();
+  const favorites = useFavorites(auth.data?.id ?? null);
   const logout = useLogout();
   const filters = useMemo<MapFilters>(
     () => ({
@@ -85,8 +87,15 @@ export function MapExplorer() {
   }, [catalog.data, venueItems, filterSignature]);
   const searchText = params.get('q') ?? '';
   const searching = Boolean(searchText.trim());
+  const savedRequested = params.get('saved') === 'true';
+  const savedOnly = savedRequested && Boolean(auth.data);
+  const favoriteSlugs = useMemo(
+    () => new Set(favorites.data?.map((venue) => venue.slug) ?? []),
+    [favorites.data],
+  );
   const hasActiveFilters =
     searching ||
+    savedRequested ||
     filters.radiusM !== 3000 ||
     Boolean(
       filters.category ||
@@ -98,22 +107,34 @@ export function MapExplorer() {
     );
   const { query: publishedSearch, activeQuery } = usePublishedVenueSearch(searchText);
   const remoteReady = searching && activeQuery === searchText.trim();
-  const displayedVenues = useMemo(
-    () =>
-      searching
-        ? searchVenues(seenVenues, searchText)
+  const displayedVenues = useMemo(() => {
+    const candidates = searching
+      ? searchVenues(seenVenues, searchText)
+      : savedOnly
+        ? seenVenues
         : [...venueItems].sort(
             (a, b) =>
               Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) ||
               a.distanceM - b.distanceM,
-          ),
-    [searching, searchText, seenVenues, venueItems],
+          );
+    return savedOnly ? candidates.filter((venue) => favoriteSlugs.has(venue.slug)) : candidates;
+  }, [searching, searchText, savedOnly, seenVenues, venueItems, favoriteSlugs]);
+  const mapVenues = useMemo(
+    () =>
+      savedOnly
+        ? seenVenues.filter((venue) => favoriteSlugs.has(venue.slug) || venue.slug === params.get('venue'))
+        : seenVenues,
+    [savedOnly, seenVenues, favoriteSlugs, params],
   );
   const publishedOnly = useMemo(() => {
     if (!remoteReady) return [];
     const knownSlugs = new Set(displayedVenues.map((venue) => venue.slug));
-    return publishedSearch.data?.data.filter((venue) => !knownSlugs.has(venue.slug)) ?? [];
-  }, [displayedVenues, publishedSearch.data, remoteReady]);
+    return (
+      publishedSearch.data?.data.filter(
+        (venue) => !knownSlugs.has(venue.slug) && (!savedOnly || favoriteSlugs.has(venue.slug)),
+      ) ?? []
+    );
+  }, [displayedVenues, publishedSearch.data, remoteReady, savedOnly, favoriteSlugs]);
   const selected = seenVenues.find((item) => item.slug === params.get('venue'));
   const selectedId = selected?.id ?? null;
   const suggestions = useMemo(
@@ -331,6 +352,16 @@ export function MapExplorer() {
           />{' '}
           Còn bàn
         </label>
+        {auth.data && (
+          <label className="filter-check">
+            <input
+              type="checkbox"
+              checked={savedOnly}
+              onChange={(event) => update({ saved: event.target.checked ? 'true' : null })}
+            />{' '}
+            Chỉ quán đã lưu
+          </label>
+        )}
         <button onClick={locate}>Vị trí của tôi</button>
         {hasActiveFilters && (
           <button
@@ -346,6 +377,7 @@ export function MapExplorer() {
                 ratingGte: null,
                 crowdLevel: null,
                 hasAvailability: null,
+                saved: null,
               })
             }
           >
@@ -367,6 +399,18 @@ export function MapExplorer() {
           {searching && (
             <p className="small">Tìm trong các địa điểm đã tải · {displayedVenues.length} kết quả.</p>
           )}
+          {savedOnly && favorites.isPending && <p>Đang tải quán đã lưu…</p>}
+          {savedOnly && favorites.isError && (
+            <p role="alert">
+              {favorites.error.message} <button onClick={() => void favorites.refetch()}>Thử lại</button>
+            </p>
+          )}
+          {savedOnly && favorites.data && displayedVenues.length === 0 && (
+            <p>
+              Chưa có quán đã lưu phù hợp trong dữ liệu đang xem.{' '}
+              <Link to="/favorites">Xem tất cả quán đã lưu</Link>.
+            </p>
+          )}
           {searching && catalog.isPending && seenVenues.length === 0 && <p>Đang tải dữ liệu để tìm…</p>}
           {searching && catalog.isError && seenVenues.length === 0 && (
             <p role="alert">
@@ -379,10 +423,10 @@ export function MapExplorer() {
               {venues.error.message} <button onClick={() => void venues.refetch()}>Thử lại</button>
             </p>
           )}
-          {!searching && venues.data?.pages[0]?.data.length === 0 && (
+          {!searching && !savedOnly && venues.data?.pages[0]?.data.length === 0 && (
             <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>
           )}
-          {searching && !catalog.isPending && displayedVenues.length === 0 && (
+          {searching && !savedOnly && !catalog.isPending && displayedVenues.length === 0 && (
             <p>Không tìm thấy địa điểm đã tải. Hãy thử tên khác hoặc bỏ bớt bộ lọc.</p>
           )}
           {displayedVenues.map((venue) => (
@@ -406,7 +450,8 @@ export function MapExplorer() {
               </strong>
               <span>{venue.address}</span>
               <span>
-                ★ {venue.rating.toFixed(1)} · {searching ? 'Xem trên bản đồ' : `${venue.distanceM} m`} ·{' '}
+                ★ {venue.rating.toFixed(1)} ·{' '}
+                {searching || savedOnly ? 'Xem trên bản đồ' : `${venue.distanceM} m`} ·{' '}
                 {'₫'.repeat(venue.priceTier)}
               </span>
               {venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}
@@ -454,7 +499,7 @@ export function MapExplorer() {
           {remoteReady && publishedSearch.data?.meta.truncated && (
             <p className="small">Có thêm kết quả. Hãy nhập tên hoặc địa chỉ cụ thể hơn.</p>
           )}
-          {!searching && venues.hasNextPage && venueItems.length < 100 && (
+          {!searching && !savedOnly && venues.hasNextPage && venueItems.length < 100 && (
             <button
               className="load-more"
               onClick={() => void venues.fetchNextPage()}
@@ -463,7 +508,7 @@ export function MapExplorer() {
               {venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}
             </button>
           )}
-          {!searching && venues.hasNextPage && venueItems.length >= 100 && (
+          {!searching && !savedOnly && venues.hasNextPage && venueItems.length >= 100 && (
             <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>
           )}
         </section>
@@ -471,7 +516,7 @@ export function MapExplorer() {
           <VenueMap
             lat={filters.lat}
             lng={filters.lng}
-            venues={seenVenues}
+            venues={mapVenues}
             userLocation={userLocation}
             selectedId={selectedId}
             selectionSerial={selectionSerial}
