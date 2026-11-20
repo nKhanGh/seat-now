@@ -1,6 +1,6 @@
 # F04 — Gói Free/Premium dành cho người dùng
 
-Ưu tiên: **P2 foundation**. Trạng thái: **PARTIAL — resolver, API, guard, trang gói và quyền ưu tiên yêu cầu đặt bàn F07 đã chạy; payment và các quyền Premium khác chưa triển khai**.
+Ưu tiên: **P2 foundation**. Trạng thái: **PARTIAL — resolver, API, guard, trang gói, ưu tiên yêu cầu đặt bàn F07 và bản đồ không quảng cáo đã chạy; payment và các quyền Premium khác chưa triển khai**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md)
 
@@ -35,7 +35,7 @@ Ngoài scope:
 | Xem bãi xe | Có | Có | Implement qua F03 |
 | Check-in/review/favorite/contribute | Có | Có | F05 demo |
 | Gửi yêu cầu đặt bàn tại quán đối tác | Có | Có | F07 demo, chờ chủ quán xác nhận |
-| Không quảng cáo | Không | Có | Entitlement/UI preview; chưa có ads |
+| Không quảng cáo | Không | Có | Bản đồ bỏ thứ tự tài trợ, nhãn ghim và nội dung quảng cáo; server kiểm tra entitlement |
 | Ưu tiên hàng chờ yêu cầu đặt bàn | Không | Có | F07 demo, không bảo đảm có bàn |
 | Giữ chỗ xe | Không | Có | Later |
 | Voucher độc quyền | Không | Có | Later |

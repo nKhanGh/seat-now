@@ -56,7 +56,7 @@ Các thao tác sau cần đăng nhập:
 
 ## 7. Gói người dùng và giới hạn bản demo
 
-Trang **Gói người dùng** cho biết quyền Free và các quyền Premium. Phần lớn quyền Premium như giữ bãi xe, voucher và AI cá nhân hóa đang được ghi **Sắp ra mắt**, chưa thể mua hoặc sử dụng thật. Dữ liệu quán và bãi xe mặc định là mô phỏng. Đừng dùng số chỗ mẫu để quyết định di chuyển ngoài đời.
+Trang **Gói người dùng** cho biết quyền Free và các quyền Premium. Tài khoản Premium demo được người vận hành cấp sẽ thấy **Premium · bản đồ không quảng cáo**: quán không được đẩy lên đầu vì tài trợ và không hiện nhãn/ưu đãi quảng cáo trên bản đồ. Tài khoản Free vẫn thấy nhãn tài trợ rõ ràng. Nếu không kiểm tra được quyền Premium, app báo lỗi và dùng bản đồ thông thường cho đến khi thử lại. Giữ bãi xe, voucher và AI cá nhân hóa vẫn được ghi **Sắp ra mắt**, chưa thể mua hoặc sử dụng thật. Dữ liệu quán và bãi xe mặc định là mô phỏng. Đừng dùng số chỗ mẫu để quyết định di chuyển ngoài đời.
 
 ## 8. Khi trang không hiển thị đúng
 

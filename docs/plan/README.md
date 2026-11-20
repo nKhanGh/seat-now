@@ -30,10 +30,10 @@ Người dùng có thể mở app, cấp hoặc từ chối quyền vị trí, t
 | P1 | [F01 Bản đồ realtime](features/F01-realtime-map.md) | Map/list, geolocation fallback, tìm theo vùng, filter khoảng cách/loại/giá/đánh giá/độ đông/chỗ trống, detail drawer | Review/community, recommendation AI |
 | P1 | [F02 Chỗ ngồi](features/F02-seat-availability.md) | Latest snapshot, bàn/chỗ trống, crowd level, wait time, freshness/confidence, realtime update | Đặt bàn, POS connector production |
 | P2 | [F03 Bãi đỗ xe](features/F03-parking.md) | Bãi của quán và bãi lân cận, khoảng cách, giá, latest spaces, stale state | Giữ chỗ/đặt chỗ xe, thanh toán |
-| P2 | [F04 Gói người dùng](features/F04-user-subscription.md) | FREE/PREMIUM, subscription state, entitlement resolver, màn hình so sánh gói | Payment gateway, voucher, AI nâng cao, quảng cáo thật |
+| P2 | [F04 Gói người dùng](features/F04-user-subscription.md) | FREE/PREMIUM, subscription state, entitlement resolver, màn hình so sánh gói, Premium ẩn quảng cáo trên bản đồ | Payment gateway, voucher, AI nâng cao, mạng quảng cáo ngoài |
 | Done demo | [F05 Cộng đồng](features/F05-community.md) | Check-in, review/ảnh/báo cáo, favorite, follow/share, đề xuất địa điểm và duyệt nội bộ | Cần quy trình kiểm duyệt và chính sách dữ liệu trước public launch |
 | Done demo | [F06 Chủ quán](features/F06-business.md) | Claim qua duyệt nội bộ, hồ sơ/logo, Premium demo, dashboard, quảng cáo/ưu đãi trong app, nhiều chi nhánh/ảnh bìa | Chưa có billing, POS connector, push, đổi voucher |
-| Done demo | [F07 Đặt bàn](features/F07-booking.md) | Quán đối tác tự bật nhận yêu cầu, người dùng gửi và theo dõi, chủ quán xác nhận/từ chối, Premium đứng trước trong hàng chờ | Chưa giữ bàn tự động, POS, thông báo hay chống overbooking |
+| Done demo | [F07 Đặt bàn](features/F07-booking.md) | Quán đối tác tự bật nhận yêu cầu, người dùng gửi và theo dõi, chủ quán xác nhận/từ chối/đánh dấu đã đón khách, Premium đứng trước trong hàng chờ | Chưa giữ bàn tự động, POS, thông báo hay chống overbooking |
 
 Theo quyết định ngày 19/11/2026, nhóm [F05 cộng đồng](features/F05-community.md) và [F06 chủ quán](features/F06-business.md) được thực hiện sau MVP demo.
 
