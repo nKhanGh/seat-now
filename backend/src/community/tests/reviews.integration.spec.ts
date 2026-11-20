@@ -59,6 +59,7 @@ describeWithMongo('reviews with MongoDB', () => {
     expect(await service.mine(authorId, 'demo-cafe')).toMatchObject({
       data: { rating: 5, body: 'Dịch vụ rất tốt hôm nay.', photoUrl: null },
     });
+    expect(await service.mine(new Types.ObjectId().toString(), 'demo-cafe')).toEqual({ data: null });
     expect(venues.updateCommunityRating).toHaveBeenLastCalledWith('demo-cafe', 5);
     expect(await model.countDocuments({ userId: new Types.ObjectId(authorId) })).toBe(1);
     await model.insertMany(
