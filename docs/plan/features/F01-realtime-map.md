@@ -17,7 +17,7 @@ Guest hoặc user đăng nhập có thể tìm địa điểm quanh vị trí hi
 
 F01 sở hữu trải nghiệm tìm kiếm/bản đồ. Số liệu availability lấy từ F02; khi F02 chưa hoàn tất, fixture phải tuân cùng DTO.
 
-Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ các địa điểm đã tải trên bản đồ, trong bán kính 2 km theo đường chim bay. Gợi ý được xếp theo khoảng cách, không dùng khẩu vị cá nhân hay dữ liệu AI; chọn một gợi ý sẽ mở chi tiết địa điểm đó.
+Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ các địa điểm đã tải trên bản đồ, trong bán kính 2 km theo đường chim bay. Mỗi loại địa điểm được chọn gần nhất trước, các chỗ còn lại lấy theo khoảng cách, rồi danh sách xếp theo khoảng cách. Không dùng khẩu vị cá nhân hay dữ liệu AI; chọn một gợi ý sẽ mở chi tiết địa điểm đó.
 
 Ô tìm theo tên/địa chỉ lọc tức thì danh sách đã tải ở client và lưu từ khóa trong URL. Sau 300 ms, `GET /map/search` tìm thêm trong toàn bộ projection địa điểm công khai bằng so khớp không phân biệt dấu/chữ hoa; mỗi lần trả tối đa 12 kết quả và cờ `truncated`. Chọn kết quả ngoài vùng sẽ đưa bản đồ tới tọa độ quán và bỏ các bộ lọc loại/giá/chỗ trống có thể che quán. Truy vấn regex phù hợp dataset demo; cần index tìm kiếm chuyên dụng trước khi tăng quy mô dữ liệu.
 
