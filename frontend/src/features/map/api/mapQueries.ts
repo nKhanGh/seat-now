@@ -1,5 +1,12 @@
+import { useEffect, useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { getNearbyVenues, getVenueDetail, MapFilters, VenueMapItem } from '../services/map.service';
+import {
+  getNearbyVenues,
+  getPublishedVenues,
+  getVenueDetail,
+  MapFilters,
+  VenueMapItem,
+} from '../services/map.service';
 
 export const mapQueryKeys = { nearby: (filters: MapFilters) => ['map', 'nearby', filters] as const };
 
@@ -13,6 +20,21 @@ export function useNearbyVenues(filters: MapFilters) {
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   });
+}
+
+export function usePublishedVenueSearch(query: string) {
+  const [debounced, setDebounced] = useState(query.trim());
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebounced(query.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+  const result = useQuery({
+    queryKey: ['map', 'search', debounced],
+    queryFn: ({ signal }) => getPublishedVenues(debounced, signal),
+    enabled: debounced.length >= 2,
+    staleTime: 60_000,
+  });
+  return { query: result, activeQuery: debounced };
 }
 
 export function useVenueDetail(slug: string | null) {

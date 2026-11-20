@@ -46,6 +46,20 @@ export type MapResponse = {
   meta: { nextCursor: string | null; truncated: boolean; queryCenter: { lat: number; lng: number } };
 };
 
+export type VenueSearchItem = Pick<
+  VenueMapItem,
+  'id' | 'slug' | 'name' | 'address' | 'category' | 'location' | 'rating' | 'priceTier'
+>;
+
+export type VenueSearchResponse = { data: VenueSearchItem[]; meta: { truncated: boolean } };
+
+export async function getPublishedVenues(query: string, signal?: AbortSignal): Promise<VenueSearchResponse> {
+  const params = new URLSearchParams({ q: query });
+  const response = await fetch(`/api/v1/map/search?${params}`, { signal });
+  if (!response.ok) throw new Error(`Không tìm được địa điểm toàn hệ thống (${response.status}).`);
+  return response.json() as Promise<VenueSearchResponse>;
+}
+
 export type VenueDetail = {
   id: string;
   slug: string;

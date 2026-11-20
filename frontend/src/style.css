@@ -47,6 +47,8 @@ p { line-height: 1.55; }
 .explorer-body { display: grid; grid-template-columns: minmax(300px, 390px) 1fr; flex: 1; min-height: 640px; }
 .venue-list { background: #f7faf7; padding: 22px; overflow-y: auto; max-height: calc(100vh - 124px); }
 .venue-list h1 { font-size: 1.7rem; }
+.published-results { border-top: 1px solid #deebe1; margin-top: 16px; padding-top: 12px; }
+.published-results h2 { font-size: 1.05rem; margin: 0; }
 .small { font-size: .84rem; color: #5b6a60; }
 .venue-card { display: flex; flex-direction: column; gap: 7px; text-align: left; width: 100%; padding: 18px; margin: 12px 0; background: white; border: 1px solid #dce8df; border-radius: 14px; color: inherit; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
 .venue-card:hover { border-color: #91bba3; box-shadow: 0 8px 22px #173b2a12; transform: translateY(-2px); }

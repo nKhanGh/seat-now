@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
-import { useHcmVenuePins, useNearbyVenues, useVenueDetail } from '../api/mapQueries';
+import { useHcmVenuePins, useNearbyVenues, usePublishedVenueSearch, useVenueDetail } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
 import { MapFilters, VenueMapItem } from '../services/map.service';
@@ -85,6 +85,8 @@ export function MapExplorer() {
   }, [catalog.data, venueItems, filterSignature]);
   const searchText = params.get('q') ?? '';
   const searching = Boolean(searchText.trim());
+  const { query: publishedSearch, activeQuery } = usePublishedVenueSearch(searchText);
+  const remoteReady = searching && activeQuery === searchText.trim();
   const displayedVenues = useMemo(
     () =>
       searching
@@ -96,6 +98,11 @@ export function MapExplorer() {
           ),
     [searching, searchText, seenVenues, venueItems],
   );
+  const publishedOnly = useMemo(() => {
+    if (!remoteReady) return [];
+    const knownSlugs = new Set(displayedVenues.map((venue) => venue.slug));
+    return publishedSearch.data?.data.filter((venue) => !knownSlugs.has(venue.slug)) ?? [];
+  }, [displayedVenues, publishedSearch.data, remoteReady]);
   const selected = seenVenues.find((item) => item.slug === params.get('venue'));
   const selectedId = selected?.id ?? null;
   const suggestions = useMemo(
@@ -145,6 +152,24 @@ export function MapExplorer() {
       );
     },
     [setParams],
+  );
+  const selectPublishedVenue = useCallback(
+    (venue: { slug: string; location: { coordinates: [number, number] } }) => {
+      setSelectedParkingSlug(null);
+      setSelectionSerial((current) => current + 1);
+      update({
+        venue: venue.slug,
+        lat: String(venue.location.coordinates[1]),
+        lng: String(venue.location.coordinates[0]),
+        category: null,
+        cuisine: null,
+        priceTier: null,
+        ratingGte: null,
+        crowdLevel: null,
+        hasAvailability: null,
+      });
+    },
+    [update],
   );
   const onCenterChange = useCallback(
     (lat: number, lng: number) => update({ lat: String(lat), lng: String(lng) }),
@@ -367,6 +392,37 @@ export function MapExplorer() {
               <AvailabilityStatus availability={venue.availability} compact />
             </button>
           ))}
+          {remoteReady && publishedSearch.isFetching && <p className="small">Đang tìm trên toàn hệ thống…</p>}
+          {remoteReady && publishedSearch.isError && (
+            <p role="alert">
+              {publishedSearch.error.message}{' '}
+              <button onClick={() => void publishedSearch.refetch()}>Thử lại</button>
+            </p>
+          )}
+          {searching && publishedOnly.length > 0 && (
+            <section className="published-results" aria-label="Kết quả ngoài vùng đã tải">
+              <h2>Quán khác trên hệ thống</h2>
+              {publishedOnly.map((venue) => (
+                <button key={venue.slug} className="venue-card" onClick={() => selectPublishedVenue(venue)}>
+                  <span className="venue-category">
+                    {venue.category === 'CAFE'
+                      ? 'Cà phê'
+                      : venue.category === 'CINEMA'
+                        ? 'Rạp phim'
+                        : 'Nhà hàng'}
+                  </span>
+                  <strong>{venue.name}</strong>
+                  <span>{venue.address}</span>
+                  <span>
+                    ★ {venue.rating.toFixed(1)} · Xem trên bản đồ · {'₫'.repeat(venue.priceTier)}
+                  </span>
+                </button>
+              ))}
+            </section>
+          )}
+          {remoteReady && publishedSearch.data?.meta.truncated && (
+            <p className="small">Có thêm kết quả. Hãy nhập tên hoặc địa chỉ cụ thể hơn.</p>
+          )}
           {!searching && venues.hasNextPage && venueItems.length < 100 && (
             <button
               className="load-more"
