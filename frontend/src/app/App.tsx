@@ -1,16 +1,34 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, lazy, Suspense, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useLogin, useRegister } from '../features/auth/api/authQueries';
 import { safeReturnTo } from '../features/auth/services/returnTo';
-import { MapExplorer } from '../features/map/pages/MapExplorer';
-import { PlansPage } from '../features/subscription/pages/PlansPage';
-import { FavoritesPage } from '../features/community/pages/FavoritesPage';
-import { PublicProfilePage } from '../features/community/pages/PublicProfilePage';
-import { FollowingPage } from '../features/community/pages/FollowingPage';
-import { ProposalsPage } from '../features/community/pages/ProposalsPage';
-import { BusinessPage } from '../features/business/pages/BusinessPage';
-import { MyBookingsPage } from '../features/booking/pages/MyBookingsPage';
+const MapExplorer = lazy(() =>
+  import('../features/map/pages/MapExplorer').then((module) => ({ default: module.MapExplorer })),
+);
+const PlansPage = lazy(() =>
+  import('../features/subscription/pages/PlansPage').then((module) => ({ default: module.PlansPage })),
+);
+const FavoritesPage = lazy(() =>
+  import('../features/community/pages/FavoritesPage').then((module) => ({ default: module.FavoritesPage })),
+);
+const PublicProfilePage = lazy(() =>
+  import('../features/community/pages/PublicProfilePage').then((module) => ({
+    default: module.PublicProfilePage,
+  })),
+);
+const FollowingPage = lazy(() =>
+  import('../features/community/pages/FollowingPage').then((module) => ({ default: module.FollowingPage })),
+);
+const ProposalsPage = lazy(() =>
+  import('../features/community/pages/ProposalsPage').then((module) => ({ default: module.ProposalsPage })),
+);
+const BusinessPage = lazy(() =>
+  import('../features/business/pages/BusinessPage').then((module) => ({ default: module.BusinessPage })),
+);
+const MyBookingsPage = lazy(() =>
+  import('../features/booking/pages/MyBookingsPage').then((module) => ({ default: module.MyBookingsPage })),
+);
 
 function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
@@ -141,17 +159,25 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
 export function App() {
   return (
-    <Routes>
-      <Route path="/" element={<MapExplorer />} />
-      <Route path="/login" element={<AuthForm mode="login" />} />
-      <Route path="/register" element={<AuthForm mode="register" />} />
-      <Route path="/plans" element={<PlansPage />} />
-      <Route path="/favorites" element={<FavoritesPage />} />
-      <Route path="/following" element={<FollowingPage />} />
-      <Route path="/users/:id" element={<PublicProfilePage />} />
-      <Route path="/proposals" element={<ProposalsPage />} />
-      <Route path="/business" element={<BusinessPage />} />
-      <Route path="/bookings" element={<MyBookingsPage />} />
-    </Routes>
+    <Suspense
+      fallback={
+        <p className="route-loading" role="status">
+          Đang tải trang…
+        </p>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<MapExplorer />} />
+        <Route path="/login" element={<AuthForm mode="login" />} />
+        <Route path="/register" element={<AuthForm mode="register" />} />
+        <Route path="/plans" element={<PlansPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/following" element={<FollowingPage />} />
+        <Route path="/users/:id" element={<PublicProfilePage />} />
+        <Route path="/proposals" element={<ProposalsPage />} />
+        <Route path="/business" element={<BusinessPage />} />
+        <Route path="/bookings" element={<MyBookingsPage />} />
+      </Routes>
+    </Suspense>
   );
 }
