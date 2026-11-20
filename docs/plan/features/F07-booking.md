@@ -9,6 +9,7 @@ Trạng thái: **demo** ngày 19/11/2026. [OpenAPI](../../../contracts/openapi/b
 3. Yêu cầu của người dùng Premium được gắn `priority` theo entitlement backend và đứng trước trong hàng chờ chủ quán. Tài khoản Free vẫn gửi được yêu cầu thường.
 4. Chủ quán xác nhận hoặc từ chối thủ công. Người dùng xem trạng thái trong “Đặt bàn của tôi” và có thể hủy yêu cầu đang chờ hoặc đã xác nhận.
 5. Danh sách của người dùng trả thêm tên và tọa độ quán bằng một truy vấn theo các slug đã đặt, để hiển thị tên dễ nhận biết và mở lại đúng quán trên bản đồ. Nếu quán đã bị xóa, danh sách vẫn giữ slug làm thông tin dự phòng.
+6. UI cho người dùng lọc danh sách đã tải theo tất cả, chờ xác nhận, đã xác nhận hoặc đã kết thúc (bị từ chối/đã hủy); lỗi tải có nút thử lại.
 
 ## Giới hạn demo
 
