@@ -37,7 +37,7 @@ Mở chi tiết một địa điểm, kéo xuống phần bãi đỗ xe. Lọc t
 
 ## 4. Đặt bàn tại quán có hỗ trợ
 
-Đăng nhập, mở một quán ăn hoặc cà phê đã bật nhận yêu cầu rồi chọn thời gian đến, số khách và **Gửi yêu cầu**. Mở **Đặt bàn của tôi** để xem trạng thái, lọc yêu cầu đang chờ/đã xác nhận/đã hủy hoặc bị từ chối, xem tên quán và chọn **Xem quán trên bản đồ** để quay lại quán. Chủ quán sẽ xác nhận hoặc từ chối thủ công; yêu cầu đang chờ **chưa giữ bàn**. Nếu không thấy mục đặt bàn trong chi tiết, quán đó chưa bật nhận yêu cầu. Yêu cầu đã xác nhận không tự chuyển sang hoàn thành khi qua giờ; bản demo chưa có bước ghi nhận khách đã đến.
+Đăng nhập, mở một quán ăn hoặc cà phê đã bật nhận yêu cầu rồi chọn thời gian đến, số khách và **Gửi yêu cầu**. Mở **Đặt bàn của tôi** để xem trạng thái, lọc yêu cầu đang chờ/đã xác nhận/đã kết thúc, xem tên quán và chọn **Xem quán trên bản đồ** để quay lại quán. Chủ quán sẽ xác nhận hoặc từ chối thủ công; yêu cầu đang chờ **chưa giữ bàn**. Nếu không thấy mục đặt bàn trong chi tiết, quán đó chưa bật nhận yêu cầu. Sau khi đón khách, chủ quán đánh dấu yêu cầu **Đã đón khách**; app không tự suy ra khách đã đến từ giờ đặt bàn.
 
 Nếu cần hủy yêu cầu đang chờ hoặc đã xác nhận, chọn **Hủy yêu cầu**, đọc lại tên quán rồi chọn **Xác nhận hủy**. Chọn **Giữ yêu cầu** để thoát khỏi bước xác nhận.
 
@@ -52,7 +52,7 @@ Các thao tác sau cần đăng nhập:
 
 ## 6. Dành cho chủ quán
 
-Đăng nhập, mở quán đã có trên bản đồ rồi chọn **Bạn là chủ quán này?** để gửi yêu cầu nhận quản lý. Sau khi người vận hành duyệt, quán xuất hiện trong danh sách quản lý. Gói cơ bản cho phép sửa hồ sơ và tải logo; các chức năng Premium demo gồm cập nhật chỗ ngồi thủ công, ảnh bìa, dashboard và ưu đãi theo lịch. Chủ quán có thể bật nhận yêu cầu đặt bàn và xử lý hàng chờ. Bản demo chưa có thanh toán gói, kết nối POS hay thông báo đẩy.
+Đăng nhập, mở quán đã có trên bản đồ rồi chọn **Bạn là chủ quán này?** để gửi yêu cầu nhận quản lý. Sau khi người vận hành duyệt, quán xuất hiện trong danh sách quản lý. Gói cơ bản cho phép sửa hồ sơ và tải logo; các chức năng Premium demo gồm cập nhật chỗ ngồi thủ công, ảnh bìa, dashboard và ưu đãi theo lịch. Chủ quán có thể bật nhận yêu cầu đặt bàn, xử lý hàng chờ và chọn **Đánh dấu đã đón khách** cho yêu cầu đã xác nhận; cần bấm **Xác nhận đã đón** ở bước tiếp theo. Yêu cầu hoàn tất rời hàng chờ, khách xem được trong **Đặt bàn của tôi** và không thể hủy. Bản demo chưa có thanh toán gói, kết nối POS hay thông báo đẩy.
 
 ## 7. Gói người dùng và giới hạn bản demo
 
