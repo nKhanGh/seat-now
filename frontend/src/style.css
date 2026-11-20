@@ -136,6 +136,12 @@ p { line-height: 1.55; }
 .parking-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid #deebe1; }
 .parking-filters select { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 6px; }
 .parking-filters label { display: inline-flex; gap: 4px; align-items: center; white-space: nowrap; font-size: .8rem; }
+.proposal-map-wrap { margin: 20px 0 8px; }
+.proposals-page .proposal-form { width: min(100%, 640px); }
+.proposals-page .proposal-locate { border: 1px solid #17654d; border-radius: 8px; background: #e3f6e8; color: #17654d; padding: 10px 12px; font-weight: 700; }
+.proposals-page .proposal-locate:hover { background: #ccefd6; }
+.proposal-map { height: 300px; border: 1px solid #b8cfc2; border-radius: 12px; overflow: hidden; }
+.proposal-location-pin { width: 24px; height: 24px; background: #d35c31; border: 4px solid white; border-radius: 50%; box-shadow: 0 0 0 3px #d35c3155, 0 4px 12px #173b2a66; cursor: grab; }
 .nearby-suggestions { border-top: 1px solid #deebe1; padding-top: 12px; }
 .nearby-suggestions h2 { font-size: 1rem; margin: 0 0 4px; }
 .nearby-suggestions p { margin: 0 0 10px; }

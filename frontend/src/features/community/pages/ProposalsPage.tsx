@@ -3,6 +3,12 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useConfirmProposal, useCreateProposal, useMyProposals, useProposals } from '../api/proposalsQueries';
 import { ProposalInput } from '../services/proposals.service';
+import { ProposalLocationPicker } from '../components/ProposalLocationPicker';
+
+function initialCoordinate(value: string | null, fallback: number, min: number, max: number) {
+  const coordinate = value === null ? fallback : Number(value);
+  return Number.isFinite(coordinate) && coordinate >= min && coordinate <= max ? coordinate : fallback;
+}
 
 export function ProposalsPage() {
   const [params] = useSearchParams();
@@ -17,14 +23,32 @@ export function ProposalsPage() {
     cuisineTypes: [],
     description: '',
     address: '',
-    lat: params.get('lat') === null ? 10.7769 : Number(params.get('lat')),
-    lng: params.get('lng') === null ? 106.7009 : Number(params.get('lng')),
+    lat: initialCoordinate(params.get('lat'), 10.7769, -90, 90),
+    lng: initialCoordinate(params.get('lng'), 106.7009, -180, 180),
     priceTier: 2,
   });
   const [message, setMessage] = useState('');
+  const [locationMessage, setLocationMessage] = useState('');
 
   function patch(next: Partial<ProposalInput>) {
     setForm((current) => ({ ...current, ...next }));
+  }
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setLocationMessage('Trình duyệt không hỗ trợ vị trí.');
+      return;
+    }
+    setLocationMessage('Đang lấy vị trí…');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        patch({ lat: Number(coords.latitude.toFixed(6)), lng: Number(coords.longitude.toFixed(6)) });
+        setLocationMessage(
+          `Đã đặt ghim theo vị trí của bạn (độ chính xác khoảng ${Math.round(coords.accuracy)} m).`,
+        );
+      },
+      () => setLocationMessage('Không lấy được vị trí. Bạn có thể bấm bản đồ hoặc nhập tọa độ.'),
+      { timeout: 8000 },
+    );
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -105,6 +129,19 @@ export function ProposalsPage() {
               required
             />
           </label>
+          <button type="button" className="proposal-locate" onClick={useMyLocation}>
+            Dùng vị trí của tôi
+          </button>
+          {locationMessage && (
+            <p role="status" className="small">
+              {locationMessage}
+            </p>
+          )}
+          <ProposalLocationPicker
+            lat={form.lat}
+            lng={form.lng}
+            onChange={(lat, lng) => patch({ lat, lng })}
+          />
           <div className="proposal-coordinates">
             <label>
               Vĩ độ
