@@ -84,9 +84,9 @@ export function VenueMap({
 
   useEffect(() => {
     if (selectionSerial === lastSelectionSerial.current) return;
-    lastSelectionSerial.current = selectionSerial;
     const selected = venues.find((venue) => venue.id === selectedId);
     if (!selected || !map.current) return;
+    lastSelectionSerial.current = selectionSerial;
     const [selectedLng, selectedLat] = selected.location.coordinates;
     const center = map.current.getCenter();
     if (Math.abs(center.lat - selectedLat) > 0.0005 || Math.abs(center.lng - selectedLng) > 0.0005) {
