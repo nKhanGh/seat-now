@@ -39,6 +39,9 @@ p { line-height: 1.55; }
 .explorer-header nav button:disabled { opacity: .55; cursor: wait; }
 .filterbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: white; border-bottom: 1px solid #deebe1; }
 .filterbar select, .filterbar button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 9px 12px; color: #152520; }
+.venue-search { display: inline-flex; align-items: center; gap: 8px; min-width: min(240px, 100%); border: 1px solid #b8cfc2; border-radius: 8px; background: white; color: #17654d; padding: 0 10px; }
+.venue-search:focus-within { outline: 2px solid #2b8e68; }
+.venue-search input { min-width: 0; width: 100%; border: 0; background: transparent; padding: 9px 0; outline: 0; color: #152520; }
 .filter-check { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
 .location-message { margin: 0; padding: 6px 24px; background: #e3f6e8; }
 .explorer-body { display: grid; grid-template-columns: minmax(300px, 390px) 1fr; flex: 1; min-height: 640px; }

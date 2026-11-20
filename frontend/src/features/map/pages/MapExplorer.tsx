@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
 import { useHcmVenuePins, useNearbyVenues, useVenueDetail } from '../api/mapQueries';
@@ -18,6 +18,7 @@ import { ShareVenueButton } from '../../community/components/ShareVenueButton';
 import { BookingPanel } from '../../booking/components/BookingPanel';
 import { NearbySuggestions } from '../components/NearbySuggestions';
 import { nearbySuggestions } from '../services/nearbySuggestions';
+import { searchVenues } from '../services/venueSearch';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -82,14 +83,18 @@ export function MapExplorer() {
       return [...bySlug.values()].slice(-500);
     });
   }, [catalog.data, venueItems, filterSignature]);
+  const searchText = params.get('q') ?? '';
+  const searching = Boolean(searchText.trim());
   const displayedVenues = useMemo(
     () =>
-      [...venueItems].sort(
-        (a, b) =>
-          Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) ||
-          a.distanceM - b.distanceM,
-      ),
-    [venueItems],
+      searching
+        ? searchVenues(seenVenues, searchText)
+        : [...venueItems].sort(
+            (a, b) =>
+              Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) ||
+              a.distanceM - b.distanceM,
+          ),
+    [searching, searchText, seenVenues, venueItems],
   );
   const selected = seenVenues.find((item) => item.slug === params.get('venue'));
   const selectedId = selected?.id ?? null;
@@ -210,6 +215,16 @@ export function MapExplorer() {
         </nav>
       </header>
       <section className="filterbar" aria-label="Bộ lọc địa điểm">
+        <label className="venue-search">
+          <Search size={18} aria-hidden="true" />
+          <input
+            type="search"
+            aria-label="Tìm địa điểm theo tên hoặc địa chỉ"
+            placeholder="Tìm tên quán, địa chỉ…"
+            value={searchText}
+            onChange={(event) => update({ q: event.target.value || null })}
+          />
+        </label>
         <select
           aria-label="Loại địa điểm"
           value={filters.category || ''}
@@ -293,14 +308,26 @@ export function MapExplorer() {
           <p className="small">
             Dữ liệu mẫu hư cấu tại nhiều khu vực TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.
           </p>
-          {venues.isPending && <p>Đang tìm địa điểm…</p>}
-          {venues.isError && (
+          {searching && (
+            <p className="small">Tìm trong các địa điểm đã tải · {displayedVenues.length} kết quả.</p>
+          )}
+          {searching && catalog.isPending && seenVenues.length === 0 && <p>Đang tải dữ liệu để tìm…</p>}
+          {searching && catalog.isError && seenVenues.length === 0 && (
+            <p role="alert">
+              Không tải được danh sách để tìm. <button onClick={() => void catalog.refetch()}>Thử lại</button>
+            </p>
+          )}
+          {!searching && venues.isPending && <p>Đang tìm địa điểm…</p>}
+          {!searching && venues.isError && (
             <p role="alert">
               {venues.error.message} <button onClick={() => void venues.refetch()}>Thử lại</button>
             </p>
           )}
-          {venues.data?.pages[0]?.data.length === 0 && (
+          {!searching && venues.data?.pages[0]?.data.length === 0 && (
             <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>
+          )}
+          {searching && !catalog.isPending && displayedVenues.length === 0 && (
+            <p>Không tìm thấy địa điểm đã tải. Hãy thử tên khác hoặc bỏ bớt bộ lọc.</p>
           )}
           {displayedVenues.map((venue) => (
             <button
@@ -323,7 +350,8 @@ export function MapExplorer() {
               </strong>
               <span>{venue.address}</span>
               <span>
-                ★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}
+                ★ {venue.rating.toFixed(1)} · {searching ? 'Xem trên bản đồ' : `${venue.distanceM} m`} ·{' '}
+                {'₫'.repeat(venue.priceTier)}
               </span>
               {venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}
               {venue.verified &&
@@ -339,7 +367,7 @@ export function MapExplorer() {
               <AvailabilityStatus availability={venue.availability} compact />
             </button>
           ))}
-          {venues.hasNextPage && venueItems.length < 100 && (
+          {!searching && venues.hasNextPage && venueItems.length < 100 && (
             <button
               className="load-more"
               onClick={() => void venues.fetchNextPage()}
@@ -348,7 +376,7 @@ export function MapExplorer() {
               {venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}
             </button>
           )}
-          {venues.hasNextPage && venueItems.length >= 100 && (
+          {!searching && venues.hasNextPage && venueItems.length >= 100 && (
             <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>
           )}
         </section>
