@@ -7,9 +7,10 @@ export type BookingRequest = {
   guestCount: number;
   note: string;
   priority: boolean;
-  status: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELED';
+  status: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELED' | 'COMPLETED';
   createdAt: string;
   resolvedAt: string | null;
+  completedAt: string | null;
   guestDisplayName?: string;
 };
 
@@ -77,7 +78,11 @@ export async function setBookingEnabled(slug: string, enabled: boolean) {
   );
 }
 
-export async function resolveBooking(slug: string, id: string, status: 'CONFIRMED' | 'DECLINED') {
+export async function resolveBooking(
+  slug: string,
+  id: string,
+  status: 'CONFIRMED' | 'DECLINED' | 'COMPLETED',
+) {
   return readData<BookingRequest>(
     await fetch(`${businessPath(slug)}/bookings/${encodeURIComponent(id)}`, {
       method: 'PATCH',

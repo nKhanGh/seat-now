@@ -77,8 +77,10 @@ export class BookingService {
     const rows = await this.bookings
       .find({
         venueSlug: slug,
-        status: { $in: ['PENDING', 'CONFIRMED'] },
-        requestedAt: { $gte: new Date(Date.now() - 2 * 60 * 60_000) },
+        $or: [
+          { status: 'PENDING', requestedAt: { $gte: new Date(Date.now() - 2 * 60 * 60_000) } },
+          { status: 'CONFIRMED', requestedAt: { $gte: new Date(Date.now() - 24 * 60 * 60_000) } },
+        ],
       })
       .sort({ status: -1, priority: -1, requestedAt: 1, _id: 1 })
       .limit(100)
@@ -110,17 +112,24 @@ export class BookingService {
     return { data: this.publicBooking(row) };
   }
 
-  async resolve(userId: string, slug: string, id: string, status: 'CONFIRMED' | 'DECLINED') {
+  async resolve(userId: string, slug: string, id: string, status: 'CONFIRMED' | 'DECLINED' | 'COMPLETED') {
     await this.business.requireOwner(userId, slug);
     if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Booking request not found');
     const row = await this.bookings
       .findOneAndUpdate(
-        { _id: new Types.ObjectId(id), venueSlug: slug, status: 'PENDING' },
-        { $set: { status, resolvedAt: new Date() } },
+        {
+          _id: new Types.ObjectId(id),
+          venueSlug: slug,
+          status: status === 'COMPLETED' ? 'CONFIRMED' : 'PENDING',
+        },
+        {
+          $set:
+            status === 'COMPLETED' ? { status, completedAt: new Date() } : { status, resolvedAt: new Date() },
+        },
         { new: true },
       )
       .lean();
-    if (!row) throw new ConflictException('Booking request is no longer pending');
+    if (!row) throw new ConflictException('Booking request cannot change to this status');
     return { data: this.publicBooking(row) };
   }
 
@@ -135,6 +144,7 @@ export class BookingService {
       status: row.status,
       createdAt: row.createdAt,
       resolvedAt: row.resolvedAt,
+      completedAt: row.completedAt,
     };
   }
 }

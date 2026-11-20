@@ -10,20 +10,22 @@ const statusLabel = {
   CONFIRMED: 'Đã xác nhận',
   DECLINED: 'Quán từ chối',
   CANCELED: 'Đã hủy',
+  COMPLETED: 'Đã đón khách',
 };
 type BookingView = 'ALL' | 'PENDING' | 'CONFIRMED' | 'CLOSED';
 const bookingViews: Array<{ value: BookingView; label: string }> = [
   { value: 'ALL', label: 'Tất cả' },
   { value: 'PENDING', label: 'Chờ xác nhận' },
   { value: 'CONFIRMED', label: 'Đã xác nhận' },
-  { value: 'CLOSED', label: 'Đã hủy / từ chối' },
+  { value: 'CLOSED', label: 'Đã kết thúc' },
 ];
 
 function inView(booking: BookingRequest, view: BookingView) {
   return (
     view === 'ALL' ||
     booking.status === view ||
-    (view === 'CLOSED' && (booking.status === 'DECLINED' || booking.status === 'CANCELED'))
+    (view === 'CLOSED' &&
+      (booking.status === 'DECLINED' || booking.status === 'CANCELED' || booking.status === 'COMPLETED'))
   );
 }
 
@@ -92,6 +94,9 @@ export function MyBookingsPage() {
             {booking.priority && ' · Ưu tiên Premium'}
           </p>
           {booking.note && <p>Ghi chú: {booking.note}</p>}
+          {booking.completedAt && (
+            <p>Chủ quán ghi nhận khách đến: {new Date(booking.completedAt).toLocaleString('vi-VN')}</p>
+          )}
           {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') &&
             (cancelId === booking.id ? (
               <div className="booking-cancel-confirm">

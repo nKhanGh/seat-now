@@ -65,7 +65,7 @@ export function useBookingManagement(slug: string, userId: string | null) {
     onSuccess: refresh,
   });
   const decision = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'CONFIRMED' | 'DECLINED' }) =>
+    mutationFn: ({ id, status }: { id: string; status: 'CONFIRMED' | 'DECLINED' | 'COMPLETED' }) =>
       resolveBooking(slug, id, status),
     onSuccess: refresh,
   });

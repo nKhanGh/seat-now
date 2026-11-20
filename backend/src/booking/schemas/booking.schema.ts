@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
-export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELED';
+export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELED' | 'COMPLETED';
 
 @Schema({ collection: 'booking_requests', timestamps: true })
 export class Booking {
@@ -11,9 +11,14 @@ export class Booking {
   @Prop({ required: true, min: 1, max: 12 }) guestCount!: number;
   @Prop({ default: '' }) note!: string;
   @Prop({ required: true, default: false }) priority!: boolean;
-  @Prop({ required: true, enum: ['PENDING', 'CONFIRMED', 'DECLINED', 'CANCELED'], default: 'PENDING' })
+  @Prop({
+    required: true,
+    enum: ['PENDING', 'CONFIRMED', 'DECLINED', 'CANCELED', 'COMPLETED'],
+    default: 'PENDING',
+  })
   status!: BookingStatus;
   @Prop({ type: Date, default: null }) resolvedAt!: Date | null;
+  @Prop({ type: Date, default: null }) completedAt!: Date | null;
   @Prop() createdAt!: Date;
   @Prop() updatedAt!: Date;
 }

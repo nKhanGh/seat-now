@@ -99,6 +99,25 @@ describeWithMongo('booking requests with MongoDB', () => {
     expect((await service.forVenue(owner, 'cafe-a')).data.map((row) => row.id)).toEqual([premium.id]);
     await expect(service.cancel(guest, ordinary.id)).rejects.toThrow(ConflictException);
     expect((await service.resolve(owner, 'cafe-a', premium.id, 'DECLINED')).data.status).toBe('DECLINED');
+    const thirdAt = new Date(Date.now() + 5 * 60 * 60_000).toISOString();
+    const arriving = (await service.create(guest, 'cafe-a', { requestedAt: thirdAt, guestCount: 4 })).data;
+    await expect(service.resolve(owner, 'cafe-a', arriving.id, 'COMPLETED')).rejects.toThrow(
+      ConflictException,
+    );
+    const confirmed = (await service.resolve(owner, 'cafe-a', arriving.id, 'CONFIRMED')).data;
+    business.requireOwner.mockRejectedValueOnce(new ForbiddenException());
+    await expect(service.resolve(guest, 'cafe-a', arriving.id, 'COMPLETED')).rejects.toThrow(
+      ForbiddenException,
+    );
+    const completed = (await service.resolve(owner, 'cafe-a', arriving.id, 'COMPLETED')).data;
+    expect(completed).toMatchObject({ status: 'COMPLETED', resolvedAt: confirmed.resolvedAt });
+    expect(completed.completedAt).toBeTruthy();
+    expect((await service.forVenue(owner, 'cafe-a')).data).toEqual([]);
+    expect((await service.mine(guest)).data[0].status).toBe('COMPLETED');
+    await expect(service.cancel(guest, arriving.id)).rejects.toThrow(ConflictException);
+    await expect(service.resolve(owner, 'cafe-a', arriving.id, 'DECLINED')).rejects.toThrow(
+      ConflictException,
+    );
     await mongoose.connection.collection('venues').deleteOne({ slug: 'cafe-a' });
     expect((await service.mine(guest)).data[0]).toMatchObject({
       venueName: 'cafe-a',
