@@ -1,8 +1,10 @@
 # SeatNow
 
+[Hướng dẫn sử dụng bản demo](docs/USER_GUIDE.md) · [Cách chạy local](#chạy-demo-local)
+
 SeatNow là ứng dụng giúp người dùng tìm địa điểm và bãi đỗ xe gần đó, xem mức độ đông/vắng cùng số chỗ còn trống gần thời gian thực, rồi ra quyết định trước khi di chuyển.
 
-Repository hiện có **đăng nhập, bản đồ, tình trạng chỗ ngồi, bãi đỗ xe, gói người dùng, cộng đồng, quản lý chủ quán và yêu cầu đặt bàn**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được triển khai theo đúng thứ tự ưu tiên:
+Repository hiện có **đăng nhập, bản đồ và tìm quán theo tên/địa chỉ, tình trạng chỗ ngồi, bãi đỗ xe, gói người dùng, cộng đồng, quản lý chủ quán và yêu cầu đặt bàn**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được triển khai theo đúng thứ tự ưu tiên:
 
 1. Bản đồ địa điểm thời gian thực và bộ lọc cơ bản.
 2. Tình trạng bàn/chỗ ngồi và thời gian chờ dự kiến.

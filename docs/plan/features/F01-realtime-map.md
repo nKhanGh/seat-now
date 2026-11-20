@@ -19,6 +19,8 @@ F01 sở hữu trải nghiệm tìm kiếm/bản đồ. Số liệu availability
 
 Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ các địa điểm đã tải trên bản đồ, trong bán kính 2 km theo đường chim bay. Gợi ý được xếp theo khoảng cách, không dùng khẩu vị cá nhân hay dữ liệu AI; chọn một gợi ý sẽ mở chi tiết địa điểm đó.
 
+Ô tìm theo tên/địa chỉ dùng danh sách địa điểm đã tải ở client (tối đa 200 bản ghi trong vùng demo TP.HCM), bỏ dấu tiếng Việt trước khi so khớp và lưu từ khóa trong URL. Đây chưa phải tìm kiếm toàn bộ cơ sở dữ liệu; người dùng có thể đổi bộ lọc hoặc kéo bản đồ để tải thêm địa điểm.
+
 Ngoài scope: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, route navigation và booking.
 
 ## 2. Màn hình và hành vi
