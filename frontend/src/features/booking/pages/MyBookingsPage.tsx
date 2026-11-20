@@ -33,6 +33,7 @@ export function MyBookingsPage() {
   const bookings = useMyBookings(userId);
   const cancel = useCancelBooking(userId);
   const [view, setView] = useState<BookingView>('ALL');
+  const [cancelId, setCancelId] = useState<string | null>(null);
   const visibleBookings = bookings.data?.filter((booking) => inView(booking, view)) ?? [];
   return (
     <main className="plans-page">
@@ -58,7 +59,11 @@ export function MyBookingsPage() {
               key={option.value}
               type="button"
               aria-pressed={view === option.value}
-              onClick={() => setView(option.value)}
+              onClick={() => {
+                setView(option.value);
+                setCancelId(null);
+                cancel.reset();
+              }}
             >
               {option.label}
             </button>
@@ -87,11 +92,46 @@ export function MyBookingsPage() {
             {booking.priority && ' · Ưu tiên Premium'}
           </p>
           {booking.note && <p>Ghi chú: {booking.note}</p>}
-          {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
-            <button disabled={cancel.isPending} onClick={() => cancel.mutate(booking.id)}>
-              Hủy yêu cầu
-            </button>
-          )}
+          {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') &&
+            (cancelId === booking.id ? (
+              <div className="booking-cancel-confirm">
+                <p>
+                  Hủy yêu cầu tại {booking.venueName ?? booking.venueSlug}? Yêu cầu sẽ rời hàng chờ của chủ
+                  quán.
+                </p>
+                <div>
+                  <button
+                    type="button"
+                    disabled={cancel.isPending}
+                    onClick={() => {
+                      setCancelId(null);
+                      cancel.reset();
+                    }}
+                  >
+                    Giữ yêu cầu
+                  </button>
+                  <button
+                    type="button"
+                    className="booking-cancel-danger"
+                    disabled={cancel.isPending}
+                    onClick={() => cancel.mutate(booking.id, { onSuccess: () => setCancelId(null) })}
+                  >
+                    {cancel.isPending ? 'Đang hủy…' : 'Xác nhận hủy'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={cancel.isPending}
+                onClick={() => {
+                  setCancelId(booking.id);
+                  cancel.reset();
+                }}
+              >
+                Hủy yêu cầu
+              </button>
+            ))}
         </section>
       ))}
       {cancel.isError && <p role="alert">{cancel.error.message}</p>}

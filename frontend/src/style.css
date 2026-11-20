@@ -122,6 +122,12 @@ p { line-height: 1.55; }
 .booking-filters button { border: 1px solid #b8cfc2; border-radius: 999px; background: white; color: #17654d; padding: 8px 12px; font-weight: 700; }
 .booking-filters button[aria-pressed="true"] { background: #17654d; border-color: #17654d; color: white; }
 .booking-filters button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
+.booking-cancel-confirm { border: 1px solid #e4b9ae; border-radius: 10px; background: #fff6f3; padding: 12px; }
+.booking-cancel-confirm p { margin: 0 0 10px; }
+.booking-cancel-confirm > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.booking-cancel-confirm button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 8px 12px; }
+.booking-cancel-confirm .booking-cancel-danger { background: #a32929; color: white; border-color: #a32929; }
+.booking-cancel-confirm button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .booking-card input[type="checkbox"] { width: auto; display: inline; margin: 0 6px 0 0; }
 .booking-row { display: grid; gap: 6px; border-top: 1px solid #deebe1; padding: 12px 0; }
 .favorite-actions { display: flex; gap: 16px; align-items: center; }
