@@ -48,6 +48,7 @@ export function MapExplorer() {
     null,
   );
   const [seenVenues, setSeenVenues] = useState<VenueMapItem[]>([]);
+  const detailRef = useRef<HTMLElement | null>(null);
   const auth = useCurrentUser();
   const favorites = useFavorites(auth.data?.id ?? null);
   const logout = useLogout();
@@ -138,6 +139,12 @@ export function MapExplorer() {
   }, [displayedVenues, publishedSearch.data, remoteReady, savedOnly, favoriteSlugs]);
   const selected = seenVenues.find((item) => item.slug === params.get('venue'));
   const selectedId = selected?.id ?? null;
+  useEffect(() => {
+    if (!selectedId || !window.matchMedia('(max-width: 760px)').matches) return;
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    const frame = requestAnimationFrame(() => detailRef.current?.scrollIntoView({ behavior }));
+    return () => cancelAnimationFrame(frame);
+  }, [selectedId, selectionSerial]);
   const userCoordinates: [number, number] | undefined = userLocation
     ? [userLocation.lng, userLocation.lat]
     : undefined;
@@ -532,7 +539,7 @@ export function MapExplorer() {
             onSelectParking={setSelectedParkingSlug}
           />
           {selected && (
-            <aside className="map-selected" aria-label={`Chi tiết ${selected.name}`}>
+            <aside ref={detailRef} className="map-selected" aria-label={`Chi tiết ${selected.name}`}>
               {venueDetail.data?.coverUrl && (
                 <img
                   className="venue-cover"
