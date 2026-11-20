@@ -8,6 +8,7 @@ Trạng thái: **demo** ngày 19/11/2026. [OpenAPI](../../../contracts/openapi/b
 2. Người dùng đăng nhập chọn thời gian từ 1 giờ đến 14 ngày tới, số khách 1–12 và ghi chú tùy chọn. Hệ thống tạo yêu cầu `PENDING`; một tài khoản không thể gửi trùng thời gian tại cùng quán.
 3. Yêu cầu của người dùng Premium được gắn `priority` theo entitlement backend và đứng trước trong hàng chờ chủ quán. Tài khoản Free vẫn gửi được yêu cầu thường.
 4. Chủ quán xác nhận hoặc từ chối thủ công. Người dùng xem trạng thái trong “Đặt bàn của tôi” và có thể hủy yêu cầu đang chờ hoặc đã xác nhận.
+5. Danh sách của người dùng trả thêm tên và tọa độ quán bằng một truy vấn theo các slug đã đặt, để hiển thị tên dễ nhận biết và mở lại đúng quán trên bản đồ. Nếu quán đã bị xóa, danh sách vẫn giữ slug làm thông tin dự phòng.
 
 ## Giới hạn demo
 
