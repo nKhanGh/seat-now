@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
 import { useHcmVenuePins, useNearbyVenues, useVenueDetail } from '../api/mapQueries';
@@ -15,6 +16,8 @@ import { FavoriteButton } from '../../community/components/FavoriteButton';
 import { ReviewPanel } from '../../community/components/ReviewPanel';
 import { ShareVenueButton } from '../../community/components/ShareVenueButton';
 import { BookingPanel } from '../../booking/components/BookingPanel';
+import { NearbySuggestions } from '../components/NearbySuggestions';
+import { nearbySuggestions } from '../services/nearbySuggestions';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -29,7 +32,6 @@ const cuisineLabels = {
 
 export function MapExplorer() {
   const [params, setParams] = useSearchParams();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectionSerial, setSelectionSerial] = useState(0);
   const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
   const [parkingFilters, setParkingFilters] = useState<ParkingFilterValues>({
@@ -89,7 +91,12 @@ export function MapExplorer() {
       ),
     [venueItems],
   );
-  const selected = seenVenues.find((item) => item.id === selectedId);
+  const selected = seenVenues.find((item) => item.slug === params.get('venue'));
+  const selectedId = selected?.id ?? null;
+  const suggestions = useMemo(
+    () => (selected ? nearbySuggestions(selected, seenVenues) : []),
+    [selected, seenVenues],
+  );
   const venueDetail = useVenueDetail(selected?.slug ?? null);
   const parking = useParkingForVenue(selected?.slug ?? null, parkingFilters);
   const parkingItems = useMemo(() => parking.data?.pages.flatMap((page) => page.data) ?? [], [parking.data]);
@@ -103,7 +110,6 @@ export function MapExplorer() {
   );
   const selectVenue = useCallback(
     (id: string) => {
-      setSelectedId(id);
       setSelectedParkingSlug(null);
       setSelectionSerial((current) => current + 1);
       const slug = seenVenues.find((item) => item.id === id)?.slug;
@@ -119,14 +125,6 @@ export function MapExplorer() {
     },
     [seenVenues, setParams],
   );
-  useEffect(() => {
-    const requestedSlug = params.get('venue');
-    const requested = seenVenues.find((item) => item.slug === requestedSlug);
-    if (requested && requested.id !== selectedId) {
-      setSelectedId(requested.id);
-      setSelectionSerial((current) => current + 1);
-    }
-  }, [params, seenVenues, selectedId]);
   const update = useCallback(
     (patch: Record<string, string | null>) => {
       setParams(
@@ -369,7 +367,7 @@ export function MapExplorer() {
             onSelectParking={setSelectedParkingSlug}
           />
           {selected && (
-            <div className="map-selected">
+            <aside className="map-selected" aria-label={`Chi tiết ${selected.name}`}>
               {venueDetail.data?.coverUrl && (
                 <img
                   className="venue-cover"
@@ -378,14 +376,19 @@ export function MapExplorer() {
                 />
               )}
               <div className="selected-heading">
-                <strong>{selected.name}</strong>
+                <div>
+                  <span className="eyebrow">Địa điểm đang xem</span>
+                  <h2>{selected.name}</h2>
+                </div>
                 <button
+                  type="button"
+                  className="close-detail"
+                  aria-label="Đóng chi tiết"
                   onClick={() => {
-                    setSelectedId(null);
                     update({ venue: null });
                   }}
                 >
-                  Đóng
+                  <X size={18} /> Đóng
                 </button>
               </div>
               <span>{selected.address}</span>
@@ -445,8 +448,9 @@ export function MapExplorer() {
                   )}
                 </>
               )}
+              <NearbySuggestions items={suggestions} onSelect={selectVenue} />
               <ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
-            </div>
+            </aside>
           )}
         </div>
       </div>

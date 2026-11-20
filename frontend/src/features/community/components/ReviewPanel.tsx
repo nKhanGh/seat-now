@@ -69,7 +69,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
               }}
             />
           </label>
-          <button disabled={save.isPending || upload.isPending || Boolean(fileError)}>
+          <button className="primary" disabled={save.isPending || upload.isPending || Boolean(fileError)}>
             {save.isPending || upload.isPending ? 'Đang lưu…' : 'Gửi đánh giá'}
           </button>
           {save.isError && <p role="alert">{save.error.message}</p>}
