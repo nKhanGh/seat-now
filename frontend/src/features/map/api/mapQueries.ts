@@ -10,11 +10,12 @@ import {
 
 export const mapQueryKeys = { nearby: (filters: MapFilters) => ['map', 'nearby', filters] as const };
 
-export function useNearbyVenues(filters: MapFilters) {
+export function useNearbyVenues(filters: MapFilters, enabled = true) {
   return useInfiniteQuery({
     queryKey: mapQueryKeys.nearby(filters),
     queryFn: ({ signal, pageParam }) => getNearbyVenues(filters, pageParam, signal),
     initialPageParam: null as string | null,
+    enabled,
     getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
     staleTime: 15_000,
     refetchInterval: 30_000,
@@ -46,10 +47,11 @@ export function useVenueDetail(slug: string | null) {
   });
 }
 
-export function useHcmVenuePins(filters: MapFilters) {
+export function useHcmVenuePins(filters: MapFilters, enabled = true) {
   const catalogFilters = { ...filters, lat: 10.7769, lng: 106.7009, radiusM: 20_000 };
   return useQuery({
     queryKey: ['map', 'hcm-pins', catalogFilters],
+    enabled,
     queryFn: async ({ signal }) => {
       const items: VenueMapItem[] = [];
       let cursor: string | null = null;

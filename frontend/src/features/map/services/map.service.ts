@@ -39,6 +39,7 @@ export type MapFilters = {
   ratingGte?: number;
   crowdLevel?: string;
   hasAvailability?: boolean;
+  adsHidden?: boolean;
 };
 
 export type MapResponse = {
@@ -128,6 +129,7 @@ export async function getNearbyVenues(
   if (filters.ratingGte) params.set('ratingGte', String(filters.ratingGte));
   if (filters.crowdLevel) params.set('crowdLevel', filters.crowdLevel);
   if (filters.hasAvailability) params.set('hasAvailability', 'true');
+  if (filters.adsHidden) params.set('adsHidden', 'true');
   if (cursor) params.set('cursor', cursor);
   const response = await fetch(`/api/v1/map/venues?${params}`, { signal });
   if (!response.ok) throw new Error(`Không tải được địa điểm (${response.status}).`);

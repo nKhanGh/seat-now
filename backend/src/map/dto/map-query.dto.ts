@@ -53,6 +53,10 @@ export class MapQueryDto {
   @IsEnum(['true', 'false'])
   hasAvailability?: string;
 
+  @IsOptional()
+  @IsEnum(['true', 'false'])
+  adsHidden?: string;
+
   @Transform(toNumber)
   @IsOptional()
   @IsInt()

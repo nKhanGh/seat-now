@@ -67,7 +67,7 @@ export class MapService {
     };
   }
 
-  async findNearby(query: MapQueryDto) {
+  async findNearby(query: MapQueryDto, adsHidden = false) {
     const now = new Date();
     const limit = query.limit ?? 20;
     const filterHash = createHash('sha256')
@@ -82,6 +82,7 @@ export class MapService {
           query.ratingGte ?? null,
           query.crowdLevel ?? null,
           query.hasAvailability ?? null,
+          adsHidden,
         ]),
       )
       .digest('base64url')
@@ -139,14 +140,16 @@ export class MapService {
         $addFields: {
           sponsorRank: {
             $cond: [
-              {
-                $and: [
-                  { $eq: ['$sponsored', true] },
-                  { $lte: ['$promotionStartsAt', now] },
-                  { $gt: ['$promotionEndsAt', now] },
-                  { $gt: ['$businessPremiumExpiresAt', now] },
-                ],
-              },
+              adsHidden
+                ? false
+                : {
+                    $and: [
+                      { $eq: ['$sponsored', true] },
+                      { $lte: ['$promotionStartsAt', now] },
+                      { $gt: ['$promotionEndsAt', now] },
+                      { $gt: ['$businessPremiumExpiresAt', now] },
+                    ],
+                  },
               1,
               0,
             ],
@@ -202,6 +205,7 @@ export class MapService {
         verified: Boolean(row.businessPremiumExpiresAt && row.businessPremiumExpiresAt > now),
         logoUrl: row.hasLogo ? `/api/v1/venues/${encodeURIComponent(row.slug)}/logo` : null,
         promotion:
+          !adsHidden &&
           row.businessPremiumExpiresAt &&
           row.businessPremiumExpiresAt > now &&
           row.promotionText &&

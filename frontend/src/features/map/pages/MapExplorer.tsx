@@ -26,6 +26,7 @@ import { directionsUrl } from '../services/directions';
 import { distanceMeters } from '../services/geo';
 import { sortVenues, VenueSort } from '../services/sortVenues';
 import { ratingLabel } from '../services/ratingLabel';
+import { useEntitlements } from '../../subscription/api/subscriptionQueries';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -55,6 +56,9 @@ export function MapExplorer() {
   const [seenVenues, setSeenVenues] = useState<VenueMapItem[]>([]);
   const detailRef = useRef<HTMLElement | null>(null);
   const auth = useCurrentUser();
+  const entitlements = useEntitlements(Boolean(auth.data));
+  const adsHidden = entitlements.data?.entitlements['ads.hidden'] ?? false;
+  const mapReady = !auth.isPending && (!auth.data || !entitlements.isPending);
   const favorites = useFavorites(auth.data?.id ?? null);
   const logout = useLogout();
   const filters = useMemo<MapFilters>(
@@ -68,11 +72,12 @@ export function MapExplorer() {
       ratingGte: Number(params.get('ratingGte')) || undefined,
       crowdLevel: params.get('crowdLevel') || undefined,
       hasAvailability: params.get('hasAvailability') === 'true',
+      adsHidden,
     }),
-    [params],
+    [params, adsHidden],
   );
-  const venues = useNearbyVenues(filters);
-  const catalog = useHcmVenuePins(filters);
+  const venues = useNearbyVenues(filters, mapReady);
+  const catalog = useHcmVenuePins(filters, mapReady);
   const venueItems = useMemo(() => venues.data?.pages.flatMap((page) => page.data) ?? [], [venues.data]);
   const filterSignature = JSON.stringify([
     filters.category,
@@ -81,6 +86,7 @@ export function MapExplorer() {
     filters.ratingGte,
     filters.crowdLevel,
     filters.hasAvailability,
+    filters.adsHidden,
   ]);
   const lastFilterSignature = useRef(filterSignature);
   useEffect(() => {
@@ -398,6 +404,7 @@ export function MapExplorer() {
             Chỉ quán đã lưu
           </label>
         )}
+        {adsHidden && <span className="small">Premium · bản đồ không quảng cáo</span>}
         <button onClick={locate}>Vị trí của tôi</button>
         {hasActiveFilters && (
           <button
@@ -425,6 +432,12 @@ export function MapExplorer() {
       {locationMessage && (
         <p role="status" className="location-message">
           {locationMessage}
+        </p>
+      )}
+      {auth.data && entitlements.isError && (
+        <p role="alert" className="location-message">
+          Không kiểm tra được quyền Premium; đang hiển thị bản đồ thông thường.{' '}
+          <button onClick={() => void entitlements.refetch()}>Thử lại</button>
         </p>
       )}
       <div className="explorer-body">
@@ -604,7 +617,7 @@ export function MapExplorer() {
                 <span className="small">Giờ mở cửa: {venueDetail.data.openingHours}</span>
               )}
               {venueDetail.data?.menuSummary && <p className="small">Menu: {venueDetail.data.menuSummary}</p>}
-              {venueDetail.data?.promotion && (
+              {!adsHidden && venueDetail.data?.promotion && (
                 <p className="promotion-label">
                   {venueDetail.data.promotion.sponsored && 'Được tài trợ · '}
                   {venueDetail.data.promotion.text}

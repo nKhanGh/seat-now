@@ -197,6 +197,12 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     const second = await service.findNearby({ ...query, cursor: first.meta.nextCursor! });
     expect(first.data[0]).toMatchObject({ slug: 'far-cafe', promotion: { sponsored: true } });
     expect(second.data[0].slug).toBe('near-cafe');
+    const adFree = await service.findNearby({ ...query, limit: 3 }, true);
+    expect(adFree.data.map((venue) => venue.slug)).toEqual(['near-cafe', 'near-restaurant', 'far-cafe']);
+    expect(adFree.data[2].promotion).toBeNull();
+    await expect(service.findNearby({ ...query, cursor: first.meta.nextCursor! }, true)).rejects.toThrow(
+      'Invalid map cursor',
+    );
     await model.updateOne(
       { slug: 'far-cafe' },
       { $set: { businessPremiumExpiresAt: new Date(Date.now() - 60_000) } },
