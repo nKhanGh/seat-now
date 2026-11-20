@@ -14,7 +14,12 @@ const venueKey = (slug: string, userId: string | null) => ['bookings', 'venue', 
 const statusKey = (slug: string) => ['bookings', 'status', slug] as const;
 
 export function useBookingStatus(slug: string) {
-  return useQuery({ queryKey: statusKey(slug), queryFn: ({ signal }) => getBookingStatus(slug, signal) });
+  return useQuery({
+    queryKey: statusKey(slug),
+    queryFn: ({ signal }) => getBookingStatus(slug, signal),
+    staleTime: 60_000,
+    retry: 1,
+  });
 }
 export function useMyBookings(userId: string | null) {
   return useQuery({

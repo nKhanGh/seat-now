@@ -26,12 +26,14 @@ export function BookingPanel({ slug, userId }: { slug: string; userId: string | 
     }
   }
 
-  if (status.isPending) return <p className="small">Đang kiểm tra nhận đặt chỗ…</p>;
+  if (status.isPending) return null;
   if (status.isError)
     return (
-      <p role="alert">
-        Không kiểm tra được nhận đặt chỗ. <button onClick={() => void status.refetch()}>Thử lại</button>
-      </p>
+      <section className="booking-panel" aria-label="Trạng thái đặt bàn">
+        <p role="alert">
+          Không tải được trạng thái đặt bàn. <button onClick={() => void status.refetch()}>Thử lại</button>
+        </p>
+      </section>
     );
   if (!status.data?.enabled) return null;
   return (
