@@ -21,6 +21,8 @@ Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ 
 
 Ô tìm theo tên/địa chỉ lọc tức thì danh sách đã tải ở client và lưu từ khóa trong URL. Sau 300 ms, `GET /map/search` tìm thêm trong toàn bộ projection địa điểm công khai bằng so khớp không phân biệt dấu/chữ hoa; mỗi lần trả tối đa 12 kết quả và cờ `truncated`. Chọn kết quả ngoài vùng sẽ đưa bản đồ tới tọa độ quán và bỏ các bộ lọc loại/giá/chỗ trống có thể che quán. Truy vấn regex phù hợp dataset demo; cần index tìm kiếm chuyên dụng trước khi tăng quy mô dữ liệu.
 
+Danh sách đã tải có lựa chọn sắp theo gần tâm bản đồ, điểm đánh giá hoặc mức giá. Khoảng cách tính lại từ tọa độ hiện tại sau khi pan; mặc định quán Sponsored đứng trước, còn lựa chọn đánh giá/giá theo đúng tiêu chí. Khi tìm từ khóa, kết quả địa phương giữ độ khớp và lựa chọn sắp xếp tạm dừng; kết quả toàn hệ thống vẫn ở nhóm riêng.
+
 Ngoài scope F01: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, điều hướng từng chặng trong app và booking. Chi tiết hiện có liên kết ra Google Maps đến tọa độ quán.
 
 ## 2. Màn hình và hành vi
