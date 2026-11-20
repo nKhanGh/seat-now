@@ -4,6 +4,7 @@ import { Model, PipelineStage, Types } from 'mongoose';
 import { createHash } from 'node:crypto';
 import { MapQueryDto } from '../dto/map-query.dto';
 import { VenueMapView } from '../schemas/venue-map-view.schema';
+import { venueSearchPattern } from './venue-search-pattern';
 
 type MapRow = {
   _id: { toString(): string };
@@ -40,6 +41,31 @@ type MapRow = {
 @Injectable()
 export class MapService {
   constructor(@InjectModel(VenueMapView.name) private readonly venues: Model<VenueMapView>) {}
+
+  async searchPublished(query: string) {
+    const pattern = venueSearchPattern(query);
+    const rows = await this.venues
+      .find(
+        { status: 'ACTIVE', $or: [{ name: pattern }, { address: pattern }] },
+        { slug: 1, name: 1, address: 1, category: 1, location: 1, rating: 1, priceTier: 1 },
+      )
+      .sort({ name: 1, _id: 1 })
+      .limit(13)
+      .lean();
+    return {
+      data: rows.slice(0, 12).map((row) => ({
+        id: row._id.toString(),
+        slug: row.slug,
+        name: row.name,
+        address: row.address,
+        category: row.category,
+        location: row.location,
+        rating: row.rating,
+        priceTier: row.priceTier,
+      })),
+      meta: { truncated: rows.length > 12 },
+    };
+  }
 
   async findNearby(query: MapQueryDto) {
     const now = new Date();

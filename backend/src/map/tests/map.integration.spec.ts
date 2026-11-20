@@ -72,6 +72,35 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     expect(result.data[0].distanceM).toBe(0);
   });
 
+  it('searches published venues by Vietnamese name outside the current map radius', async () => {
+    const model = mongoose.model(VenueMapView.name);
+    await model.insertMany([
+      {
+        slug: 'outside-search',
+        name: 'Cà phê Thảo Điền',
+        category: 'CAFE',
+        address: 'Thủ Đức',
+        location: { type: 'Point', coordinates: [106.95, 10.95] },
+        priceTier: 2,
+        rating: 4.4,
+      },
+      {
+        slug: 'inactive-search',
+        name: 'Cà phê Thảo Điền đóng cửa',
+        category: 'CAFE',
+        address: 'Thủ Đức',
+        status: 'INACTIVE',
+        location: { type: 'Point', coordinates: [106.95, 10.95] },
+        priceTier: 2,
+        rating: 4,
+      },
+    ]);
+    const result = await service.searchPublished('thao dien');
+    expect(result.data.map((venue) => venue.slug)).toEqual(['outside-search']);
+    expect((await service.searchPublished('.*')).data).toEqual([]);
+    await model.deleteMany({ slug: { $in: ['outside-search', 'inactive-search'] } });
+  });
+
   it('applies category and availability filters inside the geo query', async () => {
     const result = await service.findNearby({
       lat: 10.7769,
