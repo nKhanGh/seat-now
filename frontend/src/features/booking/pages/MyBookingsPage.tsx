@@ -16,7 +16,7 @@ const bookingViews: Array<{ value: BookingView; label: string }> = [
   { value: 'ALL', label: 'Tất cả' },
   { value: 'PENDING', label: 'Chờ xác nhận' },
   { value: 'CONFIRMED', label: 'Đã xác nhận' },
-  { value: 'CLOSED', label: 'Đã kết thúc' },
+  { value: 'CLOSED', label: 'Đã hủy / từ chối' },
 ];
 
 function inView(booking: BookingRequest, view: BookingView) {
