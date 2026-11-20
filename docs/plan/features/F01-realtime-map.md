@@ -19,7 +19,7 @@ F01 sở hữu trải nghiệm tìm kiếm/bản đồ. Số liệu availability
 
 Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ các địa điểm đã tải trên bản đồ, trong bán kính 2 km theo đường chim bay. Gợi ý được xếp theo khoảng cách, không dùng khẩu vị cá nhân hay dữ liệu AI; chọn một gợi ý sẽ mở chi tiết địa điểm đó.
 
-Ô tìm theo tên/địa chỉ dùng danh sách địa điểm đã tải ở client (tối đa 200 bản ghi trong vùng demo TP.HCM), bỏ dấu tiếng Việt trước khi so khớp và lưu từ khóa trong URL. Đây chưa phải tìm kiếm toàn bộ cơ sở dữ liệu; người dùng có thể đổi bộ lọc hoặc kéo bản đồ để tải thêm địa điểm.
+Ô tìm theo tên/địa chỉ lọc tức thì danh sách đã tải ở client và lưu từ khóa trong URL. Sau 300 ms, `GET /map/search` tìm thêm trong toàn bộ projection địa điểm công khai bằng so khớp không phân biệt dấu/chữ hoa; mỗi lần trả tối đa 12 kết quả và cờ `truncated`. Chọn kết quả ngoài vùng sẽ đưa bản đồ tới tọa độ quán và bỏ các bộ lọc loại/giá/chỗ trống có thể che quán. Truy vấn regex phù hợp dataset demo; cần index tìm kiếm chuyên dụng trước khi tăng quy mô dữ liệu.
 
 Ngoài scope: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, route navigation và booking.
 

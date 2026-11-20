@@ -54,6 +54,7 @@ Public API chính:
 
 - `GET /health` (kiểm tra API và MongoDB)
 - `GET /map/venues?lat=10.7769&lng=106.7009&radiusM=3000`
+- `GET /map/search?q=ben%20thanh` (tìm quán công khai theo tên/địa chỉ, tối đa 12 kết quả)
 - `GET /venues/:slug` (chi tiết địa điểm)
 - `GET /venues/:slug/availability`
 - `GET /venues/:slug/parking` hoặc `GET /parking-facilities?lat=...&lng=...`

@@ -1,6 +1,6 @@
 # Kế hoạch triển khai SeatNow
 
-Phiên bản 1.9 — 20/11/2026. Trạng thái: **MVP demo F00–F04, cộng đồng F05, chủ quán F06 và yêu cầu đặt bàn F07 chạy được; hardening M6 đang tiếp tục**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check, lint/format gate, CI, [hướng dẫn sử dụng](../USER_GUIDE.md) và runbook demo đã có. F01 đã có tìm quán trong tập địa điểm tải về theo tên/địa chỉ. POS/parking data connector thật, tìm kiếm toàn cơ sở dữ liệu, E2E browser automation và vận hành production còn ở M6.
+Phiên bản 2.0 — 20/11/2026. Trạng thái: **MVP demo F00–F04, cộng đồng F05, chủ quán F06 và yêu cầu đặt bàn F07 chạy được; hardening M6 đang tiếp tục**. API, UI, Socket.IO, MongoDB integration test, OpenAPI tĩnh, health check, lint/format gate, CI, [hướng dẫn sử dụng](../USER_GUIDE.md) và runbook demo đã có. F01 đã có tìm quán theo tên/địa chỉ trong danh sách tải về và toàn bộ địa điểm công khai. POS/parking data connector thật, index tìm kiếm cho quy mô lớn, E2E browser automation và vận hành production còn ở M6.
 
 [Quy chuẩn chung](COMMON.md) · [ADR stack](../adr/001-stack-and-architecture.md) · [README dự án](../../README.md)
 

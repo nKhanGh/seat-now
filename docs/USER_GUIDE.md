@@ -11,7 +11,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 
 ## 2. Tìm và xem địa điểm
 
-- Nhập tên quán hoặc địa chỉ vào ô **Tìm tên quán, địa chỉ**. Tìm kiếm không phân biệt chữ hoa và dấu tiếng Việt, trong các địa điểm đã tải; chọn kết quả để chuyển bản đồ đến quán.
+- Nhập tên quán hoặc địa chỉ vào ô **Tìm tên quán, địa chỉ**. Danh sách hiện kết quả từ các địa điểm đã tải ngay khi gõ; sau đó app tìm thêm trong toàn bộ quán công khai và đặt kết quả chưa tải ở mục **Quán khác trên hệ thống**. Tìm kiếm không phân biệt chữ hoa và dấu tiếng Việt. Chọn kết quả để chuyển bản đồ đến quán. Nếu có nhiều kết quả, nhập từ khóa cụ thể hơn.
 - Dùng bộ lọc **loại địa điểm**, **loại món**, **bán kính**, **mức giá**, **đánh giá**, **độ đông** hoặc **Còn bàn**. Danh sách bên trái và ghim trên bản đồ cùng cập nhật theo dữ liệu đã tải.
 - Kéo bản đồ để đổi khu vực tìm kiếm. Chọn **Vị trí của tôi** để xin quyền vị trí và hiển thị chấm xanh. Nếu từ chối quyền, bản đồ vẫn sử dụng được với tâm hiện tại.
 - Chọn thẻ trong danh sách hoặc ghim trên bản đồ để mở chi tiết. Trong đó có địa chỉ, thông tin bàn/ghế, thời gian chờ, bãi xe, đánh giá và gợi ý địa điểm gần đó. Chọn **Đóng** một lần để đóng chi tiết.
