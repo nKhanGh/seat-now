@@ -123,5 +123,5 @@ Thứ tự lát cắt: venue seed/index → REST map query → list/map UI → a
 - Screenshot/video desktop/mobile cho happy/empty/error/location-denied.
 - Playwright critical flow và kết quả lint/typecheck/build.
 
-Evidence hiện tại: MongoDB `2dsphere` integration test pass cho radius, cuisine, availability và cursor; API local trả 4 địa điểm trong 3 km. Bản đồ OpenFreeMap, marker, detail và bộ lọc đã được kiểm tra trực tiếp trên browser. Frontend có unit test cho stale/unknown. Chưa có Playwright automation, cluster cho tập dữ liệu lớn hoặc nguồn availability thật.
+Evidence hiện tại: MongoDB `2dsphere` integration test pass cho radius, cuisine, availability và cursor; API local trả địa điểm trong 3 km. Bản đồ OpenFreeMap, cụm ghim ở mức zoom thấp, ghim/logo riêng khi phóng gần, detail và bộ lọc đã được kiểm tra trực tiếp trên browser. Frontend có unit test cho stale/unknown. Chưa có Playwright automation hoặc nguồn availability thật.
 
