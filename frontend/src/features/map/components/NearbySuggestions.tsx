@@ -1,5 +1,6 @@
 import { MapPin } from 'lucide-react';
 import { NearbySuggestion } from '../services/nearbySuggestions';
+import { ratingLabel } from '../services/ratingLabel';
 
 const categoryLabels = { RESTAURANT: 'Nhà hàng', CAFE: 'Cà phê', CINEMA: 'Rạp phim' } as const;
 
@@ -24,7 +25,7 @@ export function NearbySuggestions({
             <span className="suggestion-content">
               <strong>{venue.name}</strong>
               <small>
-                {categoryLabels[venue.category]} · {distanceM} m · ★ {venue.rating.toFixed(1)}
+                {categoryLabels[venue.category]} · {distanceM} m · {ratingLabel(venue.rating)}
               </small>
             </span>
           </button>

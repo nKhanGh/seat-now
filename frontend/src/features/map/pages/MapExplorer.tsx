@@ -24,6 +24,7 @@ import { searchVenues } from '../services/venueSearch';
 import { directionsUrl } from '../services/directions';
 import { distanceMeters } from '../services/geo';
 import { sortVenues, VenueSort } from '../services/sortVenues';
+import { ratingLabel } from '../services/ratingLabel';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -488,7 +489,7 @@ export function MapExplorer() {
               </strong>
               <span>{venue.address}</span>
               <span>
-                ★ {venue.rating.toFixed(1)} ·{' '}
+                {ratingLabel(venue.rating)} ·{' '}
                 {searching
                   ? 'Xem trên bản đồ'
                   : `${distanceMeters([filters.lng, filters.lat], venue.location.coordinates)} m`}{' '}
@@ -530,7 +531,7 @@ export function MapExplorer() {
                   <strong>{venue.name}</strong>
                   <span>{venue.address}</span>
                   <span>
-                    ★ {venue.rating.toFixed(1)} · Xem trên bản đồ · {'₫'.repeat(venue.priceTier)}
+                    {ratingLabel(venue.rating)} · Xem trên bản đồ · {'₫'.repeat(venue.priceTier)}
                   </span>
                 </button>
               ))}
