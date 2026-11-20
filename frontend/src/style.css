@@ -90,6 +90,9 @@ p { line-height: 1.55; }
 .check-in-panel p { margin: 4px 0 8px; }
 .favorite-action { display: flex; gap: 8px; align-items: center; }
 .share-action { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.directions-link, .parking-directions { display: inline-flex; width: fit-content; align-items: center; border: 1px solid #17654d; border-radius: 8px; padding: 8px 11px; color: #17654d; background: #e3f6e8; font-weight: 700; text-decoration: none; }
+.directions-link:hover, .parking-directions:hover { background: #ccefd6; }
+.directions-link:focus-visible, .parking-directions:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .favorite-card { margin: 12px 0; max-width: 620px; }
 .favorite-card h2 { margin: 0 0 8px; }
 .profile-card { max-width: 620px; margin-top: 18px; }
@@ -133,6 +136,7 @@ p { line-height: 1.55; }
 .parking-list p { margin: 4px 0 8px; }
 .parking-card { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; background: #f7faf7; border: 1px solid #deebe1; border-radius: 8px; padding: 10px; margin: 6px 0; color: inherit; }
 .parking-card.selected { border-color: #2854a1; }
+.parking-directions { margin: 0 0 8px 10px; font-size: .84rem; }
 .parking-card span { font-size: .82rem; }
 .parking-extra { color: #53625a; }
 .parking-show-all { padding: 7px 0; font-weight: 700; }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ParkingFacilityItem } from '../services/parking.service';
+import { Coordinates, directionsUrl } from '../../map/services/directions';
 
 const relationLabels: Record<ParkingFacilityItem['relation'], string> = {
   VENUE: 'Bãi của địa điểm',
@@ -29,10 +30,12 @@ export function ParkingList({
   facilities,
   selectedSlug,
   onSelect,
+  userCoordinates,
 }: {
   facilities: ParkingFacilityItem[];
   selectedSlug: string | null;
   onSelect: (slug: string) => void;
+  userCoordinates?: Coordinates;
 }) {
   const [showAll, setShowAll] = useState(false);
   if (facilities.length === 0)
@@ -41,41 +44,55 @@ export function ParkingList({
     <section className="parking-list" aria-label="Bãi đỗ xe gần địa điểm">
       <h2>Bãi đỗ xe gần đây</h2>
       <p className="small">Khoảng cách đường chim bay, chưa tính quãng đường đi thực tế.</p>
-      {(showAll ? facilities : facilities.slice(0, 3)).map((facility) => (
-        <button
-          key={facility.id}
-          className={`parking-card${selectedSlug === facility.slug ? ' selected' : ''}`}
-          onClick={() => onSelect(facility.slug)}
-        >
-          <strong>{facility.name}</strong>
-          <span>
-            {relationLabels[facility.relation]} · Cách khoảng {facility.distanceM} m
-          </span>
-          <span>
-            {facility.vehicleTypes.map((type) => (type === 'CAR' ? 'Ô tô' : 'Xe máy')).join(', ')} ·{' '}
-            {priceLabel(facility.pricing)}
-          </span>
-          <span
-            className={
-              facility.availability.freshness === 'STALE'
-                ? 'availability-stale'
-                : facility.availability.freshness === 'FRESH'
-                  ? 'availability-fresh'
-                  : 'availability-unknown'
-            }
-          >
-            {availabilityLabel(facility.availability)}
-          </span>
-          {selectedSlug === facility.slug && (
-            <span className="parking-extra">
-              {facility.isOpenNow === true ? 'Mở 24 giờ' : 'Chưa rõ giờ mở cửa'}
-              {facility.entranceNote && ` · ${facility.entranceNote}`}
-              {facility.availability.capturedAt &&
-                ` · Cập nhật ${new Date(facility.availability.capturedAt).toLocaleString('vi-VN')}`}
-            </span>
-          )}
-        </button>
-      ))}
+      {(showAll ? facilities : facilities.slice(0, 3)).map((facility) => {
+        const parkingDirections = directionsUrl(facility.location.coordinates, userCoordinates);
+        return (
+          <div key={facility.id}>
+            <button
+              className={`parking-card${selectedSlug === facility.slug ? ' selected' : ''}`}
+              onClick={() => onSelect(facility.slug)}
+            >
+              <strong>{facility.name}</strong>
+              <span>
+                {relationLabels[facility.relation]} · Cách khoảng {facility.distanceM} m
+              </span>
+              <span>
+                {facility.vehicleTypes.map((type) => (type === 'CAR' ? 'Ô tô' : 'Xe máy')).join(', ')} ·{' '}
+                {priceLabel(facility.pricing)}
+              </span>
+              <span
+                className={
+                  facility.availability.freshness === 'STALE'
+                    ? 'availability-stale'
+                    : facility.availability.freshness === 'FRESH'
+                      ? 'availability-fresh'
+                      : 'availability-unknown'
+                }
+              >
+                {availabilityLabel(facility.availability)}
+              </span>
+              {selectedSlug === facility.slug && (
+                <span className="parking-extra">
+                  {facility.isOpenNow === true ? 'Mở 24 giờ' : 'Chưa rõ giờ mở cửa'}
+                  {facility.entranceNote && ` · ${facility.entranceNote}`}
+                  {facility.availability.capturedAt &&
+                    ` · Cập nhật ${new Date(facility.availability.capturedAt).toLocaleString('vi-VN')}`}
+                </span>
+              )}
+            </button>
+            {selectedSlug === facility.slug && parkingDirections && (
+              <a
+                className="parking-directions"
+                href={parkingDirections}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Chỉ đường đến bãi xe ↗
+              </a>
+            )}
+          </div>
+        );
+      })}
       {facilities.length > 3 && (
         <button className="parking-show-all" onClick={() => setShowAll((current) => !current)}>
           {showAll ? 'Thu gọn' : `Xem tất cả ${facilities.length} bãi`}

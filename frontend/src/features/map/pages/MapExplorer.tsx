@@ -20,6 +20,7 @@ import { BookingPanel } from '../../booking/components/BookingPanel';
 import { NearbySuggestions } from '../components/NearbySuggestions';
 import { nearbySuggestions } from '../services/nearbySuggestions';
 import { searchVenues } from '../services/venueSearch';
+import { directionsUrl } from '../services/directions';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -137,6 +138,10 @@ export function MapExplorer() {
   }, [displayedVenues, publishedSearch.data, remoteReady, savedOnly, favoriteSlugs]);
   const selected = seenVenues.find((item) => item.slug === params.get('venue'));
   const selectedId = selected?.id ?? null;
+  const userCoordinates: [number, number] | undefined = userLocation
+    ? [userLocation.lng, userLocation.lat]
+    : undefined;
+  const selectedDirections = selected ? directionsUrl(selected.location.coordinates, userCoordinates) : null;
   const suggestions = useMemo(
     () => (selected ? nearbySuggestions(selected, seenVenues) : []),
     [selected, seenVenues],
@@ -574,6 +579,16 @@ export function MapExplorer() {
                 lat={selected.location.coordinates[1]}
                 lng={selected.location.coordinates[0]}
               />
+              {selectedDirections && (
+                <a
+                  className="directions-link"
+                  href={selectedDirections}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Chỉ đường đến địa điểm ↗
+                </a>
+              )}
               <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
               <AvailabilityStatus availability={selected.availability} />
               {selected.category !== 'CINEMA' && (
@@ -593,6 +608,7 @@ export function MapExplorer() {
                     facilities={parkingItems}
                     selectedSlug={selectedParkingSlug}
                     onSelect={setSelectedParkingSlug}
+                    userCoordinates={userCoordinates}
                   />
                   {parking.hasNextPage && parkingItems.length < 100 && (
                     <button
