@@ -53,7 +53,8 @@ export function ProposalLocationPicker({ lat, lng, onChange }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180)
+      return;
     marker.current?.setLngLat([lng, lat]);
     const center = map.current?.getCenter();
     if (center && (Math.abs(center.lat - lat) > 0.001 || Math.abs(center.lng - lng) > 0.001))
