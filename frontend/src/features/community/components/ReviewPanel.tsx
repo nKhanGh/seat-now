@@ -24,6 +24,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
   const [fileError, setFileError] = useState('');
   const [success, setSuccess] = useState('');
   const [dirty, setDirty] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const items = reviews.data?.pages.flatMap((page) => page.data) ?? [];
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSuccess('');
+    setDeleteConfirm(false);
     const form = event.currentTarget;
     try {
       await save.mutateAsync({ slug, rating, body: body.trim() });
@@ -118,8 +120,57 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
                 ? 'Cập nhật đánh giá'
                 : 'Gửi đánh giá'}
           </button>
+          {myReview.data &&
+            (deleteConfirm ? (
+              <div className="review-delete-confirm">
+                <p>Xóa đánh giá và ảnh của bạn tại quán này?</p>
+                <div>
+                  <button
+                    type="button"
+                    disabled={remove.isPending}
+                    onClick={() => {
+                      setDeleteConfirm(false);
+                      remove.reset();
+                    }}
+                  >
+                    Giữ đánh giá
+                  </button>
+                  <button
+                    type="button"
+                    className="review-delete-danger"
+                    disabled={remove.isPending}
+                    onClick={() =>
+                      remove.mutate(slug, {
+                        onSuccess: () => {
+                          setRating(5);
+                          setBody('');
+                          setDirty(false);
+                          setDeleteConfirm(false);
+                          setSuccess('Đã xóa đánh giá.');
+                        },
+                      })
+                    }
+                  >
+                    {remove.isPending ? 'Đang xóa…' : 'Xác nhận xóa'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={remove.isPending}
+                onClick={() => {
+                  setSuccess('');
+                  remove.reset();
+                  setDeleteConfirm(true);
+                }}
+              >
+                Xóa đánh giá của tôi
+              </button>
+            ))}
           {save.isError && <p role="alert">{save.error.message}</p>}
           {upload.isError && <p role="alert">Review đã lưu nhưng ảnh chưa tải lên: {upload.error.message}</p>}
+          {remove.isError && <p role="alert">{remove.error.message}</p>}
           {fileError && <p role="alert">{fileError}</p>}
           {success && <p role="status">{success}</p>}
         </form>
@@ -149,22 +200,6 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
             />
           )}
           <small>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</small>
-          {userId === review.author.id && (
-            <button
-              onClick={() =>
-                remove.mutate(slug, {
-                  onSuccess: () => {
-                    setRating(5);
-                    setBody('');
-                    setDirty(false);
-                  },
-                })
-              }
-              disabled={remove.isPending}
-            >
-              Xóa review của tôi
-            </button>
-          )}
           {userId && userId !== review.author.id && (
             <button
               disabled={report.isPending || reportedIds.includes(review.id)}
@@ -180,7 +215,6 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
           )}
         </article>
       ))}
-      {remove.isError && <p role="alert">{remove.error.message}</p>}
       {report.isError && <p role="alert">{report.error.message}</p>}
       {reviews.hasNextPage && (
         <button onClick={() => void reviews.fetchNextPage()} disabled={reviews.isFetchingNextPage}>

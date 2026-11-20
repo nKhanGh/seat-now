@@ -142,6 +142,12 @@ p { line-height: 1.55; }
 .review-panel textarea { min-height: 78px; resize: vertical; }
 .review-panel textarea, .review-panel select { width: 100%; border: 1px solid #b8cfc2; border-radius: 8px; padding: 9px; background: white; }
 .review-panel .primary { width: 100%; }
+.review-delete-confirm { border: 1px solid #e4b9ae; border-radius: 10px; background: #fff6f3; padding: 12px; }
+.review-delete-confirm p { margin: 0 0 10px; }
+.review-delete-confirm > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.review-delete-confirm button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 8px 12px; }
+.review-delete-confirm .review-delete-danger { background: #a32929; color: white; border-color: #a32929; }
+.review-delete-confirm button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .review-card { border-top: 1px solid #edf2ed; padding: 10px 0; }
 .review-card p { margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .review-photo { display: block; width: min(100%, 280px); max-height: 220px; object-fit: cover; border-radius: 8px; margin: 8px 0; }
