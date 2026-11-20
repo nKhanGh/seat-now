@@ -85,6 +85,17 @@ export function MapExplorer() {
   }, [catalog.data, venueItems, filterSignature]);
   const searchText = params.get('q') ?? '';
   const searching = Boolean(searchText.trim());
+  const hasActiveFilters =
+    searching ||
+    filters.radiusM !== 3000 ||
+    Boolean(
+      filters.category ||
+      filters.cuisine ||
+      filters.priceTier ||
+      filters.ratingGte ||
+      filters.crowdLevel ||
+      filters.hasAvailability,
+    );
   const { query: publishedSearch, activeQuery } = usePublishedVenueSearch(searchText);
   const remoteReady = searching && activeQuery === searchText.trim();
   const displayedVenues = useMemo(
@@ -321,6 +332,26 @@ export function MapExplorer() {
           Còn bàn
         </label>
         <button onClick={locate}>Vị trí của tôi</button>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            className="filter-reset"
+            onClick={() =>
+              update({
+                q: null,
+                category: null,
+                cuisine: null,
+                radiusM: null,
+                priceTier: null,
+                ratingGte: null,
+                crowdLevel: null,
+                hasAvailability: null,
+              })
+            }
+          >
+            Xóa bộ lọc
+          </button>
+        )}
       </section>
       {locationMessage && (
         <p role="status" className="location-message">
