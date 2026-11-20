@@ -35,7 +35,7 @@ Các thao tác sau cần đăng nhập:
 - **Check-in:** mở địa điểm và chọn nút check-in khi đang ở gần quán. Lượt check-in là đóng góp từ cộng đồng, không xác nhận quán còn bàn.
 - **Đánh giá:** trong phần **Review cộng đồng**, chọn 1–5 sao, viết nhận xét ngắn và có thể chọn ảnh JPEG, PNG hoặc WebP tối đa 2 MB. Chọn **Gửi đánh giá**. Có thể xóa đánh giá của mình hoặc báo cáo đánh giá của người khác.
 - **Lưu và chia sẻ:** chọn lưu quán trong chi tiết, xem lại ở **Quán đã lưu**, hoặc chọn **Chia sẻ địa điểm** để lấy liên kết. Chọn tên tác giả review để xem hồ sơ và theo dõi người đó; các tài khoản đang theo dõi nằm ở **Đang theo dõi**.
-- **Đề xuất địa điểm:** chọn **Đề xuất quán**, nhập thông tin và tọa độ rồi gửi. Theo dõi tiến độ trong **Đề xuất của tôi**. Địa điểm cần ba tài khoản khác xác nhận, sau đó người vận hành duyệt mới xuất hiện trên bản đồ. Đây là luồng thêm quán mới; nếu quán đã có trên bản đồ và bạn là chủ quán, dùng luồng **Chủ quán**.
+- **Đề xuất địa điểm:** chọn **Đề xuất quán**, nhập thông tin, rồi bấm bản đồ hoặc kéo ghim để đặt đúng vị trí quán. Nút **Dùng vị trí của tôi** đặt ghim theo vị trí thiết bị nếu bạn cấp quyền; các ô vĩ độ/kinh độ vẫn cho chỉnh chính xác. Gửi đề xuất và theo dõi tiến độ trong **Đề xuất của tôi**. Địa điểm cần ba tài khoản khác xác nhận, sau đó người vận hành duyệt mới xuất hiện trên bản đồ. Đây là luồng thêm quán mới; nếu quán đã có trên bản đồ và bạn là chủ quán, dùng luồng **Chủ quán**.
 
 ## 6. Dành cho chủ quán
 

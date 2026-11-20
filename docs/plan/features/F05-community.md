@@ -16,6 +16,7 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 - Danh sách quán đã lưu chỉ cho chủ tài khoản đọc; review công khai có phân trang cursor và người viết tự xóa được.
 - Hồ sơ công khai chỉ gồm tên hiển thị và số người theo dõi, không gồm email. Link chia sẻ dùng tọa độ venue công khai và slug.
 - Đề xuất cần ba tài khoản khác nhau xác nhận, sau đó người vận hành duyệt bằng token nội bộ mới xuất hiện trên bản đồ. Người gửi theo dõi tiến độ và kết quả trong “Đề xuất của tôi”.
+- Form đề xuất có bản đồ để chọn vị trí bằng cách bấm hoặc kéo ghim, nút lấy vị trí thiết bị theo yêu cầu của người dùng; tọa độ cập nhật vào ô nhập để chỉnh chính xác. Nếu bản đồ nền lỗi, vẫn có thể nhập tọa độ thủ công.
 - Contract API: [community.json](../../../contracts/openapi/community.json). Quy trình kiểm duyệt: [local-demo.md](../../runbooks/local-demo.md).
 
 ## Quy tắc chung
