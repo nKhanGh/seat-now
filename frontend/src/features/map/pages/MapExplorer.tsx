@@ -628,9 +628,13 @@ export function MapExplorer() {
               )}
               <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
               <AvailabilityStatus availability={selected.availability} />
-              <AvailabilityHistory key={selected.slug} slug={selected.slug} />
+              <AvailabilityHistory key={`history-${selected.slug}`} slug={selected.slug} />
               {selected.category !== 'CINEMA' && (
-                <BookingPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
+                <BookingPanel
+                  key={`booking-${selected.slug}`}
+                  slug={selected.slug}
+                  userId={auth.data?.id ?? null}
+                />
               )}
               <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />
               <ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />
@@ -663,7 +667,11 @@ export function MapExplorer() {
                 </>
               )}
               <NearbySuggestions items={suggestions} onSelect={selectVenue} />
-              <ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
+              <ReviewPanel
+                key={`review-${selected.slug}`}
+                slug={selected.slug}
+                userId={auth.data?.id ?? null}
+              />
             </aside>
           )}
         </div>
