@@ -14,7 +14,7 @@ export function NearbySuggestions({
   return (
     <section className="nearby-suggestions" aria-label="Gợi ý địa điểm lân cận">
       <h2>Gợi ý quanh đây</h2>
-      <p className="small">Các địa điểm trong 2 km, tính theo đường chim bay.</p>
+      <p className="small">Trong 2 km đường chim bay; ưu tiên nhiều loại địa điểm khác nhau.</p>
       <div className="suggestion-list">
         {items.map(({ venue, distanceM }) => (
           <button key={venue.slug} className="suggestion-card" onClick={() => onSelect(venue.id)}>
