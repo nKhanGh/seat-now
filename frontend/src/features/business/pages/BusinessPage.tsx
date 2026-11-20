@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import {
   useBusinessCampaign,
@@ -446,7 +447,7 @@ export function BusinessPage() {
       {auth.isPending && <p>Đang kiểm tra đăng nhập…</p>}
       {!auth.isPending && !userId && (
         <p>
-          <Link to="/login">Đăng nhập</Link> để gửi yêu cầu.
+          <AuthLink>Đăng nhập</AuthLink> để gửi yêu cầu.
         </p>
       )}
       {userId && (

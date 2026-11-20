@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import {
   useRemoveReview,
   useReportReview,
@@ -79,7 +80,7 @@ export function ReviewPanel({ slug, userId }: { slug: string; userId: string | n
         </form>
       ) : (
         <p>
-          <Link to="/login">Đăng nhập</Link> để viết review.
+          <AuthLink>Đăng nhập</AuthLink> để viết review.
         </p>
       )}
       {reviews.isPending && <p>Đang tải review…</p>}

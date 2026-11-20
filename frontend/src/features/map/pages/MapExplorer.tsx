@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useHcmVenuePins, useNearbyVenues, usePublishedVenueSearch, useVenueDetail } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
@@ -277,8 +278,8 @@ export function MapExplorer() {
             </>
           ) : (
             <>
-              <Link to="/login">Đăng nhập</Link>
-              <Link to="/register">Đăng ký</Link>
+              <AuthLink>Đăng nhập</AuthLink>
+              <AuthLink mode="register">Đăng ký</AuthLink>
             </>
           )}
         </nav>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useEntitlements, useSubscription } from '../api/subscriptionQueries';
 
@@ -65,7 +66,7 @@ export function PlansPage() {
         </section>
       ) : (
         <p className="plan-current">
-          Bạn có thể dùng các tính năng Free ngay. <Link to="/login">Đăng nhập</Link> để xem gói của mình.
+          Bạn có thể dùng các tính năng Free ngay. <AuthLink>Đăng nhập</AuthLink> để xem gói của mình.
         </p>
       )}
       <div className="plan-grid">

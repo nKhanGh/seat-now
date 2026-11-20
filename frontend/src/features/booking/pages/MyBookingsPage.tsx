@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useCancelBooking, useMyBookings } from '../api/bookingQueries';
 
@@ -22,7 +23,7 @@ export function MyBookingsPage() {
       <h1>Yêu cầu đặt bàn của tôi</h1>
       {!auth.isPending && !userId && (
         <p>
-          <Link to="/login">Đăng nhập</Link> để xem yêu cầu.
+          <AuthLink>Đăng nhập</AuthLink> để xem yêu cầu.
         </p>
       )}
       {bookings.isPending && userId && <p>Đang tải yêu cầu…</p>}

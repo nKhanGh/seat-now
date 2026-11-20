@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useBookingStatus, useCreateBooking } from '../api/bookingQueries';
 
 function localDateTime(offsetMs: number) {
@@ -42,7 +43,7 @@ export function BookingPanel({ slug, userId }: { slug: string; userId: string | 
       <p className="small">Quán sẽ xác nhận thủ công. Gửi yêu cầu chưa đồng nghĩa đã có bàn.</p>
       {!userId ? (
         <p>
-          <Link to="/login">Đăng nhập</Link> để gửi yêu cầu.
+          <AuthLink>Đăng nhập</AuthLink> để gửi yêu cầu.
         </p>
       ) : (
         <form onSubmit={(event) => void submit(event)}>

@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useFollowingStatus, usePublicProfile, useSetFollow } from '../api/followsQueries';
 
@@ -24,7 +25,7 @@ export function PublicProfilePage() {
         <section className="card profile-card">
           <h1>{profile.data.displayName}</h1>
           <p>{profile.data.followers} người theo dõi</p>
-          {!auth.isPending && !auth.data && <Link to="/login">Đăng nhập để theo dõi</Link>}
+          {!auth.isPending && !auth.data && <AuthLink>Đăng nhập để theo dõi</AuthLink>}
           {auth.data?.id === id && <p>Đây là hồ sơ công khai của bạn.</p>}
           {auth.data && auth.data.id !== id && (
             <button

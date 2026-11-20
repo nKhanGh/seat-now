@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCheckInSummary, useCreateCheckIn } from '../api/checkInQueries';
 
 export function CheckInPanel({ slug, signedIn }: { slug: string; signedIn: boolean }) {
@@ -52,7 +52,7 @@ export function CheckInPanel({ slug, signedIn }: { slug: string; signedIn: boole
           {create.isPending ? 'Đang ghi nhận…' : 'Check-in tại đây'}
         </button>
       ) : (
-        <Link to="/login">Đăng nhập để check-in</Link>
+        <AuthLink>Đăng nhập để check-in</AuthLink>
       )}
       {message && <p role="status">{message}</p>}
     </section>

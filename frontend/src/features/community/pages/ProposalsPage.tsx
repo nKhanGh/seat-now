@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useConfirmProposal, useCreateProposal, useMyProposals, useProposals } from '../api/proposalsQueries';
 import { ProposalInput } from '../services/proposals.service';
@@ -189,7 +190,7 @@ export function ProposalsPage() {
         </form>
       ) : (
         <p>
-          <Link to="/login">Đăng nhập</Link> để đề xuất địa điểm mới.
+          <AuthLink>Đăng nhập</AuthLink> để đề xuất địa điểm mới.
         </p>
       )}
       {auth.data && (

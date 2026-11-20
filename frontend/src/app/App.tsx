@@ -1,7 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useLogin, useRegister } from '../features/auth/api/authQueries';
+import { safeReturnTo } from '../features/auth/services/returnTo';
 import { MapExplorer } from '../features/map/pages/MapExplorer';
 import { PlansPage } from '../features/subscription/pages/PlansPage';
 import { FavoritesPage } from '../features/community/pages/FavoritesPage';
@@ -13,6 +14,8 @@ import { MyBookingsPage } from '../features/booking/pages/MyBookingsPage';
 
 function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = safeReturnTo((location.state as { returnTo?: unknown } | null)?.returnTo);
   const login = useLogin();
   const register = useRegister();
   const [email, setEmail] = useState('');
@@ -32,7 +35,7 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     try {
       if (mode === 'login') await login.mutateAsync({ email, password });
       else await register.mutateAsync({ email, password, displayName });
-      void navigate('/');
+      void navigate(returnTo, { replace: true });
     } catch {
       /* The error is displayed below. */
     }
@@ -117,11 +120,17 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         <p>
           {mode === 'login' ? (
             <>
-              Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+              Chưa có tài khoản?{' '}
+              <Link to="/register" state={{ returnTo }}>
+                Đăng ký
+              </Link>
             </>
           ) : (
             <>
-              Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+              Đã có tài khoản?{' '}
+              <Link to="/login" state={{ returnTo }}>
+                Đăng nhập
+              </Link>
             </>
           )}
         </p>
