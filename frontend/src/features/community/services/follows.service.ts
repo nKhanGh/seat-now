@@ -1,5 +1,22 @@
+import { UserReview } from './reviews.service';
+
 export type PublicProfile = { id: string; displayName: string; followers: number };
 export type FollowedProfile = { id: string; displayName: string; followedAt: string };
+
+export type FollowingReview = UserReview & { author: { id: string; displayName: string } };
+export type FollowingFeed = {
+  data: FollowingReview[];
+  meta: { truncated: boolean; followingTruncated: boolean };
+};
+
+export async function getFollowingReviews(signal?: AbortSignal): Promise<FollowingFeed> {
+  const response = await fetch('/api/v1/me/following/reviews', {
+    signal,
+    credentials: 'same-origin',
+  });
+  if (!response.ok) throw new Error(`Không tải được hoạt động mới (${response.status}).`);
+  return response.json() as Promise<FollowingFeed>;
+}
 
 export async function getPublicProfile(id: string, signal?: AbortSignal): Promise<PublicProfile> {
   const response = await fetch(`/api/v1/users/${encodeURIComponent(id)}`, { signal });

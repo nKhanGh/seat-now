@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { AuthService } from '../../auth/services/auth.service';
 import { Follow } from '../schemas/follow.schema';
+import { ReviewsService } from './reviews.service';
 
 @Injectable()
 export class FollowsService {
   constructor(
     @InjectModel(Follow.name) private readonly follows: Model<Follow>,
     private readonly auth: AuthService,
+    private readonly reviews: ReviewsService,
   ) {}
 
   async publicProfile(userId: string) {
@@ -33,6 +35,16 @@ export class FollowsService {
       }),
       meta: { truncated: rows.length > 100 },
     };
+  }
+
+  async feed(userId: string) {
+    const rows = await this.follows
+      .find({ followerId: new Types.ObjectId(userId) }, { followingId: 1 })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(101)
+      .lean();
+    const feed = await this.reviews.listForUsers(rows.slice(0, 100).map((row) => row.followingId));
+    return { data: feed.data, meta: { ...feed.meta, followingTruncated: rows.length > 100 } };
   }
 
   async isFollowing(userId: string, targetId: string) {

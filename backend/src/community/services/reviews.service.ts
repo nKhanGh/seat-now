@@ -180,6 +180,47 @@ export class ReviewsService {
     };
   }
 
+  async listForUsers(userIds: Types.ObjectId[]) {
+    if (userIds.length === 0) return { data: [], meta: { truncated: false } };
+    const rows = await this.reviews
+      .find({ userId: { $in: userIds }, status: 'PUBLISHED' })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(PAGE_SIZE + 1)
+      .lean();
+    const page = rows.slice(0, PAGE_SIZE);
+    const [authors, photos, venues] = await Promise.all([
+      this.auth.publicUsersByIds(page.map((row) => row.userId)),
+      this.photos.find({ reviewId: { $in: page.map((row) => row._id) } }, { reviewId: 1 }).lean(),
+      this.venueModel
+        .find({ slug: { $in: page.map((row) => row.venueSlug) }, status: 'ACTIVE' })
+        .select({ slug: 1, name: 1, location: 1 })
+        .lean(),
+    ]);
+    const authorById = new Map(authors.map((author) => [author.id, author.displayName]));
+    const photoIds = new Set(photos.map((photo) => photo.reviewId.toString()));
+    const venueBySlug = new Map(venues.map((venue) => [venue.slug, venue]));
+    return {
+      data: page.map((row) => {
+        const venue = venueBySlug.get(row.venueSlug);
+        return {
+          id: row._id.toString(),
+          author: {
+            id: row.userId.toString(),
+            displayName: authorById.get(row.userId.toString()) ?? 'Thành viên SeatNow',
+          },
+          venueSlug: row.venueSlug,
+          venueName: venue?.name ?? row.venueSlug,
+          venueLocation: venue?.location ?? null,
+          rating: row.rating,
+          body: row.body,
+          createdAt: row.createdAt,
+          photoUrl: photoIds.has(row._id.toString()) ? `/api/v1/reviews/${row._id.toString()}/photo` : null,
+        };
+      }),
+      meta: { truncated: rows.length > PAGE_SIZE },
+    };
+  }
+
   async upsert(userId: string, slug: string, input: UpsertReviewDto) {
     await this.venues.activeLocation(slug);
     const body = input.body?.trim() ?? '';

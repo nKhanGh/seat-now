@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getFollowingList,
+  getFollowingReviews,
   getFollowingStatus,
   getPublicProfile,
   setFollow,
@@ -9,6 +10,16 @@ import {
 const profileKey = (id: string) => ['community', 'profile', id] as const;
 const statusKey = (userId: string | null, id: string) => ['community', 'follow-status', userId, id] as const;
 const listKey = (userId: string | null) => ['community', 'following', userId] as const;
+const feedKey = (userId: string | null) => ['community', 'following-feed', userId] as const;
+
+export function useFollowingReviews(userId: string | null) {
+  return useQuery({
+    queryKey: feedKey(userId),
+    queryFn: ({ signal }) => getFollowingReviews(signal),
+    enabled: Boolean(userId),
+    refetchInterval: 60_000,
+  });
+}
 
 export function usePublicProfile(id: string) {
   return useQuery({
@@ -41,6 +52,7 @@ export function useSetFollow() {
     onSuccess: (_, { id }) => {
       void client.invalidateQueries({ queryKey: ['community', 'follow-status'] });
       void client.invalidateQueries({ queryKey: ['community', 'following'] });
+      void client.invalidateQueries({ queryKey: ['community', 'following-feed'] });
       void client.invalidateQueries({ queryKey: profileKey(id) });
     },
   });
