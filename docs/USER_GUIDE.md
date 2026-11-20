@@ -17,6 +17,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 - Khi đã đăng nhập và lưu quán, bật **Chỉ quán đã lưu** để xem nhanh các quán yêu thích trong dữ liệu bản đồ đã tải. Mở **Quán đã lưu** để xem toàn bộ danh sách, kể cả quán ngoài vùng đang tải.
 - Kéo bản đồ để đổi khu vực tìm kiếm. Chọn **Vị trí của tôi** để xin quyền vị trí và hiển thị chấm xanh. Nếu từ chối quyền, bản đồ vẫn sử dụng được với tâm hiện tại.
 - Chọn thẻ trong danh sách hoặc ghim trên bản đồ để mở chi tiết. Trong đó có địa chỉ, thông tin bàn/ghế, thời gian chờ, bãi xe, đánh giá và gợi ý địa điểm gần đó. Chọn **Đóng** một lần để đóng chi tiết.
+- Trong chi tiết, chọn **Chỉ đường đến địa điểm** để mở Google Maps ở tab mới. Nếu đã dùng **Vị trí của tôi**, tọa độ đó được dùng làm điểm bắt đầu; nếu chưa, Google Maps sẽ tự hỏi điểm bắt đầu.
 - Chọn **Xem thêm địa điểm** để tải trang kết quả tiếp theo. Ghim của các địa điểm đã tải vẫn còn khi kéo bản đồ.
 - Ở mức thu nhỏ, các quán gần nhau được gom thành vòng tròn có số lượng; chọn vòng tròn để phóng gần. Khi phóng gần hơn, từng ghim quán và logo (nếu có) sẽ hiện riêng.
 - Mục **Gợi ý quanh đây** hiển thị tối đa bốn địa điểm trong phạm vi 2 km tính theo đường chim bay; chọn một gợi ý để mở địa điểm đó. Đây là gợi ý theo vị trí, chưa cá nhân hóa bằng AI.
@@ -25,7 +26,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 
 ## 3. Xem bãi đỗ xe
 
-Mở chi tiết một địa điểm, kéo xuống phần bãi đỗ xe. Lọc theo **loại xe**, **còn chỗ mới**, **mở 24 giờ** hoặc **miễn phí**. Chọn một bãi để xem thông tin giá, khoảng cách và trạng thái chỗ; kiểm tra dấu dữ liệu cũ trước khi di chuyển. Bản demo chưa hỗ trợ giữ chỗ gửi xe.
+Mở chi tiết một địa điểm, kéo xuống phần bãi đỗ xe. Lọc theo **loại xe**, **còn chỗ mới**, **mở 24 giờ** hoặc **miễn phí**. Chọn một bãi để xem thông tin giá, khoảng cách và trạng thái chỗ; kiểm tra dấu dữ liệu cũ trước khi di chuyển. Chọn **Chỉ đường đến bãi xe** để mở Google Maps với tọa độ bãi đã chọn. Khoảng cách trong SeatNow là đường chim bay; quãng đường thực tế do Google Maps tính. Bản demo chưa hỗ trợ giữ chỗ gửi xe.
 
 ## 4. Đặt bàn tại quán có hỗ trợ
 
