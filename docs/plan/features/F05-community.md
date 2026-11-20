@@ -19,6 +19,7 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 - Khi không còn review công khai, projection ghi rating `0` và UI diễn giải là **Chưa có đánh giá**, không hiện “0 sao”.
 - Người dùng đăng nhập có thể bật **Chỉ quán đã lưu** trên bản đồ để lọc danh sách và ghim trong dữ liệu đã tải; trang **Quán đã lưu** vẫn hiển thị toàn bộ mục đã lưu.
 - Hồ sơ công khai gồm tên hiển thị, số người theo dõi và danh sách review công khai có phân trang; review bị ẩn/xóa không xuất hiện. Review gắn tên và liên kết bản đồ nếu quán còn hoạt động, không lộ email. Link chia sẻ dùng tọa độ venue công khai và slug.
+- Trang **Đang theo dõi** lấy tối đa 20 review công khai mới nhất từ 100 tài khoản theo dõi gần nhất bằng một truy vấn review, kèm tác giả, quán và ảnh nếu có; phản hồi ghi rõ khi bị cắt bớt.
 - Đề xuất cần ba tài khoản khác nhau xác nhận, sau đó người vận hành duyệt bằng token nội bộ mới xuất hiện trên bản đồ. Người gửi theo dõi tiến độ và kết quả trong “Đề xuất của tôi”.
 - Form đề xuất có bản đồ để chọn vị trí bằng cách bấm hoặc kéo ghim, nút lấy vị trí thiết bị theo yêu cầu của người dùng; tọa độ cập nhật vào ô nhập để chỉnh chính xác. Nếu bản đồ nền lỗi, vẫn có thể nhập tọa độ thủ công.
 - Contract API: [community.json](../../../contracts/openapi/community.json). Quy trình kiểm duyệt: [local-demo.md](../../runbooks/local-demo.md).
