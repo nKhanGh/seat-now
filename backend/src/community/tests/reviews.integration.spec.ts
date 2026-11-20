@@ -7,6 +7,7 @@ import { AuthService } from '../../auth/services/auth.service';
 import { ReviewPhoto, ReviewPhotoSchema } from '../schemas/review-photo.schema';
 import { ReviewReport, ReviewReportSchema } from '../schemas/review-report.schema';
 import sharp from 'sharp';
+import { Venue, VenueSchema } from '../../map/schemas/venue.schema';
 
 const testUri = process.env.MONGODB_TEST_URI;
 const describeWithMongo = testUri ? describe : describe.skip;
@@ -26,19 +27,32 @@ describeWithMongo('reviews with MongoDB', () => {
     const model = mongoose.model(Review.name, ReviewSchema);
     const photos = mongoose.model(ReviewPhoto.name, ReviewPhotoSchema);
     const reports = mongoose.model(ReviewReport.name, ReviewReportSchema);
+    const venueModel = mongoose.model(Venue.name, VenueSchema);
     await Promise.all([model.createIndexes(), photos.createIndexes(), reports.createIndexes()]);
+    await venueModel.create({
+      slug: 'demo-cafe',
+      name: 'Café Demo',
+      category: 'CAFE',
+      location: { type: 'Point', coordinates: [106.7, 10.77] },
+      address: 'Quận 1, TP.HCM',
+      priceTier: 2,
+      rating: 4.5,
+    });
     const venues = {
       activeLocation: jest.fn().mockResolvedValue([106.7, 10.77]),
       updateCommunityRating: jest.fn().mockResolvedValue(undefined),
     } as unknown as VenuesService;
     const auth = {
+      publicProfileById: jest
+        .fn()
+        .mockImplementation(async (id: string) => ({ id, displayName: 'Demo User' })),
       publicUsersByIds: jest
         .fn()
         .mockImplementation(async (ids: Types.ObjectId[]) =>
           ids.map((id) => ({ id: id.toString(), displayName: 'Demo User' })),
         ),
     } as unknown as AuthService;
-    const service = new ReviewsService(model, photos, reports, venues, auth);
+    const service = new ReviewsService(model, photos, reports, venueModel, venues, auth);
     const authorId = new Types.ObjectId().toString();
     await service.upsert(authorId, 'demo-cafe', { rating: 4, body: 'Không gian thoải mái.' });
     await service.upsert(authorId, 'demo-cafe', { rating: 5, body: 'Dịch vụ rất tốt hôm nay.' });
@@ -72,6 +86,15 @@ describeWithMongo('reviews with MongoDB', () => {
     const photo = await service.getPhoto(first.data[0].id);
     expect((await sharp(photo).metadata()).format).toBe('webp');
     expect((await service.list('demo-cafe')).data[0].photoUrl).toContain('/photo');
+    const publicHistory = (await service.listByUser(authorId)).data[0];
+    expect(publicHistory).toMatchObject({
+      venueName: 'Café Demo',
+      venueLocation: { coordinates: [106.7, 10.77] },
+    });
+    expect(publicHistory.photoUrl).toContain('/photo');
+    await expect(service.listByUser(authorId, first.meta.nextCursor!)).rejects.toThrow(
+      'Invalid review cursor',
+    );
     const reporterId = new Types.ObjectId().toString();
     await service.report(reporterId, first.data[0].id, 'SPAM');
     await service.report(reporterId, first.data[0].id, 'ABUSE');
@@ -82,6 +105,7 @@ describeWithMongo('reviews with MongoDB', () => {
       'Cannot report your own review',
     );
     await service.hide(first.data[0].id);
+    expect((await service.listByUser(authorId)).data).toHaveLength(0);
     expect((await service.list('demo-cafe')).data.some((review) => review.id === first.data[0].id)).toBe(
       false,
     );

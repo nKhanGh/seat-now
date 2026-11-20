@@ -15,3 +15,4 @@ export class Review {
 export const ReviewSchema = SchemaFactory.createForClass(Review);
 ReviewSchema.index({ userId: 1, venueSlug: 1 }, { unique: true });
 ReviewSchema.index({ venueSlug: 1, status: 1, createdAt: -1, _id: -1 });
+ReviewSchema.index({ userId: 1, status: 1, createdAt: -1, _id: -1 });

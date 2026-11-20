@@ -14,6 +14,7 @@ import { UpsertReviewDto } from '../dto/review.dto';
 import { Review } from '../schemas/review.schema';
 import { ReviewPhoto } from '../schemas/review-photo.schema';
 import { ReviewReport } from '../schemas/review-report.schema';
+import { Venue } from '../../map/schemas/venue.schema';
 import sharp from 'sharp';
 
 const PAGE_SIZE = 20;
@@ -24,6 +25,7 @@ export class ReviewsService {
     @InjectModel(Review.name) private readonly reviews: Model<Review>,
     @InjectModel(ReviewPhoto.name) private readonly photos: Model<ReviewPhoto>,
     @InjectModel(ReviewReport.name) private readonly reports: Model<ReviewReport>,
+    @InjectModel(Venue.name) private readonly venueModel: Model<Venue>,
     private readonly venues: VenuesService,
     private readonly auth: AuthService,
   ) {}
@@ -87,6 +89,75 @@ export class ReviewsService {
           rows.length > PAGE_SIZE && last
             ? Buffer.from(
                 JSON.stringify({ slug, createdAt: last.createdAt.toISOString(), id: last._id.toString() }),
+              ).toString('base64url')
+            : null,
+      },
+    };
+  }
+
+  async listByUser(userId: string, encodedCursor?: string) {
+    await this.auth.publicProfileById(userId);
+    let cursor: { createdAt: Date; id: Types.ObjectId } | null = null;
+    if (encodedCursor) {
+      try {
+        const parsed = JSON.parse(Buffer.from(encodedCursor, 'base64url').toString('utf8')) as Record<
+          string,
+          unknown
+        >;
+        if (
+          parsed.userId !== userId ||
+          typeof parsed.createdAt !== 'string' ||
+          typeof parsed.id !== 'string' ||
+          !/^[a-f0-9]{24}$/.test(parsed.id) ||
+          !Number.isFinite(Date.parse(parsed.createdAt))
+        )
+          throw new Error('invalid');
+        cursor = { createdAt: new Date(parsed.createdAt), id: new Types.ObjectId(parsed.id) };
+      } catch {
+        throw new BadRequestException({ code: 'REVIEW_INVALID_CURSOR', message: 'Invalid review cursor' });
+      }
+    }
+    const filter: Record<string, unknown> = { userId: new Types.ObjectId(userId), status: 'PUBLISHED' };
+    if (cursor)
+      filter.$or = [
+        { createdAt: { $lt: cursor.createdAt } },
+        { createdAt: cursor.createdAt, _id: { $lt: cursor.id } },
+      ];
+    const rows = await this.reviews
+      .find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(PAGE_SIZE + 1)
+      .lean();
+    const page = rows.slice(0, PAGE_SIZE);
+    const [photos, venues] = await Promise.all([
+      this.photos.find({ reviewId: { $in: page.map((row) => row._id) } }, { reviewId: 1 }).lean(),
+      this.venueModel
+        .find({ slug: { $in: page.map((row) => row.venueSlug) }, status: 'ACTIVE' })
+        .select({ slug: 1, name: 1, location: 1 })
+        .lean(),
+    ]);
+    const photoIds = new Set(photos.map((photo) => photo.reviewId.toString()));
+    const venueBySlug = new Map(venues.map((venue) => [venue.slug, venue]));
+    const last = page.at(-1);
+    return {
+      data: page.map((row) => {
+        const venue = venueBySlug.get(row.venueSlug);
+        return {
+          id: row._id.toString(),
+          venueSlug: row.venueSlug,
+          venueName: venue?.name ?? row.venueSlug,
+          venueLocation: venue?.location ?? null,
+          rating: row.rating,
+          body: row.body,
+          createdAt: row.createdAt,
+          photoUrl: photoIds.has(row._id.toString()) ? `/api/v1/reviews/${row._id.toString()}/photo` : null,
+        };
+      }),
+      meta: {
+        nextCursor:
+          rows.length > PAGE_SIZE && last
+            ? Buffer.from(
+                JSON.stringify({ userId, createdAt: last.createdAt.toISOString(), id: last._id.toString() }),
               ).toString('base64url')
             : null,
       },

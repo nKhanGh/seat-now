@@ -41,6 +41,11 @@ export class ReviewsController {
     return this.reviews.list(slug, query.cursor);
   }
 
+  @Get('users/:id/reviews')
+  listByUser(@Param('id') id: string, @Query() query: ReviewQueryDto) {
+    return this.reviews.listByUser(id, query.cursor);
+  }
+
   @Put('me/reviews/:slug')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async upsert(@Req() request: CookieRequest, @Param('slug') slug: string, @Body() input: UpsertReviewDto) {
