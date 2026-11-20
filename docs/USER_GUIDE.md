@@ -37,7 +37,7 @@ Mở chi tiết một địa điểm, kéo xuống phần bãi đỗ xe. Lọc t
 
 ## 4. Đặt bàn tại quán có hỗ trợ
 
-Đăng nhập, mở một quán ăn hoặc cà phê đã bật nhận yêu cầu rồi chọn thời gian đến, số khách và **Gửi yêu cầu**. Mở **Đặt bàn của tôi** để xem trạng thái, lọc yêu cầu đang chờ/đã xác nhận/đã kết thúc, xem tên quán và chọn **Xem quán trên bản đồ** để quay lại quán. Chủ quán sẽ xác nhận hoặc từ chối thủ công; yêu cầu đang chờ **chưa giữ bàn**. Nếu không thấy mục đặt bàn trong chi tiết, quán đó chưa bật nhận yêu cầu.
+Đăng nhập, mở một quán ăn hoặc cà phê đã bật nhận yêu cầu rồi chọn thời gian đến, số khách và **Gửi yêu cầu**. Mở **Đặt bàn của tôi** để xem trạng thái, lọc yêu cầu đang chờ/đã xác nhận/đã hủy hoặc bị từ chối, xem tên quán và chọn **Xem quán trên bản đồ** để quay lại quán. Chủ quán sẽ xác nhận hoặc từ chối thủ công; yêu cầu đang chờ **chưa giữ bàn**. Nếu không thấy mục đặt bàn trong chi tiết, quán đó chưa bật nhận yêu cầu. Yêu cầu đã xác nhận không tự chuyển sang hoàn thành khi qua giờ; bản demo chưa có bước ghi nhận khách đã đến.
 
 Nếu cần hủy yêu cầu đang chờ hoặc đã xác nhận, chọn **Hủy yêu cầu**, đọc lại tên quán rồi chọn **Xác nhận hủy**. Chọn **Giữ yêu cầu** để thoát khỏi bước xác nhận.
 
