@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useCancelBooking, useMyBookings } from '../api/bookingQueries';
+import { BookingRequest } from '../services/booking.service';
 
 const statusLabel = {
   PENDING: 'Chờ xác nhận',
@@ -9,12 +11,29 @@ const statusLabel = {
   DECLINED: 'Quán từ chối',
   CANCELED: 'Đã hủy',
 };
+type BookingView = 'ALL' | 'PENDING' | 'CONFIRMED' | 'CLOSED';
+const bookingViews: Array<{ value: BookingView; label: string }> = [
+  { value: 'ALL', label: 'Tất cả' },
+  { value: 'PENDING', label: 'Chờ xác nhận' },
+  { value: 'CONFIRMED', label: 'Đã xác nhận' },
+  { value: 'CLOSED', label: 'Đã kết thúc' },
+];
+
+function inView(booking: BookingRequest, view: BookingView) {
+  return (
+    view === 'ALL' ||
+    booking.status === view ||
+    (view === 'CLOSED' && (booking.status === 'DECLINED' || booking.status === 'CANCELED'))
+  );
+}
 
 export function MyBookingsPage() {
   const auth = useCurrentUser();
   const userId = auth.data?.id ?? null;
   const bookings = useMyBookings(userId);
   const cancel = useCancelBooking(userId);
+  const [view, setView] = useState<BookingView>('ALL');
+  const visibleBookings = bookings.data?.filter((booking) => inView(booking, view)) ?? [];
   return (
     <main className="plans-page">
       <Link to="/" className="brand">
@@ -27,9 +46,30 @@ export function MyBookingsPage() {
         </p>
       )}
       {bookings.isPending && userId && <p>Đang tải yêu cầu…</p>}
-      {bookings.isError && <p role="alert">{bookings.error.message}</p>}
+      {bookings.isError && (
+        <p role="alert">
+          {bookings.error.message} <button onClick={() => void bookings.refetch()}>Thử lại</button>
+        </p>
+      )}
+      {bookings.data && bookings.data.length > 0 && (
+        <div className="booking-filters" aria-label="Lọc lịch sử đặt bàn">
+          {bookingViews.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={view === option.value}
+              onClick={() => setView(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
       {bookings.data?.length === 0 && <p>Chưa có yêu cầu nào.</p>}
-      {bookings.data?.map((booking) => (
+      {bookings.data && bookings.data.length > 0 && visibleBookings.length === 0 && (
+        <p>Không có yêu cầu ở trạng thái này.</p>
+      )}
+      {visibleBookings.map((booking) => (
         <section key={booking.id} className="card booking-card">
           <h2>{booking.venueName ?? booking.venueSlug}</h2>
           {booking.venueLocation && (
