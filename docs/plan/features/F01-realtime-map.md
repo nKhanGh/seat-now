@@ -17,6 +17,8 @@ Guest hoặc user đăng nhập có thể tìm địa điểm quanh vị trí hi
 
 F01 sở hữu trải nghiệm tìm kiếm/bản đồ. Số liệu availability lấy từ F02; khi F02 chưa hoàn tất, fixture phải tuân cùng DTO.
 
+Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ các địa điểm đã tải trên bản đồ, trong bán kính 2 km theo đường chim bay. Gợi ý được xếp theo khoảng cách, không dùng khẩu vị cá nhân hay dữ liệu AI; chọn một gợi ý sẽ mở chi tiết địa điểm đó.
+
 Ngoài scope: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, route navigation và booking.
 
 ## 2. Màn hình và hành vi

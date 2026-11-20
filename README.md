@@ -44,7 +44,7 @@ npm ci
 npm run dev
 ```
 
-Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
+Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Chi tiết quán còn gợi ý tối đa bốn địa điểm trong bán kính 2 km, xếp theo khoảng cách đường chim bay; chạm vào gợi ý để chuyển quán. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
 
 `seed:demo` chỉ chạy ở local/test, tạo 100 địa điểm hư cấu (chủ yếu quán ăn/cà phê ở nhiều quận TP.HCM) và 4 bãi xe. Slug cố định nên chạy lại không nhân đôi quán. Snapshot mẫu hết hạn sau 10 phút; chạy lại `npm run seed:demo` trong `backend` để làm mới. Khi hết hạn, UI ghi **Dữ liệu cũ** và không coi số chỗ đó là còn trống hiện tại.
 
