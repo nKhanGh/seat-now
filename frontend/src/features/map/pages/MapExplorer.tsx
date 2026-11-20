@@ -6,6 +6,7 @@ import { AuthLink } from '../../auth/components/AuthLink';
 import { useHcmVenuePins, useNearbyVenues, usePublishedVenueSearch, useVenueDetail } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
+import { AvailabilityHistory } from '../components/AvailabilityHistory';
 import { MapFilters, VenueMapItem } from '../services/map.service';
 import { useParkingForVenue } from '../../parking/api/parkingQueries';
 import { ParkingList } from '../../parking/components/ParkingList';
@@ -627,6 +628,7 @@ export function MapExplorer() {
               )}
               <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
               <AvailabilityStatus availability={selected.availability} />
+              <AvailabilityHistory key={selected.slug} slug={selected.slug} />
               {selected.category !== 'CINEMA' && (
                 <BookingPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
               )}

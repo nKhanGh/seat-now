@@ -72,6 +72,11 @@ describeWithMongo('AvailabilityService with MongoDB', () => {
     expect(current.data.version).toBe(12);
     expect(current.data.tables?.available).toBe(8);
     expect((await views.findOne({ slug: 'test-cafe' }))?.availabilityVersion).toBe(12);
+    const history = await service.historyForSlug('test-cafe');
+    expect(history.data.map((row) => row.version).sort()).toEqual([11, 12]);
+    expect(history.data.every((row) => row.freshness === 'FRESH')).toBe(true);
+    expect(history.meta).toEqual({ truncated: false, windowHours: 24 });
+    expect((await service.historyForSlug('other-cafe')).data).toEqual([]);
   });
 
   it('rejects contradictory capacity and preserves current data', async () => {
@@ -86,6 +91,40 @@ describeWithMongo('AvailabilityService with MongoDB', () => {
       'Availability version already exists',
     );
     expect((await service.getBySlug('other-cafe')).data.freshness).toBe('UNKNOWN');
+  });
+
+  it('bounds public history to ten records from the past day', async () => {
+    const snapshots = mongoose.model(AvailabilitySnapshot.name);
+    const now = Date.now();
+    await snapshots.insertMany(
+      Array.from({ length: 12 }, (_, index) => ({
+        slug: 'other-cafe',
+        version: index + 1,
+        tables: { total: 20, available: index },
+        crowdLevel: 'MODERATE',
+        acceptingGuests: true,
+        source: 'DEMO',
+        sourceRecordId: `history-${index}`,
+        confidence: 0.8,
+        capturedAt: new Date(now - index * 60_000),
+        expiresAt: new Date(now - index * 60_000 + 10 * 60_000),
+      })),
+    );
+    await snapshots.create({
+      slug: 'other-cafe',
+      version: 13,
+      crowdLevel: 'QUIET',
+      acceptingGuests: true,
+      source: 'DEMO',
+      sourceRecordId: 'history-old',
+      confidence: 0.8,
+      capturedAt: new Date(now - 48 * 60 * 60_000),
+      expiresAt: new Date(now - 48 * 60 * 60_000 + 10 * 60_000),
+    });
+    const history = await service.historyForSlug('other-cafe');
+    expect(history.data.map((row) => row.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(history.meta.truncated).toBe(true);
+    await expect(service.historyForSlug('not-published')).rejects.toMatchObject({ status: 404 });
   });
 
   it('reports stale and unknown without pretending availability is live', async () => {

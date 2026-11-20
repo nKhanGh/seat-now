@@ -12,6 +12,11 @@ export class AvailabilityController {
     return this.availability.getBySlug(slug);
   }
 
+  @Get('venues/:slug/availability/history')
+  history(@Param('slug') slug: string) {
+    return this.availability.historyForSlug(slug);
+  }
+
   @Post('internal/venues/:slug/availability-snapshots')
   ingest(
     @Param('slug') slug: string,

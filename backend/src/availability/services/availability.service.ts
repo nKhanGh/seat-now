@@ -66,6 +66,21 @@ export class AvailabilityService {
     return { data: await this.summaryForSlug(slug) };
   }
 
+  async historyForSlug(slug: string) {
+    const venue = await this.venues.exists({ slug, status: 'ACTIVE' });
+    if (!venue) throw new NotFoundException('Venue not found');
+    const since = new Date(Date.now() - 24 * 60 * 60_000);
+    const rows = await this.snapshots
+      .find({ slug, capturedAt: { $gte: since, $lte: new Date() } })
+      .sort({ capturedAt: -1, _id: -1 })
+      .limit(11)
+      .lean();
+    return {
+      data: rows.slice(0, 10).map((row) => publicAvailability(row)),
+      meta: { truncated: rows.length > 10, windowHours: 24 },
+    };
+  }
+
   async summaryForSlug(slug: string) {
     const record = await this.latest.findOne({ slug }).lean();
     return publicAvailability(record);

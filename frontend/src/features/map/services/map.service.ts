@@ -79,6 +79,30 @@ export type VenueDetail = {
   promotion: VenueMapItem['promotion'];
 };
 
+export type AvailabilityHistory = {
+  data: Array<{
+    version: number;
+    tables: { total: number; available: number } | null;
+    seats: { total: number; available: number } | null;
+    crowdLevel: VenueMapItem['availability']['crowdLevel'];
+    estimatedWaitMinutes: number | null;
+    acceptingGuests: boolean;
+    source: 'DEMO' | 'OPERATOR' | 'POS';
+    capturedAt: string;
+    freshness: 'FRESH' | 'STALE';
+  }>;
+  meta: { truncated: boolean; windowHours: number };
+};
+
+export async function getAvailabilityHistory(
+  slug: string,
+  signal?: AbortSignal,
+): Promise<AvailabilityHistory> {
+  const response = await fetch(`/api/v1/venues/${encodeURIComponent(slug)}/availability/history`, { signal });
+  if (!response.ok) throw new Error(`Không tải được lịch sử chỗ ngồi (${response.status}).`);
+  return response.json() as Promise<AvailabilityHistory>;
+}
+
 export async function getVenueDetail(slug: string, signal?: AbortSignal): Promise<VenueDetail> {
   const response = await fetch(`/api/v1/venues/${encodeURIComponent(slug)}`, { signal });
   if (!response.ok) throw new Error(`Không tải được chi tiết địa điểm (${response.status}).`);
