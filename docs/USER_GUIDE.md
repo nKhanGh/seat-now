@@ -27,6 +27,8 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 
 **Đọc tình trạng chỗ ngồi:** “Dữ liệu cũ” nghĩa là bản ghi đã hết hiệu lực; số bàn/ghế bên cạnh chỉ là lần ghi nhận trước. “Chưa có dữ liệu” nghĩa là app chưa biết tình trạng hiện tại. Bộ lọc **Còn bàn** chỉ tính bản ghi còn hạn và đang nhận khách. Dữ liệu demo hết hạn sau 10 phút.
 
+Trong chi tiết quán, chọn **Xem lịch sử chỗ ngồi 24 giờ** để xem tối đa 10 lần ghi nhận gần nhất. Đây là số liệu đã xảy ra, không dự báo số bàn hiện tại hoặc thời gian tới; mỗi dòng ghi rõ nguồn dữ liệu.
+
 Điểm đánh giá bằng `0` nghĩa là chưa còn review công khai, được hiển thị **Chưa có đánh giá** thay vì 0 sao.
 
 ## 3. Xem bãi đỗ xe
