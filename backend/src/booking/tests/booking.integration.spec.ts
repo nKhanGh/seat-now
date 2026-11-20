@@ -5,6 +5,7 @@ import { BusinessAccessService } from '../../business/services/business-access.s
 import { AuthService } from '../../auth/services/auth.service';
 import { EntitlementService } from '../../subscription/services/entitlement.service';
 import { Booking, BookingSchema } from '../schemas/booking.schema';
+import { Venue, VenueSchema } from '../../map/schemas/venue.schema';
 import { BookingService } from '../services/booking.service';
 
 const testUri = process.env.MONGODB_TEST_URI;
@@ -33,9 +34,20 @@ describeWithMongo('booking requests with MongoDB', () => {
   beforeAll(async () => {
     await mongoose.connect(testUri!, { dbName });
     const model = mongoose.model(Booking.name, BookingSchema);
+    const venues = mongoose.model(Venue.name, VenueSchema);
     await model.createIndexes();
+    await venues.create({
+      slug: 'cafe-a',
+      name: 'Café A',
+      category: 'CAFE',
+      location: { type: 'Point', coordinates: [106.7, 10.77] },
+      address: 'Quận 1, TP.HCM',
+      priceTier: 2,
+      rating: 4.5,
+    });
     service = new BookingService(
       model,
+      venues,
       business as unknown as BusinessAccessService,
       entitlements as unknown as EntitlementService,
       auth as unknown as AuthService,
@@ -56,6 +68,10 @@ describeWithMongo('booking requests with MongoDB', () => {
 
     const ordinary = (await service.create(guest, 'cafe-a', { requestedAt: firstAt, guestCount: 2 })).data;
     expect(ordinary).toMatchObject({ status: 'PENDING', priority: false, guestCount: 2 });
+    expect((await service.mine(guest)).data[0]).toMatchObject({
+      venueName: 'Café A',
+      venueLocation: { coordinates: [106.7, 10.77] },
+    });
     await expect(service.create(guest, 'cafe-a', { requestedAt: firstAt, guestCount: 2 })).rejects.toThrow(
       ConflictException,
     );
@@ -83,5 +99,10 @@ describeWithMongo('booking requests with MongoDB', () => {
     expect((await service.forVenue(owner, 'cafe-a')).data.map((row) => row.id)).toEqual([premium.id]);
     await expect(service.cancel(guest, ordinary.id)).rejects.toThrow(ConflictException);
     expect((await service.resolve(owner, 'cafe-a', premium.id, 'DECLINED')).data.status).toBe('DECLINED');
+    await mongoose.connection.collection('venues').deleteOne({ slug: 'cafe-a' });
+    expect((await service.mine(guest)).data[0]).toMatchObject({
+      venueName: 'cafe-a',
+      venueLocation: null,
+    });
   });
 });

@@ -6,11 +6,13 @@ import { AuthService } from '../../auth/services/auth.service';
 import { EntitlementService } from '../../subscription/services/entitlement.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { Booking } from '../schemas/booking.schema';
+import { Venue } from '../../map/schemas/venue.schema';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookings: Model<Booking>,
+    @InjectModel(Venue.name) private readonly venues: Model<Venue>,
     private readonly business: BusinessAccessService,
     private readonly entitlements: EntitlementService,
     private readonly auth: AuthService,
@@ -53,7 +55,21 @@ export class BookingService {
       .sort({ createdAt: -1, _id: -1 })
       .limit(100)
       .lean();
-    return { data: rows.map((row) => this.publicBooking(row)) };
+    const venueRows = await this.venues
+      .find({ slug: { $in: [...new Set(rows.map((row) => row.venueSlug))] } })
+      .select({ slug: 1, name: 1, location: 1 })
+      .lean();
+    const venueBySlug = new Map(venueRows.map((venue) => [venue.slug, venue]));
+    return {
+      data: rows.map((row) => {
+        const venue = venueBySlug.get(row.venueSlug);
+        return {
+          ...this.publicBooking(row),
+          venueName: venue?.name ?? row.venueSlug,
+          venueLocation: venue?.location ?? null,
+        };
+      }),
+    };
   }
 
   async forVenue(userId: string, slug: string) {

@@ -1,6 +1,8 @@
 export type BookingRequest = {
   id: string;
   venueSlug: string;
+  venueName?: string;
+  venueLocation?: { type: 'Point'; coordinates: [number, number] } | null;
   requestedAt: string;
   guestCount: number;
   note: string;

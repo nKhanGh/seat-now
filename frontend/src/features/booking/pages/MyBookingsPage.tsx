@@ -31,7 +31,14 @@ export function MyBookingsPage() {
       {bookings.data?.length === 0 && <p>Chưa có yêu cầu nào.</p>}
       {bookings.data?.map((booking) => (
         <section key={booking.id} className="card booking-card">
-          <h2>{booking.venueSlug}</h2>
+          <h2>{booking.venueName ?? booking.venueSlug}</h2>
+          {booking.venueLocation && (
+            <Link
+              to={`/?lat=${booking.venueLocation.coordinates[1]}&lng=${booking.venueLocation.coordinates[0]}&venue=${encodeURIComponent(booking.venueSlug)}`}
+            >
+              Xem quán trên bản đồ
+            </Link>
+          )}
           <p>
             {new Date(booking.requestedAt).toLocaleString('vi-VN')} · {booking.guestCount} khách
           </p>
