@@ -91,6 +91,7 @@ Hiện có TypeScript strict, lockfile, build, test, ESLint type-aware và Prett
 - E2E các hành trình quan trọng, accessibility keyboard, responsive, offline/reconnect.
 - Rate limit ingestion; logs có request ID nhưng không log token/PII.
 - Load test geospatial query và fan-out realtime bằng dataset gần kích thước demo mục tiêu.
+- Frontend tải trang theo route: bundle khởi đầu giảm từ khoảng 1,537 kB xuống 319 kB (minified); thư viện bản đồ tải khi mở trang bản đồ. Chunk MapLibre vẫn khoảng 1,083 kB và cần theo dõi hiệu năng trên mạng chậm.
 - Viết runbook seed/reset/backup/restore và bằng chứng nghiệm thu.
 
 ## 4. Task registry
