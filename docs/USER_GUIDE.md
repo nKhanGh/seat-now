@@ -27,6 +27,8 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 
 **Đọc tình trạng chỗ ngồi:** “Dữ liệu cũ” nghĩa là bản ghi đã hết hiệu lực; số bàn/ghế bên cạnh chỉ là lần ghi nhận trước. “Chưa có dữ liệu” nghĩa là app chưa biết tình trạng hiện tại. Bộ lọc **Còn bàn** chỉ tính bản ghi còn hạn và đang nhận khách. Dữ liệu demo hết hạn sau 10 phút.
 
+Điểm đánh giá bằng `0` nghĩa là chưa còn review công khai, được hiển thị **Chưa có đánh giá** thay vì 0 sao.
+
 ## 3. Xem bãi đỗ xe
 
 Mở chi tiết một địa điểm, kéo xuống phần bãi đỗ xe. Lọc theo **loại xe**, **còn chỗ mới**, **mở 24 giờ** hoặc **miễn phí**. Chọn một bãi để xem thông tin giá, khoảng cách và trạng thái chỗ; kiểm tra dấu dữ liệu cũ trước khi di chuyển. Chọn **Chỉ đường đến bãi xe** để mở Google Maps với tọa độ bãi đã chọn. Khoảng cách trong SeatNow là đường chim bay; quãng đường thực tế do Google Maps tính. Bản demo chưa hỗ trợ giữ chỗ gửi xe.
