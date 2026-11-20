@@ -14,6 +14,7 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 
 - Check-in xác thực khoảng cách trong 150 m và độ chính xác vị trí trong 100 m; chỉ giữ user/venue/thời gian trong 7 ngày. Số lượt một giờ là tín hiệu tự báo cáo, không tác động trực tiếp đến số bàn trống.
 - Danh sách quán đã lưu chỉ cho chủ tài khoản đọc; review công khai có phân trang cursor và người viết tự xóa được.
+- Người dùng đăng nhập có thể bật **Chỉ quán đã lưu** trên bản đồ để lọc danh sách và ghim trong dữ liệu đã tải; trang **Quán đã lưu** vẫn hiển thị toàn bộ mục đã lưu.
 - Hồ sơ công khai chỉ gồm tên hiển thị và số người theo dõi, không gồm email. Link chia sẻ dùng tọa độ venue công khai và slug.
 - Đề xuất cần ba tài khoản khác nhau xác nhận, sau đó người vận hành duyệt bằng token nội bộ mới xuất hiện trên bản đồ. Người gửi theo dõi tiến độ và kết quả trong “Đề xuất của tôi”.
 - Form đề xuất có bản đồ để chọn vị trí bằng cách bấm hoặc kéo ghim, nút lấy vị trí thiết bị theo yêu cầu của người dùng; tọa độ cập nhật vào ô nhập để chỉnh chính xác. Nếu bản đồ nền lỗi, vẫn có thể nhập tọa độ thủ công.

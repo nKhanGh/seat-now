@@ -14,6 +14,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 - Nhập tên quán hoặc địa chỉ vào ô **Tìm tên quán, địa chỉ**. Danh sách hiện kết quả từ các địa điểm đã tải ngay khi gõ; sau đó app tìm thêm trong toàn bộ quán công khai và đặt kết quả chưa tải ở mục **Quán khác trên hệ thống**. Tìm kiếm không phân biệt chữ hoa và dấu tiếng Việt. Chọn kết quả để chuyển bản đồ đến quán. Nếu có nhiều kết quả, nhập từ khóa cụ thể hơn.
 - Dùng bộ lọc **loại địa điểm**, **loại món**, **bán kính**, **mức giá**, **đánh giá**, **độ đông** hoặc **Còn bàn**. Danh sách bên trái và ghim trên bản đồ cùng cập nhật theo dữ liệu đã tải.
 - Chọn **Xóa bộ lọc** để bỏ từ khóa và mọi điều kiện lọc, trong khi vẫn giữ khu vực bản đồ đang xem.
+- Khi đã đăng nhập và lưu quán, bật **Chỉ quán đã lưu** để xem nhanh các quán yêu thích trong dữ liệu bản đồ đã tải. Mở **Quán đã lưu** để xem toàn bộ danh sách, kể cả quán ngoài vùng đang tải.
 - Kéo bản đồ để đổi khu vực tìm kiếm. Chọn **Vị trí của tôi** để xin quyền vị trí và hiển thị chấm xanh. Nếu từ chối quyền, bản đồ vẫn sử dụng được với tâm hiện tại.
 - Chọn thẻ trong danh sách hoặc ghim trên bản đồ để mở chi tiết. Trong đó có địa chỉ, thông tin bàn/ghế, thời gian chờ, bãi xe, đánh giá và gợi ý địa điểm gần đó. Chọn **Đóng** một lần để đóng chi tiết.
 - Chọn **Xem thêm địa điểm** để tải trang kết quả tiếp theo. Ghim của các địa điểm đã tải vẫn còn khi kéo bản đồ.
