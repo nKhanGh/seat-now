@@ -7,7 +7,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 1. Mở trang chủ SeatNow. Bản đồ và danh sách mặc định hiển thị quanh trung tâm Quận 1, TP.HCM.
 2. Chọn **Đăng ký**, nhập tên hiển thị, email, mật khẩu ít nhất 12 ký tự và xác nhận mật khẩu. Biểu tượng mắt dùng để hiện hoặc ẩn mật khẩu.
 3. Nếu đã có tài khoản, chọn **Đăng nhập**. Các thao tác xem bản đồ, chỗ ngồi, bãi xe và gói dịch vụ dùng được khi chưa đăng nhập.
-4. Dùng **Đăng xuất** ở thanh đầu trang khi muốn kết thúc phiên.
+4. Dùng **Đăng xuất** ở thanh đầu trang khi muốn kết thúc phiên, rồi chọn **Xác nhận đăng xuất** trong hộp thoại; chọn **Ở lại** để hủy.
 5. Nếu chọn **Đăng nhập** từ một quán, review, đặt bàn hoặc danh sách cá nhân, sau đăng nhập/đăng ký app quay lại đúng màn hình và quán đang xem.
 
 ## 2. Tìm và xem địa điểm
@@ -25,7 +25,7 @@ Tài liệu này mô tả **bản demo hiện tại**. Địa điểm, chỗ ng�
 - Ở mức thu nhỏ, các quán gần nhau được gom thành vòng tròn có số lượng; chọn vòng tròn để phóng gần. Khi phóng gần hơn, từng ghim quán và logo (nếu có) sẽ hiện riêng.
 - Mục **Gợi ý quanh đây** hiển thị tối đa bốn địa điểm trong phạm vi 2 km tính theo đường chim bay, ưu tiên có nhiều loại địa điểm khác nhau; chọn một gợi ý để mở địa điểm đó. Đây là gợi ý theo vị trí, chưa cá nhân hóa bằng AI.
 
-**Đọc tình trạng chỗ ngồi:** “Dữ liệu cũ” nghĩa là bản ghi đã hết hiệu lực; số bàn/ghế bên cạnh chỉ là lần ghi nhận trước. “Chưa có dữ liệu” nghĩa là app chưa biết tình trạng hiện tại. Bộ lọc **Còn bàn** chỉ tính bản ghi còn hạn và đang nhận khách. Dữ liệu demo hết hạn sau 10 phút.
+**Đọc tình trạng chỗ ngồi:** “Dữ liệu cũ” nghĩa là bản ghi đã hết hiệu lực; số bàn/ghế bên cạnh chỉ là lần ghi nhận trước. “Chưa có dữ liệu” nghĩa là app chưa biết tình trạng hiện tại. Bộ lọc **Còn bàn** chỉ tính bản ghi còn hạn và đang nhận khách. Dữ liệu demo có hiệu lực 7 ngày để tiện thử bộ lọc nhưng vẫn là số liệu hư cấu; không dùng để quyết định di chuyển thật.
 
 Trong chi tiết quán, chọn **Xem lịch sử chỗ ngồi 24 giờ** để xem tối đa 10 lần ghi nhận gần nhất. Đây là số liệu đã xảy ra, không dự báo số bàn hiện tại hoặc thời gian tới; mỗi dòng ghi rõ nguồn dữ liệu.
 
@@ -52,7 +52,7 @@ Các thao tác sau cần đăng nhập:
 
 ## 6. Dành cho chủ quán
 
-Đăng nhập, mở quán đã có trên bản đồ rồi chọn **Bạn là chủ quán này?** để gửi yêu cầu nhận quản lý. Sau khi người vận hành duyệt, quán xuất hiện trong danh sách quản lý. Gói cơ bản cho phép sửa hồ sơ và tải logo; các chức năng Premium demo gồm cập nhật chỗ ngồi thủ công, ảnh bìa, dashboard và ưu đãi theo lịch. Chủ quán có thể bật nhận yêu cầu đặt bàn, xử lý hàng chờ và chọn **Đánh dấu đã đón khách** cho yêu cầu đã xác nhận; cần bấm **Xác nhận đã đón** ở bước tiếp theo. Yêu cầu hoàn tất rời hàng chờ, khách xem được trong **Đặt bàn của tôi** và không thể hủy. Bản demo chưa có thanh toán gói, kết nối POS hay thông báo đẩy.
+Đăng nhập, mở quán đã có trên bản đồ rồi chọn **Bạn là chủ quán này?** để gửi yêu cầu nhận quản lý. Mô tả cách chứng minh quyền quản lý và có thể đính kèm ảnh giấy tờ JPEG, PNG hoặc WebP tối đa 3 MB; ảnh chỉ dành cho người vận hành xét duyệt. Sau khi người vận hành duyệt, quán xuất hiện trong danh sách quản lý. Gói cơ bản cho phép sửa hồ sơ và tải logo; các chức năng Premium demo gồm cập nhật chỗ ngồi thủ công, ảnh bìa, dashboard và ưu đãi theo lịch. Chủ quán có thể bật nhận yêu cầu đặt bàn, xử lý hàng chờ và chọn **Đánh dấu đã đón khách** cho yêu cầu đã xác nhận; cần bấm **Xác nhận đã đón** ở bước tiếp theo. Yêu cầu hoàn tất rời hàng chờ, khách xem được trong **Đặt bàn của tôi** và không thể hủy. Bản demo chưa có thanh toán gói, kết nối POS hay thông báo đẩy.
 
 ## 7. Gói người dùng và giới hạn bản demo
 

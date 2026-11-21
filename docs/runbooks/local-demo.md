@@ -44,6 +44,8 @@ the claim and approves or rejects it; a slug alone never grants edit access.
 $base = 'http://localhost:3000/api/v1'
 $headers = @{ Authorization = "Bearer $env:BUSINESS_ADMIN_TOKEN" }
 Invoke-RestMethod "$base/internal/business/claims" -Headers $headers
+# If hasDocument is true, inspect the private attachment before deciding:
+Invoke-WebRequest "$base/internal/business/claims/<claimId>/document" -Headers $headers -OutFile claim-document.webp
 # After reviewing evidence, replace the placeholder with the actual claim ID:
 Invoke-RestMethod "$base/internal/business/claims/<claimId>/approve" -Method Post -Headers $headers
 # Or reject invalid ownership evidence:

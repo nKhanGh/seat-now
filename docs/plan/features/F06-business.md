@@ -21,6 +21,7 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. API, React UI, MongoDB integr
 
 - API chủ quán yêu cầu cookie session và kiểm tra owner ở backend cho từng venue.
 - Claim, nâng gói và huy hiệu phải do operator duyệt; token nội bộ không xuất hiện trong frontend.
+- Ảnh chứng minh quyền quản lý được chuẩn hóa WebP, chỉ trả qua API nội bộ có token xét duyệt và `Cache-Control: no-store`; danh sách yêu cầu chỉ trả cờ `hasDocument`. Ảnh được xóa khỏi claim khi duyệt hoặc từ chối.
 - API công khai chỉ trả dữ liệu hồ sơ cần hiển thị, không tiết lộ thông tin tài khoản chủ quán.
 - Snapshot thủ công dùng ingestion hiện có, có nguồn, version, độ tin cậy và thời gian hết hạn; không ghi đè snapshot mới hơn.
 - Mỗi lát cắt có MongoDB integration test, OpenAPI và hướng dẫn demo.
