@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDecideProposal, useReadyProposals } from '../api/adminQueries';
+import { priceTierLabel } from '../../../shared/priceTier';
 
 type Decision = { id: string; action: 'approve' | 'reject' };
 
@@ -76,7 +77,7 @@ export function AdminProposalsPanel({ queue }: { queue: ReturnType<typeof useRea
               <strong>Loại món:</strong> {proposal.cuisineTypes.join(', ') || 'Chưa khai báo'}
             </p>
             <p>
-              <strong>Mức giá:</strong> {'₫'.repeat(proposal.priceTier)}
+              <strong>Mức giá:</strong> {priceTierLabel(proposal.priceTier)}
             </p>
             <p>
               <strong>Mô tả:</strong>

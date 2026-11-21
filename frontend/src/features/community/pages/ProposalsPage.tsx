@@ -5,6 +5,7 @@ import { useCurrentUser } from '../../auth/api/authQueries';
 import { useConfirmProposal, useCreateProposal, useMyProposals, useProposals } from '../api/proposalsQueries';
 import { ProposalInput } from '../services/proposals.service';
 import { ProposalLocationPicker } from '../components/ProposalLocationPicker';
+import { PRICE_TIER_OPTIONS } from '../../../shared/priceTier';
 
 function initialCoordinate(value: string | null, fallback: number, min: number, max: number) {
   const coordinate = value === null ? fallback : Number(value);
@@ -176,9 +177,9 @@ export function ProposalsPage() {
               value={form.priceTier}
               onChange={(event) => patch({ priceTier: Number(event.target.value) })}
             >
-              {[1, 2, 3, 4].map((tier) => (
-                <option key={tier} value={tier}>
-                  {'₫'.repeat(tier)}
+              {PRICE_TIER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>

@@ -3,6 +3,7 @@ import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useFavorites, useSetFavorite } from '../api/favoritesQueries';
 import { ratingLabel } from '../../map/services/ratingLabel';
+import { priceTierLabel } from '../../../shared/priceTier';
 
 export function FavoritesPage() {
   const auth = useCurrentUser();
@@ -32,7 +33,7 @@ export function FavoritesPage() {
           <h2>{venue.name}</h2>
           <p>{venue.address}</p>
           <p>
-            {ratingLabel(venue.rating)} · {'₫'.repeat(venue.priceTier)}
+            {ratingLabel(venue.rating)} · Giá: {priceTierLabel(venue.priceTier)}
           </p>
           <div className="favorite-actions">
             <Link
