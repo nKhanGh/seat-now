@@ -58,7 +58,7 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         mode === 'login'
           ? await login.mutateAsync({ email, password })
           : await register.mutateAsync({ email, password, displayName });
-      void navigate(user.role === 'ADMIN' && returnTo === '/' ? '/admin' : returnTo, { replace: true });
+      void navigate(user.role === 'ADMIN' ? '/admin' : returnTo, { replace: true });
     } catch {
       /* The error is displayed below. */
     }
