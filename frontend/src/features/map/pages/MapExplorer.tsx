@@ -129,10 +129,15 @@ export function MapExplorer() {
     const nearbyItems =
       venues.isError && venueItems.length === 0
         ? seenVenues.filter(
-            (venue) => distanceMeters([filters.lng, filters.lat], venue.location.coordinates) <= filters.radiusM,
+            (venue) =>
+              distanceMeters([filters.lng, filters.lat], venue.location.coordinates) <= filters.radiusM,
           )
         : venueItems;
-    const candidates = searching ? searchVenues(seenVenues, searchText) : savedOnly ? seenVenues : nearbyItems;
+    const candidates = searching
+      ? searchVenues(seenVenues, searchText)
+      : savedOnly
+        ? seenVenues
+        : nearbyItems;
     const filtered = savedOnly ? candidates.filter((venue) => favoriteSlugs.has(venue.slug)) : candidates;
     return searching ? filtered : sortVenues(filtered, sortOrder, [filters.lng, filters.lat]);
   }, [
@@ -300,6 +305,7 @@ export function MapExplorer() {
               <Link to="/favorites">Quán đã lưu</Link>
               <Link to="/bookings">Đặt bàn của tôi</Link>
               <Link to="/following">Đang theo dõi</Link>
+              {auth.data.role === 'ADMIN' && <Link to="/admin">Xét duyệt</Link>}
               <span>Chào {auth.data.displayName}</span>
               <button
                 onClick={() => {
@@ -323,7 +329,9 @@ export function MapExplorer() {
         <h2 id="logout-title">Đăng xuất khỏi SeatNow?</h2>
         <p>Bạn có thể đăng nhập lại bất cứ lúc nào.</p>
         {logout.isError && (
-          <p role="alert" className="error">{logout.error.message}</p>
+          <p role="alert" className="error">
+            {logout.error.message}
+          </p>
         )}
         <div className="logout-actions">
           <button type="button" onClick={() => logoutDialog.current?.close()} disabled={logout.isPending}>

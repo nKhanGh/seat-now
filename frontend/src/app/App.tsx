@@ -29,6 +29,9 @@ const BusinessPage = lazy(() =>
 const MyBookingsPage = lazy(() =>
   import('../features/booking/pages/MyBookingsPage').then((module) => ({ default: module.MyBookingsPage })),
 );
+const AdminPage = lazy(() =>
+  import('../features/admin/pages/AdminPage').then((module) => ({ default: module.AdminPage })),
+);
 
 function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
@@ -51,9 +54,11 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       return;
     }
     try {
-      if (mode === 'login') await login.mutateAsync({ email, password });
-      else await register.mutateAsync({ email, password, displayName });
-      void navigate(returnTo, { replace: true });
+      const user =
+        mode === 'login'
+          ? await login.mutateAsync({ email, password })
+          : await register.mutateAsync({ email, password, displayName });
+      void navigate(user.role === 'ADMIN' && returnTo === '/' ? '/admin' : returnTo, { replace: true });
     } catch {
       /* The error is displayed below. */
     }
@@ -177,6 +182,7 @@ export function App() {
         <Route path="/proposals" element={<ProposalsPage />} />
         <Route path="/business" element={<BusinessPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </Suspense>
   );
