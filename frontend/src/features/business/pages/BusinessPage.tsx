@@ -15,6 +15,7 @@ import {
 } from '../api/businessQueries';
 import { BusinessProfileInput, BusinessVenue, ManualAvailabilityInput } from '../services/business.service';
 import { BookingQueue } from '../../booking/components/BookingQueue';
+import { BusinessCommunityPanel } from '../components/BusinessCommunityPanel';
 
 function CampaignEditor({ venue, userId }: { venue: BusinessVenue; userId: string }) {
   const campaign = useBusinessCampaign(userId);
@@ -502,6 +503,7 @@ export function BusinessPage() {
               <p role="status" className="notice">
                 Đã được cấp quyền quản lý: <strong>{venue.name}</strong>
               </p>
+              <BusinessCommunityPanel slug={venue.slug} name={venue.name} />
               <ProfileEditor venue={venue} userId={userId} />
               {venue.category !== 'CINEMA' && (
                 <BookingQueue slug={venue.slug} userId={userId} enabled={venue.bookingEnabled} />

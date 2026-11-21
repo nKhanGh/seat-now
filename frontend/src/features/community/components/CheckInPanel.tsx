@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import { AuthLink } from '../../auth/components/AuthLink';
 import { useCheckInSummary, useCreateCheckIn } from '../api/checkInQueries';
-
-const activityLabels = {
-  NONE: 'Chưa đủ dữ liệu cộng đồng để nhận xét độ đông.',
-  LOW: 'Tín hiệu cộng đồng: ít người ghé trong giờ qua.',
-  MODERATE: 'Tín hiệu cộng đồng: có người ghé trong giờ qua.',
-  HIGH: 'Tín hiệu cộng đồng: nhiều người ghé trong giờ qua.',
-} as const;
+import { activitySignalLabels } from '../services/activitySignal';
 
 export function CheckInPanel({ slug, signedIn }: { slug: string; signedIn: boolean }) {
   const summary = useCheckInSummary(slug);
@@ -53,7 +47,7 @@ export function CheckInPanel({ slug, signedIn }: { slug: string; signedIn: boole
               ? 'Chưa có check-in trong giờ qua.'
               : `${summary.data.lastHourUsers} người đã check-in trong giờ qua.`}
           </p>
-          <p className="community-activity">{activityLabels[summary.data.activitySignal]}</p>
+          <p className="community-activity">{activitySignalLabels[summary.data.activitySignal]}</p>
         </>
       )}
       <p className="small">

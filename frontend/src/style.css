@@ -130,6 +130,15 @@ p { line-height: 1.55; }
 .business-form label { display: grid; gap: 5px; }
 .business-form textarea { min-height: 86px; resize: vertical; }
 .business-logo-preview { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; }
+.business-community { width: min(100%, 700px); margin: 20px 0; }
+.business-community-heading, .business-review-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.business-community-heading h3 { margin: 4px 0 12px; }
+.business-community-heading button { width: auto; padding: 8px 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #17654d; font-weight: 700; }
+.business-community-heading button:hover { background: #e3f6e8; }
+.business-review { border-top: 1px solid #deebe1; padding: 14px 0; }
+.business-review p { margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.business-review time { color: #5b6a60; font-size: .85rem; white-space: nowrap; }
+.business-review img { display: block; width: min(100%, 260px); max-height: 210px; object-fit: cover; border-radius: 9px; }
 .business-cover-preview { width: min(100%, 320px); aspect-ratio: 2; object-fit: cover; border-radius: 12px; }
 .venue-cover { width: 100%; aspect-ratio: 2; object-fit: cover; border-radius: 12px; }
 .business-dashboard { max-width: 700px; margin: 20px 0; }

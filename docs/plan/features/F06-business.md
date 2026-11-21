@@ -5,7 +5,7 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. API, React UI, MongoDB integr
 ## Thứ tự triển khai
 
 1. Xác minh quyền quản lý: tài khoản gửi yêu cầu quản lý venue; chỉ người vận hành dùng token nội bộ mới duyệt. Không cho tự nhận quyền bằng cách biết slug. Một venue có một chủ quản lý trong bản đầu.
-2. Gói Basic: chủ quán xem danh sách venue của mình, cập nhật mô tả, giờ mở cửa, menu và khoảng giá; tải logo đã được kiểm tra và chuyển định dạng an toàn. Logo và hồ sơ xuất hiện công khai trên bản đồ/chi tiết.
+2. Gói Basic: chủ quán xem danh sách venue của mình, cập nhật mô tả, giờ mở cửa, menu và khoảng giá; tải logo đã được kiểm tra và chuyển định dạng an toàn. Logo và hồ sơ xuất hiện công khai trên bản đồ/chi tiết. Trang quản lý hiển thị số check-in trong giờ qua, tín hiệu hoạt động cộng đồng và năm review công khai mới nhất kèm ảnh qua API Free đã có.
 3. Gói Premium: cấp gói bằng tác vụ nội bộ cho demo, không giả lập thanh toán. Chủ quán được cập nhật chỗ trống thủ công; nguồn dữ liệu hiển thị là `OPERATOR`, có thời điểm hết hạn. Huy hiệu xác thực chỉ xuất hiện nếu quyền quản lý đã duyệt và gói đang Premium.
 4. Dashboard: số lượt mở trang chi tiết theo giờ không lưu danh tính khách, trung bình tỷ lệ lấp đầy và khung giờ cao từ snapshot 7 ngày. Không suy ra occupancy từ lượt xem/check-in.
 5. Sponsored và giờ vắng: ưu đãi trong app có thời hạn và do chủ quán bật, vị trí tài trợ được xếp trước trong API bản đồ với nhãn rõ ràng; trạng thái “còn nhiều bàn trống” chỉ hiện khi snapshot còn mới. Không tự động gửi push trước khi có opt-in và hạ tầng thông báo.
