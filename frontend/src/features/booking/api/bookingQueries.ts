@@ -40,7 +40,7 @@ export function useVenueBookings(slug: string, userId: string | null) {
 export function useCreateBooking(slug: string, userId: string | null) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: { requestedAt: string; guestCount: number; note: string }) =>
+    mutationFn: (input: { requestedAt: string; endsAt: string; guestCount: number; note: string }) =>
       createBooking(slug, input),
     onSuccess: () => client.invalidateQueries({ queryKey: myKey(userId) }),
   });

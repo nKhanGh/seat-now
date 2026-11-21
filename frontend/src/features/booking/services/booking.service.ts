@@ -4,6 +4,7 @@ export type BookingRequest = {
   venueName?: string;
   venueLocation?: { type: 'Point'; coordinates: [number, number] } | null;
   requestedAt: string;
+  endsAt: string;
   guestCount: number;
   note: string;
   priority: boolean;
@@ -34,7 +35,7 @@ export async function getBookingStatus(slug: string, signal?: AbortSignal) {
 
 export async function createBooking(
   slug: string,
-  input: { requestedAt: string; guestCount: number; note: string },
+  input: { requestedAt: string; endsAt: string; guestCount: number; note: string },
 ) {
   return readData<BookingRequest>(
     await fetch(`${venuePath(slug)}/bookings`, {

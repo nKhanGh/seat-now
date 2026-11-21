@@ -62,7 +62,10 @@ export function BookingQueue({
       {bookings.data?.length === 0 && <p>Không có yêu cầu hoặc bàn đã xác nhận cần xử lý.</p>}
       {bookings.data?.map((booking) => (
         <div className="booking-row" key={booking.id}>
-          <strong>{new Date(booking.requestedAt).toLocaleString('vi-VN')}</strong>
+          <strong>
+            {new Date(booking.requestedAt).toLocaleString('vi-VN')} –{' '}
+            {new Date(booking.endsAt).toLocaleString('vi-VN')}
+          </strong>
           {booking.guestDisplayName && <span>Người gửi: {booking.guestDisplayName}</span>}
           <span>
             {booking.guestCount} khách · {booking.priority ? 'Ưu tiên Premium' : 'Thường'} ·{' '}
@@ -112,9 +115,11 @@ export function BookingQueue({
                 Đánh dấu đã đón khách
               </button>
             ))}
+          {decision.isError && decision.variables?.id === booking.id && (
+            <p role="alert">{decision.error.message}</p>
+          )}
         </div>
       ))}
-      {decision.isError && <p role="alert">{decision.error.message}</p>}
     </section>
   );
 }

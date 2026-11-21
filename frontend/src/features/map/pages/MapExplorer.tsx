@@ -699,6 +699,7 @@ export function MapExplorer() {
                   key={`booking-${selected.slug}`}
                   slug={selected.slug}
                   userId={auth.data?.id ?? null}
+                  availability={selected.availability}
                 />
               )}
               <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />

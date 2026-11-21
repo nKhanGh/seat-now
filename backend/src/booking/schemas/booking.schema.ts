@@ -8,6 +8,7 @@ export class Booking {
   @Prop({ type: Types.ObjectId, required: true }) userId!: Types.ObjectId;
   @Prop({ required: true }) venueSlug!: string;
   @Prop({ type: Date, required: true }) requestedAt!: Date;
+  @Prop({ type: Date }) endsAt?: Date;
   @Prop({ required: true, min: 1, max: 12 }) guestCount!: number;
   @Prop({ default: '' }) note!: string;
   @Prop({ required: true, default: false }) priority!: boolean;

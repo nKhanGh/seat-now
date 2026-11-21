@@ -40,7 +40,8 @@ describe('booking availability in venue detail', () => {
       typeof useBookingStatus
     >);
     const html = render();
-    expect(html).toContain('Thời gian đến');
+    expect(html).toContain('Bắt đầu (giờ đến)');
+    expect(html).toContain('Kết thúc (giờ rời quán)');
     expect(html).toContain('Số khách');
     expect(html).toContain('Gửi yêu cầu');
     expect(html).not.toContain('Quán này chưa mở nhận yêu cầu đặt bàn.');

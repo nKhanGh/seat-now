@@ -87,7 +87,8 @@ export function MyBookingsPage() {
             </Link>
           )}
           <p>
-            {new Date(booking.requestedAt).toLocaleString('vi-VN')} · {booking.guestCount} khách
+            {new Date(booking.requestedAt).toLocaleString('vi-VN')} –{' '}
+            {new Date(booking.endsAt).toLocaleString('vi-VN')} · {booking.guestCount} khách
           </p>
           <p>
             {statusLabel[booking.status]}
