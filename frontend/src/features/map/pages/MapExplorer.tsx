@@ -27,6 +27,7 @@ import { distanceMeters } from '../services/geo';
 import { sortVenues, VenueSort } from '../services/sortVenues';
 import { ratingLabel } from '../services/ratingLabel';
 import { useEntitlements } from '../../subscription/api/subscriptionQueries';
+import { PRICE_TIER_OPTIONS, priceTierLabel } from '../../../shared/priceTier';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -394,15 +395,17 @@ export function MapExplorer() {
           <option value="10000">10 km</option>
         </select>
         <select
+          className="price-filter"
           aria-label="Mức giá"
           value={filters.priceTier || ''}
           onChange={(event) => update({ priceTier: event.target.value })}
         >
           <option value="">Mọi mức giá</option>
-          <option value="1">₫</option>
-          <option value="2">₫₫</option>
-          <option value="3">₫₫₫</option>
-          <option value="4">₫₫₫₫</option>
+          {PRICE_TIER_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
         <select
           aria-label="Đánh giá tối thiểu"
@@ -557,7 +560,7 @@ export function MapExplorer() {
                 {searching
                   ? 'Xem trên bản đồ'
                   : `${distanceMeters([filters.lng, filters.lat], venue.location.coordinates)} m`}{' '}
-                · {'₫'.repeat(venue.priceTier)}
+                · Giá: {priceTierLabel(venue.priceTier)}
               </span>
               {venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}
               {venue.verified &&
@@ -595,7 +598,7 @@ export function MapExplorer() {
                   <strong>{venue.name}</strong>
                   <span>{venue.address}</span>
                   <span>
-                    {ratingLabel(venue.rating)} · Xem trên bản đồ · {'₫'.repeat(venue.priceTier)}
+                    {ratingLabel(venue.rating)} · Xem trên bản đồ · Giá: {priceTierLabel(venue.priceTier)}
                   </span>
                 </button>
               ))}

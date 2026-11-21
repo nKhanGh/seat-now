@@ -8,6 +8,7 @@ import {
   useUploadBusinessLogo,
 } from '../api/businessQueries';
 import { BusinessProfileInput, BusinessVenue, ManualAvailabilityInput } from '../services/business.service';
+import { PRICE_TIER_OPTIONS } from '../../../shared/priceTier';
 export function CampaignEditor({ venue, userId }: { venue: BusinessVenue; userId: string }) {
   const campaign = useBusinessCampaign(userId);
   const localDateTime = (time: number) =>
@@ -343,9 +344,9 @@ export function ProfileEditor({ venue, userId }: { venue: BusinessVenue; userId:
       <label>
         Mức giá
         <select value={form.priceTier} onChange={(event) => patch({ priceTier: Number(event.target.value) })}>
-          {[1, 2, 3, 4].map((tier) => (
-            <option key={tier} value={tier}>
-              {'₫'.repeat(tier)}
+          {PRICE_TIER_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
