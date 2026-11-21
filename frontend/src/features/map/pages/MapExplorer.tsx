@@ -286,9 +286,14 @@ export function MapExplorer() {
   return (
     <main className="explorer">
       <header className="explorer-header">
-        <Link to="/" className="brand">
-          SeatNow
-        </Link>
+        <div className="header-primary">
+          <Link to="/" className="brand">
+            SeatNow
+          </Link>
+          <Link to="/business" className="header-business-link">
+            Quản lý quán
+          </Link>
+        </div>
         <nav>
           <span className="sync-status" role="status">
             {liveStatus === 'connected'
@@ -299,7 +304,6 @@ export function MapExplorer() {
           </span>
           <Link to="/plans">Gói người dùng</Link>
           <Link to={`/proposals?lat=${filters.lat}&lng=${filters.lng}`}>Đề xuất quán</Link>
-          <Link to="/business">Chủ quán</Link>
           {auth.data ? (
             <>
               <Link to="/favorites">Quán đã lưu</Link>

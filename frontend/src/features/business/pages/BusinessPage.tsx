@@ -452,9 +452,14 @@ export function BusinessPage() {
   }
   return (
     <main className="plans-page business-page">
-      <Link to="/" className="brand">
-        SeatNow
-      </Link>
+      <header className="business-page-header">
+        <Link to="/" className="brand">
+          SeatNow
+        </Link>
+        <Link to="/" className="business-home-link">
+          Về trang chính
+        </Link>
+      </header>
       <h1>Dành cho chủ quán</h1>
       <p>
         {venues.data?.length
