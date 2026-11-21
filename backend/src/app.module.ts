@@ -26,7 +26,7 @@ import { BookingModule } from './booking/booking.module';
         autoIndex: process.env.NODE_ENV !== 'production',
       }),
     }),
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 240 }]),
     LiveModule,
     AuthModule,
     MapModule,

@@ -55,6 +55,7 @@ export function MapExplorer() {
   );
   const [seenVenues, setSeenVenues] = useState<VenueMapItem[]>([]);
   const detailRef = useRef<HTMLElement | null>(null);
+  const logoutDialog = useRef<HTMLDialogElement | null>(null);
   const auth = useCurrentUser();
   const entitlements = useEntitlements(Boolean(auth.data));
   const adsHidden = entitlements.data?.entitlements['ads.hidden'] ?? false;
@@ -125,7 +126,13 @@ export function MapExplorer() {
   const { query: publishedSearch, activeQuery } = usePublishedVenueSearch(searchText);
   const remoteReady = searching && activeQuery === searchText.trim();
   const displayedVenues = useMemo(() => {
-    const candidates = searching ? searchVenues(seenVenues, searchText) : savedOnly ? seenVenues : venueItems;
+    const nearbyItems =
+      venues.isError && venueItems.length === 0
+        ? seenVenues.filter(
+            (venue) => distanceMeters([filters.lng, filters.lat], venue.location.coordinates) <= filters.radiusM,
+          )
+        : venueItems;
+    const candidates = searching ? searchVenues(seenVenues, searchText) : savedOnly ? seenVenues : nearbyItems;
     const filtered = savedOnly ? candidates.filter((venue) => favoriteSlugs.has(venue.slug)) : candidates;
     return searching ? filtered : sortVenues(filtered, sortOrder, [filters.lng, filters.lat]);
   }, [
@@ -134,10 +141,12 @@ export function MapExplorer() {
     savedOnly,
     seenVenues,
     venueItems,
+    venues.isError,
     favoriteSlugs,
     sortOrder,
     filters.lng,
     filters.lat,
+    filters.radiusM,
   ]);
   const mapVenues = useMemo(
     () =>
@@ -292,7 +301,13 @@ export function MapExplorer() {
               <Link to="/bookings">Đặt bàn của tôi</Link>
               <Link to="/following">Đang theo dõi</Link>
               <span>Chào {auth.data.displayName}</span>
-              <button onClick={() => logout.mutate()} disabled={logout.isPending}>
+              <button
+                onClick={() => {
+                  logout.reset();
+                  logoutDialog.current?.showModal();
+                }}
+                disabled={logout.isPending}
+              >
                 Đăng xuất
               </button>
             </>
@@ -304,6 +319,26 @@ export function MapExplorer() {
           )}
         </nav>
       </header>
+      <dialog ref={logoutDialog} className="logout-dialog" aria-labelledby="logout-title">
+        <h2 id="logout-title">Đăng xuất khỏi SeatNow?</h2>
+        <p>Bạn có thể đăng nhập lại bất cứ lúc nào.</p>
+        {logout.isError && (
+          <p role="alert" className="error">{logout.error.message}</p>
+        )}
+        <div className="logout-actions">
+          <button type="button" onClick={() => logoutDialog.current?.close()} disabled={logout.isPending}>
+            Ở lại
+          </button>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => logout.mutate(undefined, { onSuccess: () => logoutDialog.current?.close() })}
+            disabled={logout.isPending}
+          >
+            {logout.isPending ? 'Đang đăng xuất…' : 'Xác nhận đăng xuất'}
+          </button>
+        </div>
+      </dialog>
       <section className="filterbar" aria-label="Bộ lọc địa điểm">
         <label className="venue-search">
           <Search size={18} aria-hidden="true" />
@@ -474,12 +509,12 @@ export function MapExplorer() {
             </p>
           )}
           {!searching && venues.isPending && <p>Đang tìm địa điểm…</p>}
-          {!searching && venues.isError && (
+          {!searching && venues.isError && displayedVenues.length === 0 && (
             <p role="alert">
               {venues.error.message} <button onClick={() => void venues.refetch()}>Thử lại</button>
             </p>
           )}
-          {!searching && !savedOnly && venues.data?.pages[0]?.data.length === 0 && (
+          {!searching && !savedOnly && !venues.isError && venues.data?.pages[0]?.data.length === 0 && (
             <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>
           )}
           {searching && !savedOnly && !catalog.isPending && displayedVenues.length === 0 && (

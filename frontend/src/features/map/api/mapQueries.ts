@@ -9,6 +9,7 @@ import {
 } from '../services/map.service';
 
 export const mapQueryKeys = { nearby: (filters: MapFilters) => ['map', 'nearby', filters] as const };
+const retryMapQuery = (failures: number, error: Error) => failures < 2 && !error.message.includes('(429)');
 
 export function useNearbyVenues(filters: MapFilters, enabled = true) {
   return useInfiniteQuery({
@@ -17,9 +18,10 @@ export function useNearbyVenues(filters: MapFilters, enabled = true) {
     initialPageParam: null as string | null,
     enabled,
     getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
-    staleTime: 15_000,
-    refetchInterval: 30_000,
-    refetchOnWindowFocus: true,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: false,
+    retry: retryMapQuery,
   });
 }
 
@@ -34,6 +36,7 @@ export function usePublishedVenueSearch(query: string) {
     queryFn: ({ signal }) => getPublishedVenues(debounced, signal),
     enabled: debounced.length >= 2,
     staleTime: 60_000,
+    retry: retryMapQuery,
   });
   return { query: result, activeQuery: debounced };
 }
@@ -62,7 +65,9 @@ export function useHcmVenuePins(filters: MapFilters, enabled = true) {
       } while (cursor && items.length < 200);
       return items;
     },
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 300_000,
+    refetchInterval: 300_000,
+    refetchOnWindowFocus: false,
+    retry: retryMapQuery,
   });
 }
