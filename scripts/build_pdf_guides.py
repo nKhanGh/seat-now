@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import html
 import re
+import sys
 from pathlib import Path
 
 from reportlab.lib import colors
@@ -241,7 +242,12 @@ def build(source: Path, destination: Path) -> None:
 def main() -> None:
     register_fonts()
     OUT.mkdir(parents=True, exist_ok=True)
-    for name in ("USER_GUIDE", "DEPLOY_GUIDE"):
+    available = ("USER_GUIDE", "DEPLOY_GUIDE", "ROLE_GUIDE")
+    selected = tuple(sys.argv[1:]) or available
+    unknown = set(selected) - set(available)
+    if unknown:
+        raise ValueError(f"Unknown guide: {', '.join(sorted(unknown))}")
+    for name in selected:
         source = ROOT / "docs" / f"{name}.md"
         destination = OUT / f"seatnow-{name.lower().replace('_', '-')}.pdf"
         build(source, destination)
