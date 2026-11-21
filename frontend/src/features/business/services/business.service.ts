@@ -62,7 +62,11 @@ export async function getMyBusinessVenues(signal?: AbortSignal): Promise<Busines
   );
 }
 
-export async function requestBusinessClaim(slug: string, evidence: string, document: File | null): Promise<BusinessClaim> {
+export async function requestBusinessClaim(
+  slug: string,
+  evidence: string,
+  document: File | null,
+): Promise<BusinessClaim> {
   const form = new FormData();
   form.set('evidence', evidence);
   if (document) form.set('document', document);

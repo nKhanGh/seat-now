@@ -112,8 +112,14 @@ const hcmAreas = [
 const cafeFirst = ['Mây', 'Nắng', 'Lá', 'Gió', 'Mộc', 'Sương', 'Hẻm', 'Hiên'];
 const cafeLast = ['Ban Mai', 'Phố Nhỏ', 'Ven Sông', 'Tháng Tư'];
 const restaurantFirst = [
-  'Bếp Nhà', 'Cơm Phố', 'Mâm Việt', 'Góc Bếp',
-  'Nồi Đất', 'Bếp Mộc', 'Hương Quê', 'Món Nhà',
+  'Bếp Nhà',
+  'Cơm Phố',
+  'Mâm Việt',
+  'Góc Bếp',
+  'Nồi Đất',
+  'Bếp Mộc',
+  'Hương Quê',
+  'Món Nhà',
 ];
 const restaurantLast = ['Sài Gòn', 'Ven Sông', 'An Nhiên', 'Phố Nhỏ'];
 

@@ -491,10 +491,14 @@ export function BusinessPage() {
                 onChange={(event) => setDocument(event.target.files?.[0] ?? null)}
               />
             </label>
-            <p className="small">JPEG, PNG hoặc WebP, tối đa 3 MB. Ảnh chỉ dành cho người vận hành xét duyệt.</p>
+            <p className="small">
+              JPEG, PNG hoặc WebP, tối đa 3 MB. Ảnh chỉ dành cho người vận hành xét duyệt.
+            </p>
             {document && <p className="small">Đã chọn: {document.name}</p>}
             {documentError && (
-              <p role="alert" className="error">{documentError}</p>
+              <p role="alert" className="error">
+                {documentError}
+              </p>
             )}
             <button className="primary" disabled={request.isPending}>
               {request.isPending ? 'Đang gửi…' : 'Gửi yêu cầu'}
@@ -508,7 +512,8 @@ export function BusinessPage() {
           {claims.data?.length === 0 && <p>Chưa có yêu cầu nào.</p>}
           {claims.data?.map((claim) => (
             <p key={claim.id}>
-              {claim.venueSlug}{claim.hasDocument ? ' · Có ảnh chứng minh' : ''} ·{' '}
+              {claim.venueSlug}
+              {claim.hasDocument ? ' · Có ảnh chứng minh' : ''} ·{' '}
               {claim.status === 'PENDING'
                 ? 'Chờ duyệt'
                 : claim.status === 'APPROVED'
