@@ -181,26 +181,32 @@ Premium demo chỉ giúp yêu cầu xếp trước trong hàng chờ, không b�
 
 ### Xin quyền quản lý quán có sẵn
 
-1. Đăng nhập bằng tài khoản sẽ dùng để quản lý. Mở quán trên bản đồ và bấm **Bạn là chủ quán này?**; app tới `/business` và điền sẵn **Slug địa điểm**. Bạn cũng có thể mở **Quản lý quán** trên header.
+1. Đăng nhập bằng tài khoản sẽ dùng để quản lý. Mở quán trên bản đồ và bấm **Bạn là chủ quán này?**; app tới `/business/claims` và điền sẵn **Slug địa điểm**. Bạn cũng có thể mở **Quản lý quán** trên header, rồi chọn **Yêu cầu quyền**.
 2. Trong **Yêu cầu quản lý quán**, viết **Thông tin chứng minh quyền quản lý** từ 20–300 ký tự: cách người vận hành đối chiếu bạn với quán, giấy tờ hoặc thông tin liên hệ.
 3. Có thể chọn **Ảnh giấy tờ hoặc hình chứng minh** JPEG/PNG/WebP tối đa 3 MB. Ảnh chỉ dành cho người vận hành, không hiện công khai; sau khi duyệt/từ chối sẽ bị xóa khỏi yêu cầu.
 4. Bấm **Gửi yêu cầu**. Xem **Yêu cầu của tôi**: **Chờ duyệt**, **Đã duyệt** hoặc **Từ chối**. Chỉ biết slug không đủ để sửa quán.
-5. Sau khi admin duyệt, vào lại `/business`, bấm **Cập nhật trạng thái** nếu cần. Kiểm tra dòng **Đang đăng nhập**: quyền gắn với **đúng email đã gửi yêu cầu**. Quán được duyệt ở **Địa điểm đang quản lý**; bấm **Đến phần quản lý** để cuộn tới quán.
+5. Sau khi admin duyệt, vào lại `/business`, bấm **Cập nhật trạng thái** nếu cần. Kiểm tra dòng **Đang đăng nhập**: quyền gắn với **đúng email đã gửi yêu cầu**. Quán được duyệt ở **Địa điểm đang quản lý**; chọn **Đặt bàn**, **Tương tác** hoặc **Hồ sơ** để mở trang tương ứng.
+
+### Điều hướng khu vực chủ quán
+
+- Header của `/business` có **Tổng quan** và **Yêu cầu quyền**. Khi tài khoản đã được duyệt, header thêm các nút theo quán đang chọn: **Đặt bàn**, **Tương tác**, **Hồ sơ**. Gói Premium có thêm **Chỗ trống**, **Thống kê**, **Ưu đãi**. Mỗi nút mở một trang riêng; có thể lưu URL hoặc tải lại trang.
+- Nếu quản lý nhiều quán, dùng **Chi nhánh** trên header để đổi quán. App giữ cùng mục đang xem nếu quán mới hỗ trợ mục đó. Trang **Tổng quan** liệt kê các quán và có nút đi thẳng đến từng công việc.
+- **Về trang chính** quay lại bản đồ. Yêu cầu nhận quyền mới luôn nằm ở **Yêu cầu quyền**, không nằm cuối trang quản lý quán.
 
 ### Công cụ gói Cơ bản (Free Business)
 
 - **Tương tác khách hàng:** số tài khoản check-in trong giờ qua, tín hiệu tự báo cáo, năm review công khai gần nhất và ảnh. Chọn **Làm mới**; bấm **Xem trang quán và tất cả đánh giá** để xem hết.
 - **Hồ sơ quán:** sửa tên, địa chỉ, mô tả, giờ mở cửa, menu tóm tắt, mức giá; bấm **Lưu hồ sơ**. Thông tin mới hiện công khai sau khi tải lại.
 - **Logo:** chọn JPEG/PNG/WebP tối đa 2 MB rồi bấm **Cập nhật logo**. Logo hiện ở thẻ quán, chi tiết và ghim khi dữ liệu cập nhật.
-- **Yêu cầu đặt bàn:** thẻ **Đặt bàn** nằm ngay đầu phần quán đang quản lý. Ở nhà hàng/cà phê, chọn **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**; đổi checkbox mà chưa lưu thì khách vẫn chưa thấy form gửi. Xem hàng chờ, bấm **Xác nhận** hoặc **Từ chối**. Khi khách thực sự tới, bấm **Đánh dấu đã đón khách** → **Xác nhận đã đón**; **Chưa đón khách** hủy bước này. Kiểm tra khả năng phục vụ trước khi xác nhận vì snapshot bàn trống chưa phải inventory đặt bàn.
-- Một tài khoản có thể quản lý nhiều quán đã được duyệt, mỗi quán có phần riêng. Bấm **Về trang chính** để quay lại bản đồ.
+- **Yêu cầu đặt bàn:** mở **Đặt bàn** của nhà hàng/cà phê trên header. Chọn **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**; đổi checkbox mà chưa lưu thì khách vẫn chưa thấy form gửi. Xem hàng chờ, bấm **Xác nhận** hoặc **Từ chối**. Khi khách thực sự tới, bấm **Đánh dấu đã đón khách** → **Xác nhận đã đón**; **Chưa đón khách** hủy bước này. Kiểm tra khả năng phục vụ trước khi xác nhận vì snapshot bàn trống chưa phải inventory đặt bàn.
+- Một tài khoản có thể quản lý nhiều quán đã được duyệt, chọn **Chi nhánh** để chuyển quán.
 
 ### Công cụ Premium Business trong bản demo
 
-Người vận hành cấp gói cho từng quán bằng API nội bộ, có ngày hết hạn; chưa có nút mua gói. Khi còn Premium, `/business` hiện thêm:
+Người vận hành cấp gói cho từng quán bằng API nội bộ, có ngày hết hạn; chưa có nút mua gói. Khi còn Premium, header quản lý hiện thêm các trang:
 
 1. **Cập nhật chỗ trống:** nhập tổng/còn trống bàn và ghế, độ đông, thời gian chờ 0–240 phút, trạng thái **Đang nhận khách**, rồi bấm **Cập nhật chỗ trống**. Rạp phim chỉ nhập ghế. Số liệu có nguồn **Chủ địa điểm cập nhật** và tự cũ sau 10 phút.
-2. **Dashboard:** lượt mở trang chi tiết 7 ngày, tỷ lệ lấp đầy trung bình và khung giờ lấp đầy cao. Lượt mở không phải số người duy nhất; tỷ lệ lấy từ snapshot, có thể gồm dữ liệu mẫu.
+2. **Thống kê:** lượt mở trang chi tiết 7 ngày, tỷ lệ lấp đầy trung bình và khung giờ lấp đầy cao. Lượt mở không phải số người duy nhất; tỷ lệ lấy từ snapshot, có thể gồm dữ liệu mẫu.
 3. **Ảnh bìa:** chọn JPEG/PNG/WebP tối đa 2 MB rồi bấm **Cập nhật ảnh bìa**.
 4. **Ưu đãi giờ vắng:** nhập nội dung ít nhất 10 ký tự, giờ bắt đầu/kết thúc, tùy chọn **Đẩy lên đầu danh sách được tài trợ**, rồi bấm **Lên lịch ưu đãi**. Nội dung hiện trong app đúng lịch và có nhãn **Được tài trợ** nếu đẩy vị trí. Bấm **Tắt ưu đãi hiện tại** để gỡ.
 5. **Huy hiệu xác thực:** xuất hiện với quán có quyền quản lý đã duyệt và gói Premium còn hiệu lực.
@@ -248,7 +254,7 @@ Người vận hành có thể cấp Premium cho **tài khoản người dùng**
 ### B. Chủ quán nhận quyền và đặt bàn (tài khoản khách, chủ quán, admin)
 
 1. Chủ quán đăng nhập, mở quán ăn/cà phê trên bản đồ, bấm **Bạn là chủ quán này?**, gửi yêu cầu kèm thông tin chứng minh.
-2. Admin vào `/admin` → **Chủ quán**, kiểm tra rồi duyệt. Chủ quán mở `/business`, bấm **Cập nhật trạng thái**, chọn **Nhận yêu cầu đặt bàn** trong thẻ **Đặt bàn** ở đầu phần quán rồi bấm **Lưu cài đặt**; sau đó có thể sửa hồ sơ/logo.
+2. Admin vào `/admin` → **Chủ quán**, kiểm tra rồi duyệt. Chủ quán mở `/business`, bấm **Cập nhật trạng thái**, chọn **Đặt bàn** trên header, bật **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**; chọn **Hồ sơ** để sửa thông tin/logo.
 3. Khách đăng nhập tài khoản khác, mở quán đó, chọn giờ và số khách, bấm **Gửi yêu cầu**. Kiểm tra **Đặt bàn của tôi** đang **Chờ xác nhận**.
 4. Chủ quán vào hàng chờ, bấm **Xác nhận**. Khách tải lại danh sách để thấy **Đã xác nhận**. Chủ quán chỉ ghi nhận **Đã đón khách** sau khi khách tới.
 
@@ -273,7 +279,7 @@ Chỉ demo check-in thành công với địa điểm thật có tọa độ đ�
 | Bấm **Check-in tại đây** rồi báo “Bạn cần ở gần địa điểm” | API từ chối vì cách tọa độ quán hơn 150 m. Số check-in không đổi. Quán seed thường hư cấu; đọc mục 6.                                                                                                                                              |
 | Check-in báo GPS chưa đủ chính xác                        | Độ chính xác trình duyệt báo lớn hơn 100 m. Đợi GPS ổn định rồi thử.                                                                                                                                                                               |
 | Chủ quán đã được duyệt nhưng chưa thấy quán               | Mở `/business`, bấm **Cập nhật trạng thái**, kiểm tra email đang đăng nhập có đúng email gửi yêu cầu không; tải lại trang nếu cần.                                                                                                                 |
-| Không thấy nút **Gửi yêu cầu** trong chi tiết quán        | Rạp phim không hỗ trợ đặt bàn. Với nhà hàng/cà phê, phần **Yêu cầu đặt bàn** sẽ báo nếu chủ quán chưa bật **Nhận yêu cầu đặt bàn**. Chủ quán đã được admin duyệt mở `/business`, chọn ô này và bấm **Lưu cài đặt**; sau đó khách tải lại chi tiết. |
+| Không thấy nút **Gửi yêu cầu** trong chi tiết quán        | Rạp phim không hỗ trợ đặt bàn. Với nhà hàng/cà phê, phần **Yêu cầu đặt bàn** sẽ báo nếu chủ quán chưa bật **Nhận yêu cầu đặt bàn**. Chủ quán đã được admin duyệt mở `/business`, chọn **Đặt bàn** trên header, bật ô này và bấm **Lưu cài đặt**; sau đó khách tải lại chi tiết. |
 | Gửi yêu cầu đặt bàn rồi chưa có bàn                       | **Chờ xác nhận** là yêu cầu, chưa giữ inventory. Chờ chủ quán xác nhận trên `/business`.                                                                                                                                                           |
 | Tab admin **Quán cộng đồng** trống                        | Chưa có đề xuất đủ ba lượt xác nhận của ba tài khoản khác người gửi.                                                                                                                                                                               |
 | Review có sao/chữ nhưng chưa có ảnh                       | Ảnh tải riêng sau review; nếu bước ảnh lỗi, chọn lại JPEG/PNG/WebP dưới 2 MB và cập nhật đánh giá.                                                                                                                                                 |

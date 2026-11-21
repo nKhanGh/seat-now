@@ -11,6 +11,10 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. API, React UI, MongoDB integr
 5. Sponsored và giờ vắng: ưu đãi trong app có thời hạn và do chủ quán bật, vị trí tài trợ được xếp trước trong API bản đồ với nhãn rõ ràng; trạng thái “còn nhiều bàn trống” chỉ hiện khi snapshot còn mới. Không tự động gửi push trước khi có opt-in và hạ tầng thông báo.
 6. Chuỗi đa chi nhánh: một tài khoản có thể quản lý nhiều venue đã duyệt trong danh sách tập trung; logo và ảnh bìa cấu hình theo từng chi nhánh.
 
+## Điều hướng giao diện
+
+`/business` là tổng quan các quán đã được duyệt. `/business/claims` chứa yêu cầu quyền quản lý và biểu mẫu gửi yêu cầu. Mỗi quán có URL riêng `/business/venues/:slug/:section`, với `section` là `bookings`, `community`, `profile` và (khi Premium còn hiệu lực) `availability`, `dashboard`, `offers`. Header có nút chuyển trang và bộ chọn chi nhánh; quyền của từng URL vẫn được kiểm tra bằng danh sách quán thuộc tài khoản và API backend. Tải lại trực tiếp URL con được backend trả về SPA.
+
 ## Giới hạn demo
 
 - Gói Premium được operator cấp với ngày hết hạn, chưa có thanh toán/billing. Ưu đãi là nội dung hiển thị; chưa có mã voucher, đổi quà hay đo chuyển đổi.

@@ -35,8 +35,9 @@ Socket.IO contract is at `contracts/events/live.md`.
 
 ## Business owner demo
 
-Open `/business` after signing in. An owner can submit a management request
-for an existing venue, including evidence for operator review. Set a strong
+Open `/business` after signing in. Use **Yêu cầu quyền** (`/business/claims`)
+to submit a management request for an existing venue, including evidence for
+operator review. Set a strong
 `BUSINESS_ADMIN_TOKEN` only in the backend environment. The operator reviews
 the claim and approves or rejects it; a slug alone never grants edit access.
 
@@ -61,7 +62,9 @@ Invoke-RestMethod "$base/internal/business/claims/<claimId>/approve" -Method Pos
 Invoke-RestMethod "$base/internal/business/claims/<claimId>/reject" -Method Post -Headers $headers
 ```
 
-An approved owner can edit the venue profile and upload a logo on the Basic
+An approved owner uses the header to switch between **Đặt bàn**, **Tương tác**
+and **Hồ sơ** pages. The **Chi nhánh** selector switches venues without scrolling
+through a long page. The owner can edit the venue profile and upload a logo on the Basic
 plan. For a time-limited Premium demo, use the internal plan endpoint. This
 does not charge anyone or create a payment subscription:
 
@@ -73,8 +76,9 @@ $body = @{ plan = 'PREMIUM'; premiumExpiresAt = $expires } | ConvertTo-Json
 Invoke-RestMethod "$base/internal/business/venues/<venueSlug>/plan" -Method Put -Headers $headers -Body $body
 ```
 
-Premium owners can update seats manually, see a seven-day dashboard, upload a
-cover image and schedule an in-app offer on `/business`. Operator snapshots
+Premium owners use the separate **Chỗ trống**, **Thống kê** and **Ưu đãi** pages
+to update seats manually, see a seven-day dashboard and schedule an in-app offer;
+the cover image is uploaded on **Hồ sơ**. Operator snapshots
 expire after ten minutes. Sponsored results are labeled and sorted first in
 map search. Offers and covers stop appearing when Premium expires. The
 dashboard counts detail requests, not unique people, and occupancy averages
@@ -83,8 +87,9 @@ redemption flow in this demo.
 
 ## Booking request demo
 
-After the operator approves a business claim, the owner opens `/business` and
-checks **Nhận yêu cầu đặt bàn** for a restaurant or cafe. This opt-in is off by
+After the operator approves a business claim, the owner opens `/business`,
+chooses **Đặt bàn** on the header and checks **Nhận yêu cầu đặt bàn** for a restaurant or cafe.
+This opt-in is off by
 default; cinema table bookings are not supported. Another signed-in user opens
 that venue on the map, chooses a time at least one hour and at most fourteen
 days ahead, and sends a request for 1–12 guests. The request appears as
