@@ -36,6 +36,8 @@ Trong terminal thứ hai, mở `http://localhost:3100/api/v1/health` và `http:/
 3. Chọn plan **Free** cho demo nếu còn khả dụng trong tài khoản. Đặt tên service, ví dụ `seatnow-demo`. Render cấp URL HTTPS dạng `https://...onrender.com`.
 4. Trong **Environment**, đặt các biến sau:
 
+   Có thể sao chép [`render.env.example`](../render.env.example) thành `.env.render` ở thư mục gốc, điền các giá trị rồi dán nội dung vào **Add from .env** trên Render. File `.env.render` được Git bỏ qua. Chỉ dùng ba biến bắt buộc trong mẫu; Dockerfile đã đặt `NODE_ENV=production`, còn Render có thể cấp `PORT` khi chạy.
+
 | Biến | Giá trị |
 | --- | --- |
 | `MONGODB_URI` | URI Atlas của database `seatnow`; giữ bí mật. |
