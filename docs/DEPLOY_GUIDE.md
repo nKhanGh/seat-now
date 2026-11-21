@@ -9,6 +9,18 @@ Cập nhật: 21/11/2026. Tài liệu này dành cho dự án học tập, tri�
 - Không commit `backend/.env`, `.env.admin`, mật khẩu, URI MongoDB hoặc token vận hành.
 - Ứng dụng demo chưa có xác minh email/khôi phục mật khẩu. Chỉ dùng dữ liệu và tài khoản thử nghiệm; không công bố dữ liệu thật của quán hoặc khách.
 
+### Kiểm tra Docker image ở máy local
+
+Từ thư mục gốc, khởi động MongoDB local và build đúng image sẽ dùng để deploy:
+
+```powershell
+docker compose -f infra/compose.yaml up -d
+docker build -t seatnow-local-check .
+docker run --rm --network infra_default -p 127.0.0.1:3100:3000 -e NODE_ENV=development -e MONGODB_URI=mongodb://mongodb:27017/seatnow -e PUBLIC_ORIGIN=http://localhost:3100 -e JWT_SECRET=local-docker-smoke-test-secret-32-characters seatnow-local-check
+```
+
+Trong terminal thứ hai, mở `http://localhost:3100/api/v1/health` và `http://localhost:3100/`. Dừng container bằng **Ctrl+C**; `--rm` tự xóa container tạm. Lệnh này dùng `NODE_ENV=development` vì URL local là HTTP; bản deploy trên Render giữ `NODE_ENV=production` và dùng HTTPS.
+
 ## 2. Chuẩn bị MongoDB Atlas
 
 1. Trong Atlas, tạo project và **Free cluster (M0)**. Chọn provider/region có hỗ trợ Free.
