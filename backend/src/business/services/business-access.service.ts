@@ -87,10 +87,16 @@ export class BusinessAccessService {
       .sort({ createdAt: 1, _id: 1 })
       .limit(100)
       .lean();
+    const users = await this.auth.adminUsersByIds(rows.map((row) => row.userId));
+    const byId = new Map(users.map((user) => [user.id, user]));
+    const venues = await this.venues.publicProfilesBySlugs(rows.map((row) => row.venueSlug));
+    const bySlug = new Map(venues.map((venue) => [venue.slug, venue]));
     return {
       data: rows.map((row) => ({
         ...this.publicClaim(row),
         userId: row.userId.toString(),
+        applicant: byId.get(row.userId.toString()) ?? null,
+        venueName: bySlug.get(row.venueSlug)?.name ?? row.venueSlug,
         evidence: row.evidence,
       })),
     };
@@ -203,7 +209,9 @@ export class BusinessAccessService {
   }
 
   private publicClaim(
-    claim: Pick<BusinessClaim, 'venueSlug' | 'status' | 'hasDocument' | 'createdAt'> & { _id: Types.ObjectId },
+    claim: Pick<BusinessClaim, 'venueSlug' | 'status' | 'hasDocument' | 'createdAt'> & {
+      _id: Types.ObjectId;
+    },
   ) {
     return {
       id: claim._id.toString(),

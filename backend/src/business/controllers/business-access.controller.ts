@@ -1,6 +1,18 @@
 import { getSessionToken } from '../../auth/session-token';
 import {
-  Body, Controller, Get, Headers, Param, Post, Put, Req, Res, UploadedFile, UseInterceptors,
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Headers,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Req,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -22,6 +34,11 @@ export class BusinessAccessController {
 
   private async userId(request: CookieRequest) {
     return (await this.auth.authenticate(getSessionToken(request))).id;
+  }
+
+  private async requireAdmin(request: CookieRequest) {
+    const user = await this.auth.authenticate(getSessionToken(request));
+    if (user.role !== 'ADMIN') throw new ForbiddenException('Admin access required');
   }
 
   @Post('business/claims/:slug')
@@ -50,6 +67,37 @@ export class BusinessAccessController {
   pendingClaims(@Headers('authorization') authorization: string | undefined) {
     assertBusinessAdminToken(authorization);
     return this.business.pendingClaims();
+  }
+
+  @Get('admin/business/claims')
+  async adminPendingClaims(@Req() request: CookieRequest) {
+    await this.requireAdmin(request);
+    return this.business.pendingClaims();
+  }
+
+  @Get('admin/business/claims/:id/document')
+  async adminClaimDocument(
+    @Req() request: CookieRequest,
+    @Param('id') id: string,
+    @Res() response: Response,
+  ) {
+    await this.requireAdmin(request);
+    const data = await this.business.claimDocument(id);
+    response.type('image/webp').setHeader('Cache-Control', 'no-store').send(data);
+  }
+
+  @Post('admin/business/claims/:id/approve')
+  @HttpCode(200)
+  async adminApproveClaim(@Req() request: CookieRequest, @Param('id') id: string) {
+    await this.requireAdmin(request);
+    return this.business.approveClaim(id);
+  }
+
+  @Post('admin/business/claims/:id/reject')
+  @HttpCode(200)
+  async adminRejectClaim(@Req() request: CookieRequest, @Param('id') id: string) {
+    await this.requireAdmin(request);
+    return this.business.rejectClaim(id);
   }
 
   @Get('internal/business/claims/:id/document')

@@ -29,7 +29,11 @@ describeWithMongo('AuthService with MongoDB', () => {
       displayName: 'Demo User',
     };
     const registered = await auth.register(input);
-    expect(registered.user).toMatchObject({ email: 'demo@example.invalid', emailVerified: false });
+    expect(registered.user).toMatchObject({
+      email: 'demo@example.invalid',
+      role: 'USER',
+      emailVerified: false,
+    });
     expect(await users.findOne({ emailNormalized: 'demo@example.invalid' })).toHaveProperty('passwordHash');
     await expect(auth.register({ ...input, email: 'demo@example.invalid' })).rejects.toThrow(
       'Email already registered',
@@ -38,6 +42,8 @@ describeWithMongo('AuthService with MongoDB', () => {
     const loggedIn = await auth.login({ email: 'demo@example.invalid', password: input.password });
     expect(loggedIn.token).not.toBe(registered.token);
     expect((await auth.authenticate(loggedIn.token)).id).toBe(registered.user.id);
+    await users.updateOne({ emailNormalized: 'demo@example.invalid' }, { $set: { role: 'ADMIN' } });
+    expect((await auth.authenticate(loggedIn.token)).role).toBe('ADMIN');
     await expect(auth.login({ email: input.email, password: 'wrong-password' })).rejects.toThrow(
       'Invalid credentials',
     );

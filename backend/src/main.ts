@@ -96,6 +96,7 @@ async function bootstrap() {
             '/proposals',
             '/business',
             '/bookings',
+            '/admin',
           ].includes(request.path) ||
             /^\/users\/[a-f0-9]{24}$/.test(request.path))
         ) {

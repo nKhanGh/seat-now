@@ -31,6 +31,7 @@ describeWithMongo('business ownership with MongoDB', () => {
     } as unknown as VenuesService;
     const auth = {
       publicProfileById: jest.fn().mockResolvedValue({ displayName: 'Owner' }),
+      adminUsersByIds: jest.fn().mockResolvedValue([]),
     } as unknown as AuthService;
     const service = new BusinessAccessService(claims, access, venues, auth);
     const ownerId = new Types.ObjectId().toString();
@@ -41,18 +42,32 @@ describeWithMongo('business ownership with MongoDB', () => {
     const image = await sharp({ create: { width: 8, height: 8, channels: 3, background: '#ffffff' } })
       .png()
       .toBuffer();
-    const claimWithPhoto = await service.requestClaim(ownerId, 'demo-bistro', 'Giấy phép kinh doanh quán này.', {
-      buffer: image,
-      size: image.length,
-    });
+    const claimWithPhoto = await service.requestClaim(
+      ownerId,
+      'demo-bistro',
+      'Giấy phép kinh doanh quán này.',
+      {
+        buffer: image,
+        size: image.length,
+      },
+    );
     expect(claimWithPhoto.data.hasDocument).toBe(true);
+    expect((await service.pendingClaims()).data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ venueSlug: 'demo-cafe', venueName: 'Demo Café' }),
+        expect.objectContaining({ venueSlug: 'demo-bistro', venueName: 'demo-bistro' }),
+      ]),
+    );
     expect((await sharp(await service.claimDocument(claimWithPhoto.data.id)).metadata()).format).toBe('webp');
-    expect((await service.myClaims(ownerId)).data.find((item) => item.id === claimWithPhoto.data.id))
-      .toMatchObject({ hasDocument: true });
-    await expect(service.requestClaim(ownerId, 'invalid-image', 'Tôi có giấy tờ hợp lệ của quán này.', {
-      buffer: Buffer.from('not an image'),
-      size: 12,
-    })).rejects.toThrow('Invalid claim document image');
+    expect(
+      (await service.myClaims(ownerId)).data.find((item) => item.id === claimWithPhoto.data.id),
+    ).toMatchObject({ hasDocument: true });
+    await expect(
+      service.requestClaim(ownerId, 'invalid-image', 'Tôi có giấy tờ hợp lệ của quán này.', {
+        buffer: Buffer.from('not an image'),
+        size: 12,
+      }),
+    ).rejects.toThrow('Invalid claim document image');
     expect((await service.myVenues(ownerId)).data).toHaveLength(0);
     await expect(service.requireOwner(ownerId, 'demo-cafe')).rejects.toThrow(
       'Venue management access required',
@@ -61,8 +76,9 @@ describeWithMongo('business ownership with MongoDB', () => {
       service.requestClaim(ownerId, 'demo-cafe', 'Tôi có giấy tờ quản lý quán này.'),
     ).rejects.toThrow('Claim already submitted');
     await service.approveClaim(claim.data.id);
-    expect((await service.myClaims(ownerId)).data.find((item) => item.id === claim.data.id)?.status)
-      .toBe('APPROVED');
+    expect((await service.myClaims(ownerId)).data.find((item) => item.id === claim.data.id)?.status).toBe(
+      'APPROVED',
+    );
     expect((await service.myVenues(ownerId)).data).toMatchObject([
       { slug: 'demo-cafe', plan: 'FREE', verified: false },
     ]);
@@ -87,7 +103,8 @@ describeWithMongo('business ownership with MongoDB', () => {
     );
     await service.rejectClaim(claimWithPhoto.data.id);
     await expect(service.claimDocument(claimWithPhoto.data.id)).rejects.toThrow('Claim document not found');
-    expect((await service.myClaims(ownerId)).data.find((item) => item.id === claimWithPhoto.data.id))
-      .toMatchObject({ status: 'REJECTED', hasDocument: false });
+    expect(
+      (await service.myClaims(ownerId)).data.find((item) => item.id === claimWithPhoto.data.id),
+    ).toMatchObject({ status: 'REJECTED', hasDocument: false });
   });
 });

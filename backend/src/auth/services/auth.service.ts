@@ -19,6 +19,7 @@ export type PublicUser = {
   id: string;
   email: string;
   displayName: string;
+  role: 'USER' | 'ADMIN';
   emailVerified: boolean;
 };
 
@@ -36,6 +37,7 @@ export class AuthService {
         emailNormalized,
         passwordHash: await argon2.hash(input.password, { type: argon2.argon2id }),
         displayName: input.displayName.trim(),
+        role: 'USER',
       });
       const token = await this.createSession(user._id);
       return { user: this.toPublicUser(user), token };
@@ -90,6 +92,15 @@ export class AuthService {
   async publicUsersByIds(ids: Types.ObjectId[]) {
     const users = await this.users.find({ _id: { $in: ids }, status: 'ACTIVE' }, { displayName: 1 }).lean();
     return users.map((user) => ({ id: user._id.toString(), displayName: user.displayName }));
+  }
+
+  async adminUsersByIds(ids: Types.ObjectId[]) {
+    const users = await this.users.find({ _id: { $in: ids } }, { emailNormalized: 1, displayName: 1 }).lean();
+    return users.map((user) => ({
+      id: user._id.toString(),
+      email: user.emailNormalized,
+      displayName: user.displayName,
+    }));
   }
 
   async publicProfileById(id: string) {
@@ -150,6 +161,7 @@ export class AuthService {
       id: user._id.toString(),
       email: user.emailNormalized,
       displayName: user.displayName,
+      role: user.role === 'ADMIN' ? 'ADMIN' : 'USER',
       emailVerified: Boolean(user.emailVerifiedAt),
     };
   }
