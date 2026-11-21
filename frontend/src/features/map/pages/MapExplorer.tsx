@@ -689,7 +689,9 @@ export function MapExplorer() {
                   Chỉ đường đến địa điểm ↗
                 </a>
               )}
-              <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
+              <Link to={`/business/claims?slug=${encodeURIComponent(selected.slug)}`}>
+                Bạn là chủ quán này?
+              </Link>
               <AvailabilityStatus availability={selected.availability} />
               <AvailabilityHistory key={`history-${selected.slug}`} slug={selected.slug} />
               {selected.category !== 'CINEMA' && (

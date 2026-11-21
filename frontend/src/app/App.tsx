@@ -28,6 +28,21 @@ const ProposalsPage = lazy(() =>
 const BusinessPage = lazy(() =>
   import('../features/business/pages/BusinessPage').then((module) => ({ default: module.BusinessPage })),
 );
+const BusinessOverviewPage = lazy(() =>
+  import('../features/business/pages/BusinessOverviewPage').then((module) => ({
+    default: module.BusinessOverviewPage,
+  })),
+);
+const BusinessClaimsPage = lazy(() =>
+  import('../features/business/pages/BusinessClaimsPage').then((module) => ({
+    default: module.BusinessClaimsPage,
+  })),
+);
+const BusinessVenuePage = lazy(() =>
+  import('../features/business/pages/BusinessVenuePage').then((module) => ({
+    default: module.BusinessVenuePage,
+  })),
+);
 const MyBookingsPage = lazy(() =>
   import('../features/booking/pages/MyBookingsPage').then((module) => ({ default: module.MyBookingsPage })),
 );
@@ -186,7 +201,11 @@ export function App() {
         <Route path="/following" element={<FollowingPage />} />
         <Route path="/users/:id" element={<PublicProfilePage />} />
         <Route path="/proposals" element={<ProposalsPage />} />
-        <Route path="/business" element={<BusinessPage />} />
+        <Route path="/business" element={<BusinessPage />}>
+          <Route index element={<BusinessOverviewPage />} />
+          <Route path="claims" element={<BusinessClaimsPage />} />
+          <Route path="venues/:slug/:section" element={<BusinessVenuePage />} />
+        </Route>
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Routes>

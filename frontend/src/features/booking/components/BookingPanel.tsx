@@ -40,7 +40,7 @@ export function BookingPanel({ slug, userId }: { slug: string; userId: string | 
         <div className="booking-unavailable" role="status">
           <strong>Quán này chưa mở nhận yêu cầu đặt bàn.</strong>
           <p>Chủ quán cần bật “Nhận yêu cầu đặt bàn” trong trang quản lý trước khi khách có thể gửi.</p>
-          <Link to={`/business?slug=${encodeURIComponent(slug)}`}>
+          <Link to={`/business/venues/${encodeURIComponent(slug)}/bookings`}>
             Bạn quản lý quán này? Mở trang quản lý
           </Link>
         </div>

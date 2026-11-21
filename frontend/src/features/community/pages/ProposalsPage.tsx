@@ -71,7 +71,8 @@ export function ProposalsPage() {
       <h1>Đề xuất địa điểm</h1>
       <p>Địa điểm mới cần ba người khác xác nhận và được duyệt trước khi xuất hiện trên bản đồ.</p>
       <p>
-        Muốn quản lý một quán đã có trên bản đồ? <Link to="/business">Gửi yêu cầu xác minh chủ quán</Link>.
+        Muốn quản lý một quán đã có trên bản đồ?{' '}
+        <Link to="/business/claims">Gửi yêu cầu xác minh chủ quán</Link>.
       </p>
       {auth.data ? (
         <form className="card proposal-form" onSubmit={(event) => void submit(event)}>

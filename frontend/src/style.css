@@ -126,7 +126,7 @@ p { line-height: 1.55; }
 .proposal-coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .proposal-card { max-width: 700px; margin: 12px 0; }
 .proposal-card h3 { margin: 0 0 8px; }
-.business-form { max-width: 700px; display: grid; gap: 12px; margin: 20px 0; }
+.business-form { width: min(100%, 700px); display: grid; gap: 12px; margin: 20px 0; }
 .business-form label { display: grid; gap: 5px; }
 .business-form textarea { min-height: 86px; resize: vertical; }
 .business-logo-preview { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; }
@@ -141,7 +141,7 @@ p { line-height: 1.55; }
 .business-review img { display: block; width: min(100%, 260px); max-height: 210px; object-fit: cover; border-radius: 9px; }
 .business-cover-preview { width: min(100%, 320px); aspect-ratio: 2; object-fit: cover; border-radius: 12px; }
 .venue-cover { width: 100%; aspect-ratio: 2; object-fit: cover; border-radius: 12px; }
-.business-dashboard { max-width: 700px; margin: 20px 0; }
+.business-dashboard { width: min(100%, 700px); margin: 20px 0; }
 .booking-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
 .booking-panel h3 { margin: 4px 0; }
 .booking-unavailable { padding: 12px; border: 1px solid #d8e7dd; border-radius: 10px; background: #f4f8f4; }
@@ -253,8 +253,36 @@ p { line-height: 1.55; }
 .business-section-heading button { border: 1px solid #b8cfc2; border-radius: 9px; padding: 10px 14px; background: white; color: #17654d; font-weight: 700; }
 .business-section-heading button:hover { background: #e3f6e8; }
 .business-section-heading button:disabled { opacity: .55; cursor: wait; }
-.business-managed-venue { scroll-margin-top: 24px; }
-.business-page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.business-page { max-width: 1160px; }
+.business-workspace-header { display: block; padding: 20px 24px 0; border: 1px solid #deebe1; border-radius: 20px; background: white; box-shadow: 0 10px 30px #173b2a0d; }
+.business-workspace-top, .business-workspace-title { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.business-workspace-top { margin-bottom: 18px; }
+.business-workspace-title { align-items: end; }
+.business-workspace-title h1 { margin: 4px 0 0; font-size: clamp(2rem, 5vw, 3rem); }
+.business-workspace-title .eyebrow { margin: 0; }
+.business-workspace-title label { display: grid; gap: 5px; min-width: min(100%, 280px); font-weight: 700; }
+.business-workspace-title select { width: 100%; padding: 10px 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #162c24; font: inherit; }
+.business-workspace-nav { display: flex; gap: 8px; overflow-x: auto; margin-top: 22px; padding-bottom: 12px; scrollbar-width: thin; }
+.business-workspace-nav a { flex: 0 0 auto; padding: 10px 14px; border: 1px solid #cfe1d4; border-radius: 9px; background: #f7faf7; color: #17654d; text-decoration: none; font-weight: 700; white-space: nowrap; }
+.business-workspace-nav a:hover { background: #e3f6e8; }
+.business-workspace-nav a[aria-current='page'] { border-color: #17654d; background: #17654d; color: white; }
+.business-workspace-nav a:focus-visible, .business-workspace-title select:focus-visible { outline: 2px solid #d99b28; outline-offset: 2px; }
+.business-session { margin: 18px 0 4px; color: #52645b; }
+.business-overview, .business-claims-page, .business-tool-page { padding: 20px 0 40px; }
+.business-overview .business-section-heading { margin-top: 0; }
+.business-venue-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 16px; margin: 22px 0; }
+.business-venue-card { width: 100%; padding: 22px; }
+.business-venue-card h3 { margin: 6px 0 10px; }
+.business-venue-card p { overflow-wrap: anywhere; }
+.business-venue-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.business-venue-actions a, .business-claim-cta, .business-claim-card a { display: inline-block; padding: 8px 12px; border: 1px solid #b8cfc2; border-radius: 9px; color: #17654d; text-decoration: none; font-weight: 700; }
+.business-venue-actions a:hover, .business-claim-cta:hover, .business-claim-card a:hover { background: #e3f6e8; }
+.business-claim-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 12px; margin: 18px 0 28px; }
+.business-claim-card { display: grid; gap: 10px; width: 100%; padding: 20px; }
+.business-claim-card a { justify-self: start; }
+.business-tool-heading h2 { margin: 4px 0 18px; }
+.business-tool-heading .eyebrow { margin: 0; }
+.business-tool-page .business-form, .business-tool-page .business-community, .business-tool-page .business-dashboard { margin-top: 0; }
 .plans-header { display: flex; align-items: center; justify-content: space-between; }
 .plans-hero { max-width: 680px; margin: 52px 0 30px; }
 .plans-hero h1 { margin-bottom: 12px; }
@@ -272,3 +300,4 @@ p { line-height: 1.55; }
 @media (max-width: 760px) { .explorer { height: auto; min-height: 100dvh; overflow: visible; } }
 @media (max-width: 600px) { .admin-heading, .admin-claim-title { flex-direction: column; align-items: start; } .admin-claim { padding: 18px; } }
 @media (max-width: 600px) { .business-section-heading { flex-direction: column; align-items: start; } }
+@media (max-width: 600px) { .business-workspace-header { padding: 16px 16px 0; } .business-workspace-title { align-items: start; flex-direction: column; } .business-workspace-title label { width: 100%; } .business-venue-card { padding: 18px; } }

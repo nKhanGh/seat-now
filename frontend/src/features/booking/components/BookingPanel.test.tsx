@@ -31,7 +31,7 @@ describe('booking availability in venue detail', () => {
     const html = render();
     expect(html).toContain('Yêu cầu đặt bàn');
     expect(html).toContain('Quán này chưa mở nhận yêu cầu đặt bàn.');
-    expect(html).toContain('/business?slug=demo-hcm-028');
+    expect(html).toContain('/business/venues/demo-hcm-028/bookings');
     expect(html).not.toContain('Gửi yêu cầu');
   });
 
