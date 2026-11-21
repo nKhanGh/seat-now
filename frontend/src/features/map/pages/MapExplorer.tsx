@@ -7,6 +7,7 @@ import { useHcmVenuePins, useNearbyVenues, usePublishedVenueSearch, useVenueDeta
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
 import { AvailabilityHistory } from '../components/AvailabilityHistory';
+import { FilterSelect } from '../components/FilterSelect';
 import { MapFilters, VenueMapItem } from '../services/map.service';
 import { useParkingForVenue } from '../../parking/api/parkingQueries';
 import { ParkingList } from '../../parking/components/ParkingList';
@@ -363,82 +364,85 @@ export function MapExplorer() {
             onChange={(event) => update({ q: event.target.value || null })}
           />
         </label>
-        <select
-          aria-label="Loại địa điểm"
+        <FilterSelect
+          label="Loại địa điểm"
           value={filters.category || ''}
-          onChange={(event) => update({ category: event.target.value })}
-        >
-          <option value="">Tất cả loại</option>
-          <option value="RESTAURANT">Nhà hàng</option>
-          <option value="CAFE">Cà phê</option>
-          <option value="CINEMA">Rạp phim</option>
-        </select>
-        <select
-          aria-label="Loại món"
+          onChange={(category) => update({ category })}
+          options={[
+            { value: '', label: 'Tất cả loại' },
+            { value: 'RESTAURANT', label: 'Nhà hàng' },
+            { value: 'CAFE', label: 'Cà phê' },
+            { value: 'CINEMA', label: 'Rạp phim' },
+          ]}
+        />
+        <FilterSelect
+          label="Loại món"
           value={filters.cuisine || ''}
-          onChange={(event) => update({ cuisine: event.target.value })}
-        >
-          <option value="">Tất cả món</option>
-          <option value="VIETNAMESE">Món Việt</option>
-          <option value="WESTERN">Món Âu</option>
-          <option value="COFFEE">Cà phê</option>
-          <option value="DESSERT">Tráng miệng</option>
-        </select>
-        <select
-          aria-label="Bán kính"
-          value={filters.radiusM}
-          onChange={(event) => update({ radiusM: event.target.value })}
-        >
-          <option value="1000">1 km</option>
-          <option value="3000">3 km</option>
-          <option value="5000">5 km</option>
-          <option value="10000">10 km</option>
-        </select>
-        <select
+          onChange={(cuisine) => update({ cuisine })}
+          options={[
+            { value: '', label: 'Tất cả món' },
+            { value: 'VIETNAMESE', label: 'Món Việt' },
+            { value: 'WESTERN', label: 'Món Âu' },
+            { value: 'COFFEE', label: 'Cà phê' },
+            { value: 'DESSERT', label: 'Tráng miệng' },
+          ]}
+        />
+        <FilterSelect
+          label="Bán kính"
+          value={String(filters.radiusM)}
+          onChange={(radiusM) => update({ radiusM })}
+          options={[
+            { value: '1000', label: '1 km' },
+            { value: '3000', label: '3 km' },
+            { value: '5000', label: '5 km' },
+            { value: '10000', label: '10 km' },
+          ]}
+        />
+        <FilterSelect
           className="price-filter"
-          aria-label="Mức giá"
-          value={filters.priceTier || ''}
-          onChange={(event) => update({ priceTier: event.target.value })}
-        >
-          <option value="">Mọi mức giá</option>
-          {PRICE_TIER_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="Đánh giá tối thiểu"
-          value={filters.ratingGte || ''}
-          onChange={(event) => update({ ratingGte: event.target.value })}
-        >
-          <option value="">Mọi đánh giá</option>
-          <option value="4">Từ 4 sao</option>
-          <option value="4.5">Từ 4.5 sao</option>
-        </select>
-        <select
-          aria-label="Độ đông"
+          label="Mức giá"
+          value={String(filters.priceTier || '')}
+          onChange={(priceTier) => update({ priceTier })}
+          options={[
+            { value: '', label: 'Mọi mức giá' },
+            ...PRICE_TIER_OPTIONS.map((option) => ({ ...option, value: String(option.value) })),
+          ]}
+        />
+        <FilterSelect
+          label="Đánh giá tối thiểu"
+          value={String(filters.ratingGte || '')}
+          onChange={(ratingGte) => update({ ratingGte })}
+          options={[
+            { value: '', label: 'Mọi đánh giá' },
+            { value: '4', label: 'Từ 4 sao' },
+            { value: '4.5', label: 'Từ 4.5 sao' },
+          ]}
+        />
+        <FilterSelect
+          label="Độ đông"
           value={filters.crowdLevel || ''}
-          onChange={(event) => update({ crowdLevel: event.target.value })}
-        >
-          <option value="">Mọi độ đông</option>
-          <option value="QUIET">Vắng</option>
-          <option value="MODERATE">Vừa</option>
-          <option value="BUSY">Đông</option>
-          <option value="FULL">Đầy</option>
-        </select>
-        <select
-          aria-label="Sắp xếp danh sách"
+          onChange={(crowdLevel) => update({ crowdLevel })}
+          align="end"
+          options={[
+            { value: '', label: 'Mọi độ đông' },
+            { value: 'QUIET', label: 'Vắng' },
+            { value: 'MODERATE', label: 'Vừa' },
+            { value: 'BUSY', label: 'Đông' },
+            { value: 'FULL', label: 'Đầy' },
+          ]}
+        />
+        <FilterSelect
+          label="Sắp xếp danh sách"
           value={sortOrder}
-          onChange={(event) =>
-            update({ sort: event.target.value === 'distance' ? null : event.target.value })
-          }
+          onChange={(sort) => update({ sort: sort === 'distance' ? null : sort })}
           disabled={searching}
-        >
-          <option value="distance">Gần nhất</option>
-          <option value="rating">Đánh giá cao</option>
-          <option value="price">Giá thấp</option>
-        </select>
+          align="end"
+          options={[
+            { value: 'distance', label: 'Gần nhất' },
+            { value: 'rating', label: 'Đánh giá cao' },
+            { value: 'price', label: 'Giá thấp' },
+          ]}
+        />
         <label className="filter-check">
           <input
             type="checkbox"

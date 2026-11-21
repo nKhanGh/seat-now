@@ -54,10 +54,23 @@ p { line-height: 1.55; }
 .explorer-header nav a[href="/register"]:hover { background: #86391f; box-shadow: 0 4px 12px #a94c2d38; }
 .explorer-header nav a:focus-visible, .explorer-header nav button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .explorer-header nav button:disabled { opacity: .55; cursor: wait; }
-.filterbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: #fffdf9; border-bottom: 1px solid #deebe1; }
+.filterbar { position: relative; z-index: 5; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: #fffdf9; border-bottom: 1px solid #deebe1; }
 .filterbar select, .filterbar button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 9px 12px; color: #152520; }
 .filterbar select:hover, .filterbar button:hover { border-color: #5f9c79; }
 .filterbar select:focus-visible, .filterbar button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
+.filter-select { position: relative; flex: 0 0 auto; min-width: 124px; }
+.filterbar .filter-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 42px; border-radius: 10px; background: white; box-shadow: 0 2px 5px #173b2a08; text-align: left; white-space: nowrap; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+.filterbar .filter-select-trigger:hover:not(:disabled) { background: #f7fcf8; box-shadow: 0 3px 9px #173b2a15; }
+.filterbar .filter-select-trigger[aria-expanded="true"] { border-color: #17654d; box-shadow: 0 0 0 3px #17654d20; }
+.filter-select-trigger svg { flex: 0 0 auto; color: #17654d; transition: transform .18s ease; }
+.filter-select-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+.filterbar .filter-select-trigger:disabled { opacity: .55; cursor: not-allowed; }
+.filter-select-menu { position: absolute; top: calc(100% + 7px); left: 0; z-index: 20; min-width: 100%; width: max-content; max-width: min(300px, calc(100vw - 24px)); max-height: min(320px, 50vh); overflow-y: auto; padding: 6px; border: 1px solid #d7e7db; border-radius: 13px; background: #fffefa; box-shadow: 0 14px 32px #173b2a26; }
+.filter-select-menu.align-end { left: auto; right: 0; }
+.filterbar .filter-select-option { display: flex; align-items: center; justify-content: space-between; gap: 18px; width: 100%; min-height: 38px; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: #152520; text-align: left; white-space: nowrap; }
+.filterbar .filter-select-option:hover, .filterbar .filter-select-option:focus-visible { outline: 0; background: #e8f5eb; color: #12533e; }
+.filterbar .filter-select-option[aria-selected="true"] { background: #e6f4e9; color: #12533e; font-weight: 750; }
+.filter-select-option svg { color: #17654d; flex: 0 0 auto; }
 .filterbar .price-filter { min-width: 165px; }
 .filterbar select:disabled { opacity: .55; cursor: not-allowed; }
 .filterbar .filter-reset { border-color: #17654d; color: #17654d; font-weight: 700; }
