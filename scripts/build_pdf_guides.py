@@ -18,6 +18,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     HRFlowable,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -55,8 +56,8 @@ def register_fonts() -> None:
 
 def styles() -> dict[str, ParagraphStyle]:
     base = ParagraphStyle(
-        "body", fontName="SeatNow", fontSize=9.2, leading=14.3,
-        textColor=DARK, spaceAfter=7, allowWidows=0, allowOrphans=0,
+        "body", fontName="SeatNow", fontSize=9.2, leading=13.5,
+        textColor=DARK, spaceAfter=6, allowWidows=0, allowOrphans=0,
     )
     return {
         "body": base,
@@ -66,20 +67,20 @@ def styles() -> dict[str, ParagraphStyle]:
         ),
         "h2": ParagraphStyle(
             "h2", parent=base, fontName="SeatNow-Bold", fontSize=14,
-            leading=18, textColor=GREEN, spaceBefore=17, spaceAfter=7,
+            leading=18, textColor=GREEN, spaceBefore=14, spaceAfter=6,
             keepWithNext=True,
         ),
         "h3": ParagraphStyle(
             "h3", parent=base, fontName="SeatNow-Bold", fontSize=11,
-            leading=15, spaceBefore=11, spaceAfter=5, keepWithNext=True,
+            leading=15, spaceBefore=9, spaceAfter=4, keepWithNext=True,
         ),
         "h4": ParagraphStyle(
             "h4", parent=base, fontName="SeatNow-Bold", fontSize=9.5,
-            leading=14, spaceBefore=8, keepWithNext=True,
+            leading=14, spaceBefore=7, keepWithNext=True,
         ),
         "list": ParagraphStyle(
             "list", parent=base, leftIndent=17, firstLineIndent=-13,
-            spaceAfter=4,
+            spaceAfter=3,
         ),
         "table": ParagraphStyle(
             "table", parent=base, fontSize=8.2, leading=11.5, spaceAfter=0,
@@ -89,7 +90,7 @@ def styles() -> dict[str, ParagraphStyle]:
             leading=11.5, textColor=GREEN, spaceAfter=0,
         ),
         "code": ParagraphStyle(
-            "code", parent=base, fontSize=8, leading=12, spaceAfter=0,
+            "code", parent=base, fontSize=8, leading=11.5, spaceAfter=0,
             wordWrap="CJK",
         ),
         "subtitle": ParagraphStyle(
@@ -142,8 +143,8 @@ def parse_table(lines: list[str], style: dict[str, ParagraphStyle]) -> Table:
         ("GRID", (0, 0), (-1, -1), 0.35, LINE),
         ("LEFTPADDING", (0, 0), (-1, -1), 7),
         ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
     ]))
     return table
 
@@ -164,6 +165,11 @@ def make_story(source: Path, style: dict[str, ParagraphStyle]) -> list:
         stripped = line.strip()
         if not stripped:
             flush()
+            index += 1
+            continue
+        if stripped == "<!-- PAGEBREAK -->":
+            flush()
+            story.append(PageBreak())
             index += 1
             continue
         if stripped.startswith("```"):

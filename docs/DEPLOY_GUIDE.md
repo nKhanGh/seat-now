@@ -32,7 +32,7 @@ Trong terminal thứ hai, mở `http://localhost:3100/api/v1/health` và `http:/
 ## 3. Tạo Web Service trên Render
 
 1. Trong Render chọn **New > Web Service**, kết nối repository GitHub chứa SeatNow.
-2. Chọn **Language: Docker**. Giữ root/build context ở thư mục gốc; Dockerfile path là `./Dockerfile`. Dockerfile đã build React, NestJS và phục vụ frontend từ backend, nên **không cần tạo static site riêng**.
+2. Chọn **Language: Docker**. Giữ root/build context ở thư mục gốc; Dockerfile path là `./Dockerfile`. Dockerfile đã build React, NestJS và phục vụ frontend từ backend, nên **không cần tạo static site riêng**. Chọn branch `develop` để thử tính năng mới, hoặc `main` sau khi merge PR.
 3. Chọn plan **Free** cho demo nếu còn khả dụng trong tài khoản. Đặt tên service, ví dụ `seatnow-demo`. Render cấp URL HTTPS dạng `https://...onrender.com`.
 4. Trong **Environment**, đặt các biến sau:
 
@@ -47,7 +47,7 @@ Trong terminal thứ hai, mở `http://localhost:3100/api/v1/health` và `http:/
 | `NODE_ENV` | Dockerfile đã đặt `production`; không cần đổi. |
 | `MAP_ASSET_ORIGINS` | Tùy chọn, mặc định cho OpenFreeMap. Chỉ chỉnh nếu đổi nguồn tile/style. |
 
-5. Nếu URL thực chưa biết khi tạo service, tạo service trước, sao chép URL được cấp, sửa `PUBLIC_ORIGIN` cho khớp rồi **redeploy**. Origin sai sẽ gây lỗi 403 khi đăng nhập, đăng ký hoặc gửi form.
+5. Nếu URL thực chưa biết khi tạo service, tạo service trước, sao chép URL được cấp, sửa `PUBLIC_ORIGIN` cho khớp rồi **Save and deploy**. Origin sai sẽ gây lỗi 403 khi đăng nhập, đăng ký hoặc gửi form. File `.env.render` trên máy không tự đồng bộ lên Render; phải nhập các biến trong trang **Environment** của service.
 6. Thêm dải outbound IP của Render vào Atlas như bước 2.4. Chọn **Manual Deploy > Deploy latest commit** nếu lần khởi động đầu lỗi kết nối MongoDB.
 7. Đợi log báo Nest application started và service Live. Mở `https://TEN-SERVICE.onrender.com/api/v1/health`; mong đợi `data.status = ok` và `data.database = ok`. Sau đó mở `/` để kiểm tra bản đồ.
 
@@ -92,7 +92,8 @@ Script sẽ từ chối email đã thuộc tài khoản thường. Không đặt
 | API không kết nối MongoDB | Kiểm tra URI Atlas, Database User, IP Access List và dải outbound của Render. |
 | Đăng nhập/form trả 403 | `PUBLIC_ORIGIN` phải khớp chính xác URL HTTPS trên thanh địa chỉ, không có `/` cuối. |
 | Trang trắng khi tải lại URL con | Kiểm tra đã deploy commit có SPA fallback cho `/business/*` và frontend build được copy vào image. |
-| Không có quán trên bản đồ | Chạy seed demo từ local vào đúng database Atlas; kiểm tra API và bộ lọc bản đồ. |
+| Health `database: ok` nhưng không có quán, admin cũ đăng nhập 401 | Backend đã kết nối MongoDB nhưng có thể đang dùng sai database. Kiểm tra URI trong Render có `/seatnow` sau `.mongodb.net`, lưu bằng **Save and deploy**. So API `/api/v1/map/venues` với Atlas `seatnow` trước khi seed lại để tránh bản ghi trùng. |
+| Không có quán trên bản đồ sau khi chọn đúng database | Kiểm tra Atlas `seatnow` có dữ liệu hay chưa; chỉ seed demo từ local nếu database thật sự trống. Kiểm tra bộ lọc/bán kính trên bản đồ. |
 | Bản đồ nền không hiện | Kiểm tra mạng tải tile và `MAP_ASSET_ORIGINS` trong Content Security Policy. |
 | Lần mở đầu chậm | Render Free có thể ngủ sau thời gian không truy cập và cần thời gian khởi động lại. |
 

@@ -4,8 +4,17 @@ Tài liệu cho **bản demo phục vụ học tập**, cập nhật ngày 21/11
 
 > **Dữ liệu mẫu:** Khoảng 100 địa điểm và 4 bãi xe được tạo để thử giao diện, tập trung ở TP.HCM. Tên, địa chỉ, tọa độ và số chỗ có thể là hư cấu. Đừng dùng chúng để quyết định đi đến địa điểm thật.
 
+## Bắt đầu nhanh trên bản web
+
+1. Mở [SeatNow](https://seat-now.onrender.com). Lần mở đầu trên Render Free có thể cần chờ service khởi động. Nếu trang không có quán, mở `/api/v1/health` để xem API và database, rồi kiểm tra `/api/v1/map/venues?lat=10.7769&lng=106.7009&radiusM=20000&limit=20`. Health `database: ok` chỉ chứng minh kết nối, **không chứng minh đã chọn đúng database có dữ liệu**.
+2. Trên bản đồ, chọn quán và đọc tình trạng chỗ ngồi, bãi xe, review. Không cần đăng nhập cho bước khám phá.
+3. Để thử quyền người dùng, chọn **Đăng ký** hoặc **Đăng nhập**. Các bước check-in, review, lưu quán và yêu cầu đặt bàn nằm ở mục 6–9.
+4. Để thử chủ quán, dùng tài khoản đã được admin duyệt quyền quản lý quán và mở `/business`. Để thử admin, dùng tài khoản admin riêng rồi mở `/admin`. Không dùng tài khoản người dùng thường để thử quyền admin.
+5. Khi bản web rỗng dù MongoDB Atlas đã có quán, kiểm tra biến `MONGODB_URI` trong Render **có tên database `/seatnow` sau `.mongodb.net`**, rồi chọn **Save and deploy**. File env trên máy không tự đồng bộ lên Render. Kiểm tra thêm branch Render: dùng `develop` cho bản mới nhất hoặc `main` sau khi merge PR.
+
 ## Mục lục
 
+0. [Bắt đầu nhanh trên bản web](#bắt-đầu-nhanh-trên-bản-web)
 1. [Mở app và vai trò tài khoản](#1-mở-app-và-vai-trò-tài-khoản)
 2. [Đăng ký, đăng nhập, đăng xuất](#2-đăng-ký-đăng-nhập-đăng-xuất)
 3. [Bản đồ, tìm kiếm và bộ lọc](#3-bản-đồ-tìm-kiếm-và-bộ-lọc)
@@ -21,10 +30,11 @@ Tài liệu cho **bản demo phục vụ học tập**, cập nhật ngày 21/11
 13. [Kịch bản demo từ đầu đến cuối](#13-kịch-bản-demo-từ-đầu-đến-cuối)
 14. [Xử lý lỗi thường gặp](#14-xử-lý-lỗi-thường-gặp)
 15. [Khởi động và chuẩn bị dữ liệu local](#15-khởi-động-và-chuẩn-bị-dữ-liệu-local)
+16. [Checklist nghiệm thu bản deploy](#16-checklist-nghiệm-thu-bản-deploy)
 
 ## 1. Mở app và vai trò tài khoản
 
-Khi nhóm chạy hai server phát triển, mở **http://localhost:5173**. Nếu đã build frontend và để backend phục vụ cả app, mở **http://localhost:3000**. API nằm dưới `/api/v1`. Trang chính `/` là bản đồ; mọi vai trò đều có thể xem bản đồ, chỗ ngồi và bãi xe mà không cần đăng nhập.
+Trên bản deploy, mở **https://seat-now.onrender.com** sau khi service đã Live và chọn đúng database. Khi nhóm chạy hai server phát triển, mở **http://localhost:5173**. Nếu đã build frontend và để backend phục vụ cả app, mở **http://localhost:3000**. API nằm dưới `/api/v1`. Trang chính `/` là bản đồ; mọi vai trò đều có thể xem bản đồ, chỗ ngồi và bãi xe mà không cần đăng nhập.
 
 | Vai trò                 | Có thể làm gì                                                                                                                      |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -284,7 +294,9 @@ Chỉ demo check-in thành công với địa điểm thật có tọa độ đ�
 | Tab admin **Quán cộng đồng** trống                        | Chưa có đề xuất đủ ba lượt xác nhận của ba tài khoản khác người gửi.                                                                                                                                                                               |
 | Review có sao/chữ nhưng chưa có ảnh                       | Ảnh tải riêng sau review; nếu bước ảnh lỗi, chọn lại JPEG/PNG/WebP dưới 2 MB và cập nhật đánh giá.                                                                                                                                                 |
 | Phiên đăng nhập mất sau khi khởi động lại API             | Đăng nhập lại; giữ `JWT_SECRET` cố định trong `backend/.env` khi chạy local.                                                                                                                                                                       |
-| Có thông báo không tải được dữ liệu                       | Bấm **Thử lại** nếu có; kiểm tra API tại `http://localhost:3000/api/v1/health`, MongoDB Docker và tab Network của trình duyệt.                                                                                                                     |
+| Có thông báo không tải được dữ liệu                       | Bấm **Thử lại** nếu có; kiểm tra `/api/v1/health` trên đúng origin đang mở, MongoDB và tab Network của trình duyệt.                                                                                                                                |
+| Bản Render health OK nhưng không có quán; tài khoản cũ đăng nhập 401 | So `MONGODB_URI` trên Render với URI Atlas chứa `/seatnow`. URI kết thúc ở `.mongodb.net/` thường chọn database mặc định khác. Lưu biến bằng **Save and deploy**; kiểm tra lại API `/api/v1/map/venues` và đăng nhập. |
+| Trên Render thiếu nút/trang mới dù local có                 | Kiểm tra branch trong Settings của Web Service. Bản mới nằm trên `develop` cho tới khi PR được merge vào `main`; deploy lại sau khi đổi branch.                                                                                                    |
 
 ## 15. Khởi động và chuẩn bị dữ liệu local
 
@@ -335,3 +347,21 @@ Cho **quán đã được admin duyệt quyền quản lý**, cấu hình `BUSIN
 4. Nếu cần test tự động, xem lệnh trong [README](../README.md#chạy-demo-local). Integration test dùng database `seatnow_test_*` và xóa database tạm sau khi chạy.
 
 Phần vận hành nâng cao như dựng lại projection, ingest snapshot, backup/restore và kiểm duyệt báo cáo review nằm trong [runbook local](runbooks/local-demo.md).
+
+<!-- PAGEBREAK -->
+
+## 16. Checklist nghiệm thu bản deploy
+
+Dùng checklist này sau mỗi lần đổi cấu hình Render hoặc merge PR. Ưu tiên tài khoản và địa điểm thử nghiệm; xóa review/đề xuất thử nếu không còn cần. Không dùng tọa độ quán hư cấu để thử check-in ngoài đời.
+
+| Vai trò/bước | Thao tác | Kết quả mong đợi |
+| --- | --- | --- |
+| Hệ thống | Mở `/api/v1/health`, sau đó mở API `/api/v1/map/venues?lat=10.7769&lng=106.7009&radiusM=20000&limit=20`. | Health `status: ok`, `database: ok`; API bản đồ có `data` chứa quán nếu Atlas `seatnow` đã có dữ liệu. |
+| Khách | Mở `/`, chọn quán và xem **Độ đông**, bãi xe, review. Bật/tắt **Còn bàn**. | Ghim và thẻ quán hiển thị; chi tiết có tình trạng và bãi xe nếu có; bộ lọc thay đổi danh sách. |
+| Người dùng | Đăng nhập, lưu một quán, mở **Quán đã lưu**, viết review thử rồi tải lại trang. | Quán vẫn được lưu; review xuất hiện đúng sao/nội dung. Có thể xóa review thử ở chính tài khoản đó. |
+| Người đặt bàn | Chọn nhà hàng/cà phê đã bật nhận yêu cầu, chọn giờ đến–rời và gửi. | `/bookings` hiện **Chờ xác nhận**; sau khi chủ quán xác nhận mới hiện **Đã xác nhận**. |
+| Chủ quán | Đăng nhập tài khoản đã được duyệt, mở `/business`, chọn **Đặt bàn** hoặc **Hồ sơ**. | Thấy đúng quán được cấp quyền, đổi cài đặt rồi **Lưu cài đặt** hoặc **Lưu hồ sơ**; tải lại vẫn thấy giá trị mới. |
+| Admin | Đăng nhập tài khoản admin riêng, mở `/admin` và xem hai tab. | Tới trang xét duyệt; chỉ yêu cầu đang chờ và đề xuất đủ ba xác nhận hợp lệ mới hiện trong hàng chờ. |
+| Điều hướng | Tải lại trực tiếp `/login`, `/bookings`, `/business` và `/admin`. | React vẫn mở đúng trang; trang cần quyền hiển thị thông báo/điều hướng phù hợp khi chưa đăng nhập. |
+
+Nếu chỉ thấy `database: ok` nhưng bản đồ không có quán và tài khoản cũ không đăng nhập được, dừng thử luồng vai trò. Kiểm tra Render `MONGODB_URI` có đường dẫn `/seatnow`, lưu **Save and deploy**, rồi chạy lại hai bước đầu. Nếu giao diện thiếu tính năng trong hướng dẫn, kiểm tra branch Render đã có commit mới.

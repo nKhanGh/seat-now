@@ -1,6 +1,12 @@
 # Hướng dẫn sử dụng SeatNow theo 3 vai trò
 
-Tài liệu cho bản demo học tập - cập nhật 21/11/2026. Các nút và đường dẫn được đối chiếu với giao diện hiện tại. Khi chạy local bằng Vite, mở `http://localhost:5173`; khi backend phục vụ bản build hoặc deploy Docker, dùng `http://localhost:3000` hay URL HTTPS của service.
+Tài liệu cho bản demo học tập - cập nhật 21/11/2026. Các nút và đường dẫn được đối chiếu với giao diện hiện tại. Bản web dùng [https://seat-now.onrender.com](https://seat-now.onrender.com) sau khi cấu hình Render đúng; khi chạy local bằng Vite, mở `http://localhost:5173`, hoặc `http://localhost:3000` nếu backend phục vụ cả frontend.
+
+## Trước khi thử ba vai trò
+
+1. Mở trang chủ và xác nhận có danh sách quán. Nếu danh sách trống, kiểm tra `/api/v1/health`, rồi thử `/api/v1/map/venues?lat=10.7769&lng=106.7009&radiusM=20000&limit=20`. Health OK nhưng bản đồ trống có thể là Render đang dùng URI trỏ tới database khác; Atlas của bản demo dùng tên `/seatnow`.
+2. Chuẩn bị tài khoản người dùng thường, tài khoản được duyệt quản lý quán và tài khoản admin riêng. Không dùng cùng một phiên trình duyệt cho nhiều vai trò; đăng xuất trước khi đổi tài khoản hoặc dùng cửa sổ riêng tư.
+3. Bản Render cần deploy branch chứa các tính năng mới. Nếu đang chọn `main` cũ, dùng `develop` để thử hoặc merge PR rồi deploy `main`.
 
 ## 1. Ba vai trò trong ứng dụng
 
@@ -108,6 +114,8 @@ Trang admin có nút **Về bản đồ**. Hàng chờ báo cáo review hiện c
 | Hiện tượng | Cách xử lý |
 | --- | --- |
 | Bản đồ trống | Kiểm tra mạng tile, bỏ bộ lọc và mở `/api/v1/health`; dữ liệu demo cần chạy `seed:demo`. |
+| Render health OK nhưng quán trống, admin cũ đăng nhập 401 | Kiểm tra `MONGODB_URI` của service có `/seatnow` sau `.mongodb.net`; file env local không tự cập nhật Render. Lưu bằng **Save and deploy**. |
+| Tính năng mới không xuất hiện trên Render | Kiểm tra Web Service đã chọn `develop` hoặc `main` sau khi merge PR. |
 | Không check-in được | Cần vị trí thật gần quán, quyền GPS và độ chính xác đủ tốt; quán seed là hư cấu. |
 | Không có form đặt bàn | Chỉ nhà hàng/cà phê được chủ quán bật nhận yêu cầu mới có form. |
 | Đã gửi đặt bàn nhưng chưa có bàn | **Chờ xác nhận** chưa giữ bàn; chờ chủ quán quyết định trong trang **Đặt bàn**. |
