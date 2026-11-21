@@ -162,15 +162,15 @@ Ba lượt xác nhận là tín hiệu cộng đồng, chưa chứng minh địa
 ### Người dùng gửi yêu cầu
 
 1. Đăng nhập, mở **nhà hàng hoặc quán cà phê** rồi kéo trong chi tiết xuống **Yêu cầu đặt bàn**, ngay sau phần tình trạng/lịch sử chỗ ngồi và trước check-in. Chỉ quán đã được chủ quán bật **Nhận yêu cầu đặt bàn** mới hiện form và nút **Gửi yêu cầu**; rạp phim không có form. Nếu quán chưa bật, phần này giải thích rõ **Quán này chưa mở nhận yêu cầu đặt bàn** và dẫn chủ quán đến trang quản lý.
-2. Chọn **Thời gian đến** từ ít nhất một giờ tới và không quá 14 ngày, **Số khách** 1–12 và **Ghi chú** nếu cần (tối đa 500 ký tự).
-3. Chọn **Gửi yêu cầu**. Trạng thái đầu tiên là **Chờ xác nhận**. Đây **chưa phải bàn đã giữ**; chủ quán xác nhận hoặc từ chối thủ công. Một tài khoản không gửi trùng thời gian tại cùng quán.
-4. Mở **Đặt bàn của tôi** hoặc `/bookings` để xem thời gian, tên quán, số khách, ghi chú, nhãn **Ưu tiên Premium** nếu có. Dùng **Tất cả**, **Chờ xác nhận**, **Đã xác nhận**, **Đã kết thúc** để lọc. Chọn **Xem quán trên bản đồ** để trở lại quán.
+2. Chọn **Bắt đầu (giờ đến)** từ ít nhất một giờ tới và không quá 14 ngày. Ô **Kết thúc (giờ rời quán)** được gợi ý sau 2 giờ; có thể chỉnh để lượt kéo dài 30 phút đến 4 giờ. Chọn **Số khách** 1–12 và **Ghi chú** nếu cần (tối đa 500 ký tự).
+3. Chọn **Gửi yêu cầu**. Trạng thái đầu tiên là **Chờ xác nhận**. Đây **chưa phải bàn đã giữ**; chủ quán xác nhận hoặc từ chối thủ công. Một tài khoản không gửi trùng giờ bắt đầu tại cùng quán. Nếu quán hiện hết bàn, app cảnh báo; bạn vẫn có thể xin giờ khác vì số bàn hiện tại không dự báo chỗ trong tương lai.
+4. Mở **Đặt bàn của tôi** hoặc `/bookings` để xem giờ bắt đầu–kết thúc, tên quán, số khách, ghi chú, nhãn **Ưu tiên Premium** nếu có. Dùng **Tất cả**, **Chờ xác nhận**, **Đã xác nhận**, **Đã kết thúc** để lọc. Chọn **Xem quán trên bản đồ** để trở lại quán.
 5. Nếu yêu cầu đang chờ hoặc đã xác nhận và cần hủy, bấm **Hủy yêu cầu** → **Xác nhận hủy**. **Giữ yêu cầu** quay lại. Yêu cầu đã đón khách/từ chối/đã hủy không thể hủy tiếp.
 
 | Trạng thái       | Ý nghĩa                                              |
 | ---------------- | ---------------------------------------------------- |
 | **Chờ xác nhận** | Quán chưa quyết định, chưa giữ bàn.                  |
-| **Đã xác nhận**  | Chủ quán chấp nhận; app chưa đồng bộ số bàn thực tế. |
+| **Đã xác nhận**  | Chủ quán chấp nhận; app chặn vượt tổng bàn/ghế đã biết do các lượt đặt trùng giờ trong app, nhưng chưa đồng bộ số bàn thực tế. |
 | **Quán từ chối** | Quán không nhận yêu cầu.                             |
 | **Đã hủy**       | Người dùng đã xác nhận hủy.                          |
 | **Đã đón khách** | Chủ quán đã ghi nhận khách đến; không thể hủy.       |
@@ -198,7 +198,7 @@ Premium demo chỉ giúp yêu cầu xếp trước trong hàng chờ, không b�
 - **Tương tác khách hàng:** số tài khoản check-in trong giờ qua, tín hiệu tự báo cáo, năm review công khai gần nhất và ảnh. Chọn **Làm mới**; bấm **Xem trang quán và tất cả đánh giá** để xem hết.
 - **Hồ sơ quán:** sửa tên, địa chỉ, mô tả, giờ mở cửa, menu tóm tắt, mức giá; bấm **Lưu hồ sơ**. Thông tin mới hiện công khai sau khi tải lại.
 - **Logo:** chọn JPEG/PNG/WebP tối đa 2 MB rồi bấm **Cập nhật logo**. Logo hiện ở thẻ quán, chi tiết và ghim khi dữ liệu cập nhật.
-- **Yêu cầu đặt bàn:** mở **Đặt bàn** của nhà hàng/cà phê trên header. Chọn **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**; đổi checkbox mà chưa lưu thì khách vẫn chưa thấy form gửi. Xem hàng chờ, bấm **Xác nhận** hoặc **Từ chối**. Khi khách thực sự tới, bấm **Đánh dấu đã đón khách** → **Xác nhận đã đón**; **Chưa đón khách** hủy bước này. Kiểm tra khả năng phục vụ trước khi xác nhận vì snapshot bàn trống chưa phải inventory đặt bàn.
+- **Yêu cầu đặt bàn:** mở **Đặt bàn** của nhà hàng/cà phê trên header. Chọn **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**; đổi checkbox mà chưa lưu thì khách vẫn chưa thấy form gửi. Hàng chờ hiện giờ đến–rời; bấm **Xác nhận** hoặc **Từ chối**. Nếu các lượt đã xác nhận chồng giờ dùng hết tổng bàn/ghế được ghi nhận, nút xác nhận báo hết chỗ; hãy từ chối hoặc trao đổi giờ khác. Khi khách thực sự tới, bấm **Đánh dấu đã đón khách** → **Xác nhận đã đón**; **Chưa đón khách** hủy bước này. Kiểm tra khả năng phục vụ thực tế vì snapshot bàn trống chưa phải inventory đặt bàn.
 - Một tài khoản có thể quản lý nhiều quán đã được duyệt, chọn **Chi nhánh** để chuyển quán.
 
 ### Công cụ Premium Business trong bản demo

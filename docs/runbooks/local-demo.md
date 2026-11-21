@@ -91,12 +91,17 @@ After the operator approves a business claim, the owner opens `/business`,
 chooses **Đặt bàn** on the header and checks **Nhận yêu cầu đặt bàn** for a restaurant or cafe.
 This opt-in is off by
 default; cinema table bookings are not supported. Another signed-in user opens
-that venue on the map, chooses a time at least one hour and at most fourteen
-days ahead, and sends a request for 1–12 guests. The request appears as
+that venue on the map, chooses a start time at least one hour and at most fourteen
+days ahead, an end time 30 minutes to four hours later, and sends a request for 1–12 guests. The request appears as
 **Chờ xác nhận** on `/bookings`; the owner's `/business` queue shows it with the
 guest's display name. The owner confirms or declines; the guest sees the
 updated state on `/bookings` (which refreshes every 30 seconds). The owner
-keeps seeing upcoming confirmed bookings and the guest may cancel one.
+keeps seeing upcoming confirmed bookings and the guest may cancel one. To test
+the full-capacity case, set a venue snapshot to one total table, send two
+overlapping requests from different accounts, and confirm the first. Confirming
+the second returns 409; an adjacent non-overlapping request can be confirmed.
+Current empty tables are only a snapshot, so future requests remain pending
+until the owner confirms capacity.
 
 To verify priority, activate a local Premium fixture for a second user with
 `SEED_PREMIUM_EMAIL` and `npm run seed:premium` from `backend`, then send a
