@@ -65,9 +65,10 @@ export function VenueMap({
 
   useEffect(() => {
     if (!container.current) return;
+    const mapContainer = container.current;
     const configuredStyle: unknown = import.meta.env.VITE_MAP_STYLE_URL as unknown;
     const instance = new Map({
-      container: container.current,
+      container: mapContainer,
       style:
         typeof configuredStyle === 'string' && configuredStyle
           ? configuredStyle
@@ -141,13 +142,21 @@ export function VenueMap({
       }
     });
     instance.addControl(new NavigationControl(), 'top-right');
-    instance.on('moveend', () => {
+    let disposed = false;
+    const handleMoveEnd = () => {
+      if (disposed) return;
       const center = instance.getCenter();
       onCenterChangeRef.current(Number(center.lat.toFixed(5)), Number(center.lng.toFixed(5)));
-    });
+    };
+    instance.on('moveend', handleMoveEnd);
     instance.on('zoomend', () => setZoom(instance.getZoom()));
+    const resizeObserver = new ResizeObserver(() => instance.resize());
+    resizeObserver.observe(mapContainer);
     map.current = instance;
     return () => {
+      disposed = true;
+      resizeObserver.disconnect();
+      instance.off('moveend', handleMoveEnd);
       markers.current.forEach((marker) => marker.remove());
       markers.current = [];
       locationMarker.current?.remove();

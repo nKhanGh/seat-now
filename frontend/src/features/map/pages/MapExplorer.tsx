@@ -234,8 +234,11 @@ export function MapExplorer() {
     [update],
   );
   const onCenterChange = useCallback(
-    (lat: number, lng: number) => update({ lat: String(lat), lng: String(lng) }),
-    [update],
+    (lat: number, lng: number) => {
+      if (Math.abs(lat - filters.lat) < 0.00001 && Math.abs(lng - filters.lng) < 0.00001) return;
+      update({ lat: String(lat), lng: String(lng) });
+    },
+    [update, filters.lat, filters.lng],
   );
 
   function locate() {
