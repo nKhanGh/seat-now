@@ -77,7 +77,7 @@ Nhập tên hoặc địa chỉ ở ô **Tìm tên quán, địa chỉ…**. App
 | **Tất cả loại**       | Nhà hàng, cà phê, rạp phim.                                                           |
 | **Tất cả món**        | Món Việt, món Âu, cà phê, tráng miệng.                                                |
 | **Bán kính**          | 1, 3, 5 hoặc 10 km quanh tâm tìm kiếm.                                                |
-| **Mọi mức giá**       | Bậc ₫ đến ₫₫₫₫; không phải giá món cụ thể.                                            |
+| **Mọi mức giá**       | Mức 1 - Bình dân đến mức 4 - Rất cao; đây là phân loại tương đối, không phải giá món cụ thể. |
 | **Mọi đánh giá**      | Không lọc, từ 4 sao hoặc từ 4,5 sao. Điểm 0 hiện **Chưa có đánh giá**.                |
 | **Mọi độ đông**       | Vắng, vừa, đông hoặc đầy theo snapshot chỗ ngồi.                                      |
 | **Còn bàn**           | Chỉ quán có bàn/ghế trống, đang nhận khách và snapshot còn hiệu lực.                  |
@@ -148,7 +148,7 @@ Nếu review lưu thành công nhưng tải ảnh lỗi, app hiện thông báo 
 Luồng này dành cho **quán chưa có trên hệ thống**. Nếu quán đã có và bạn muốn sửa hồ sơ, xem mục 10 để gửi yêu cầu nhận quản lý.
 
 1. Đăng nhập và chọn **Đề xuất quán** trên header hoặc mở `/proposals`.
-2. Trong **Thêm địa điểm**, nhập tên (3–100 ký tự), loại nhà hàng/cà phê/rạp phim, loại món nếu phù hợp, địa chỉ (5–200 ký tự), mô tả (10–500 ký tự), mức giá ₫–₫₫₫₫.
+2. Trong **Thêm địa điểm**, nhập tên (3–100 ký tự), loại nhà hàng/cà phê/rạp phim, loại món nếu phù hợp, địa chỉ (5–200 ký tự), mô tả (10–500 ký tự), mức giá tương đối từ mức 1 đến mức 4.
 3. Chọn tọa độ bằng cách bấm bản đồ nhỏ, kéo ghim, bấm **Dùng vị trí của tôi** hoặc nhập **Vĩ độ/Kinh độ**. Kiểm tra ghim trước khi gửi; tọa độ được dùng để hiển thị và kiểm tra check-in.
 4. Chọn **Gửi đề xuất**. Thành công nghĩa là đề xuất đã lưu, **chưa xuất hiện trên bản đồ**. Một tài khoản gửi tối đa năm đề xuất trong 24 giờ.
 5. Xem **Đề xuất của tôi**: **Chờ cộng đồng xác nhận (0/3, 1/3, 2/3)** → **Đủ xác nhận, chờ người vận hành duyệt** → **Đã duyệt và lên bản đồ** hoặc **Đã bị từ chối**.
