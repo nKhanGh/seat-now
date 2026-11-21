@@ -1,7 +1,10 @@
 import { getSessionToken } from '../../auth/session-token';
-import { Body, Controller, Get, Headers, Param, Post, Put, Req } from '@nestjs/common';
+import {
+  Body, Controller, Get, Headers, Param, Post, Put, Req, Res, UploadedFile, UseInterceptors,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { Request } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request, Response } from 'express';
 import { AuthService } from '../../auth/services/auth.service';
 import { assertBusinessAdminToken } from '../assert-business-admin-token';
 import { CreateClaimDto } from '../dto/create-claim.dto';
@@ -23,12 +26,14 @@ export class BusinessAccessController {
 
   @Post('business/claims/:slug')
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @UseInterceptors(FileInterceptor('document', { limits: { files: 1, fileSize: 3_000_000 } }))
   async requestClaim(
     @Req() request: CookieRequest,
     @Param('slug') slug: string,
     @Body() input: CreateClaimDto,
+    @UploadedFile() file: { buffer: Buffer; size: number } | undefined,
   ) {
-    return this.business.requestClaim(await this.userId(request), slug, input.evidence);
+    return this.business.requestClaim(await this.userId(request), slug, input.evidence, file);
   }
 
   @Get('business/claims/me')
@@ -45,6 +50,17 @@ export class BusinessAccessController {
   pendingClaims(@Headers('authorization') authorization: string | undefined) {
     assertBusinessAdminToken(authorization);
     return this.business.pendingClaims();
+  }
+
+  @Get('internal/business/claims/:id/document')
+  async claimDocument(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('id') id: string,
+    @Res() response: Response,
+  ) {
+    assertBusinessAdminToken(authorization);
+    const data = await this.business.claimDocument(id);
+    response.type('image/webp').setHeader('Cache-Control', 'no-store').send(data);
   }
 
   @Post('internal/business/claims/:id/approve')

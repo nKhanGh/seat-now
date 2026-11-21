@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
@@ -425,14 +425,27 @@ export function BusinessPage() {
   const request = useRequestBusinessClaim(userId);
   const [slug, setSlug] = useState(params.get('slug') ?? '');
   const [evidence, setEvidence] = useState('');
+  const [document, setDocument] = useState<File | null>(null);
+  const documentInput = useRef<HTMLInputElement | null>(null);
+  const [documentError, setDocumentError] = useState('');
   const [sent, setSent] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSent(false);
+    setDocumentError('');
+    if (
+      document &&
+      (document.size > 3_000_000 || !['image/jpeg', 'image/png', 'image/webp'].includes(document.type))
+    ) {
+      setDocumentError('Chọn ảnh JPEG, PNG hoặc WebP tối đa 3 MB.');
+      return;
+    }
     try {
-      await request.mutateAsync({ slug: slug.trim(), evidence: evidence.trim() });
+      await request.mutateAsync({ slug: slug.trim(), evidence: evidence.trim(), document });
       setSent(true);
       setEvidence('');
+      setDocument(null);
+      if (documentInput.current) documentInput.current.value = '';
     } catch {
       /* Error is shown below. */
     }
@@ -469,6 +482,20 @@ export function BusinessPage() {
                 placeholder="Mô tả giấy tờ hoặc cách người vận hành có thể đối chiếu quyền quản lý"
               />
             </label>
+            <label>
+              Ảnh giấy tờ hoặc hình chứng minh (nếu có)
+              <input
+                ref={documentInput}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => setDocument(event.target.files?.[0] ?? null)}
+              />
+            </label>
+            <p className="small">JPEG, PNG hoặc WebP, tối đa 3 MB. Ảnh chỉ dành cho người vận hành xét duyệt.</p>
+            {document && <p className="small">Đã chọn: {document.name}</p>}
+            {documentError && (
+              <p role="alert" className="error">{documentError}</p>
+            )}
             <button className="primary" disabled={request.isPending}>
               {request.isPending ? 'Đang gửi…' : 'Gửi yêu cầu'}
             </button>
@@ -481,7 +508,7 @@ export function BusinessPage() {
           {claims.data?.length === 0 && <p>Chưa có yêu cầu nào.</p>}
           {claims.data?.map((claim) => (
             <p key={claim.id}>
-              {claim.venueSlug} ·{' '}
+              {claim.venueSlug}{claim.hasDocument ? ' · Có ảnh chứng minh' : ''} ·{' '}
               {claim.status === 'PENDING'
                 ? 'Chờ duyệt'
                 : claim.status === 'APPROVED'

@@ -37,8 +37,8 @@ export function useBusinessVenues(userId: string | null) {
 export function useRequestBusinessClaim(userId: string | null) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ slug, evidence }: { slug: string; evidence: string }) =>
-      requestBusinessClaim(slug, evidence),
+    mutationFn: ({ slug, evidence, document }: { slug: string; evidence: string; document: File | null }) =>
+      requestBusinessClaim(slug, evidence, document),
     onSuccess: () => client.invalidateQueries({ queryKey: claimsKey(userId) }),
   });
 }

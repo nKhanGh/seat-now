@@ -2,6 +2,7 @@ export type BusinessClaim = {
   id: string;
   venueSlug: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  hasDocument: boolean;
   createdAt: string;
 };
 export type BusinessVenue = {
@@ -61,13 +62,15 @@ export async function getMyBusinessVenues(signal?: AbortSignal): Promise<Busines
   );
 }
 
-export async function requestBusinessClaim(slug: string, evidence: string): Promise<BusinessClaim> {
+export async function requestBusinessClaim(slug: string, evidence: string, document: File | null): Promise<BusinessClaim> {
+  const form = new FormData();
+  form.set('evidence', evidence);
+  if (document) form.set('document', document);
   return readData<BusinessClaim>(
     await fetch(`/api/v1/business/claims/${encodeURIComponent(slug)}`, {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ evidence }),
+      body: form,
     }),
   );
 }

@@ -4,6 +4,8 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  PayloadTooLargeException,
+  UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -12,6 +14,7 @@ import { VenuesService } from '../../venues/services/venues.service';
 import { BusinessAccess } from '../schemas/business-access.schema';
 import { BusinessClaim } from '../schemas/business-claim.schema';
 import { SetBusinessPlanDto } from '../dto/set-business-plan.dto';
+import sharp from 'sharp';
 
 @Injectable()
 export class BusinessAccessService {
@@ -22,14 +25,26 @@ export class BusinessAccessService {
     private readonly auth: AuthService,
   ) {}
 
-  async requestClaim(userId: string, slug: string, evidence: string) {
+  async requestClaim(
+    userId: string,
+    slug: string,
+    evidence: string,
+    file?: { buffer: Buffer; size: number },
+  ) {
     await this.venues.activeLocation(slug);
     if (await this.access.exists({ venueSlug: slug })) throw new ConflictException('Venue already managed');
     const trimmed = evidence.trim();
     if (trimmed.length < 20) throw new BadRequestException('Evidence is too short');
+    const documentData = file ? await this.processClaimDocument(file) : undefined;
     const owner = new Types.ObjectId(userId);
     try {
-      const claim = await this.claims.create({ userId: owner, venueSlug: slug, evidence: trimmed });
+      const claim = await this.claims.create({
+        userId: owner,
+        venueSlug: slug,
+        evidence: trimmed,
+        hasDocument: Boolean(documentData),
+        documentData,
+      });
       return { data: this.publicClaim(claim) };
     } catch (error) {
       if (isDuplicate(error)) throw new ConflictException('Claim already submitted');
@@ -81,6 +96,13 @@ export class BusinessAccessService {
     };
   }
 
+  async claimDocument(id: string): Promise<Buffer> {
+    if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Claim document not found');
+    const claim = await this.claims.findById(id).select('+documentData');
+    if (!claim?.documentData) throw new NotFoundException('Claim document not found');
+    return claim.documentData;
+  }
+
   async approveClaim(id: string) {
     const claim = await this.findClaim(id);
     if (claim.status === 'APPROVED') return { data: { id, status: 'APPROVED' } };
@@ -96,14 +118,20 @@ export class BusinessAccessService {
           throw new ConflictException('Venue already managed');
       } else throw error;
     }
-    await this.claims.updateOne({ _id: claim._id, status: 'PENDING' }, { $set: { status: 'APPROVED' } });
+    await this.claims.updateOne(
+      { _id: claim._id, status: 'PENDING' },
+      { $set: { status: 'APPROVED', hasDocument: false }, $unset: { documentData: 1 } },
+    );
     return { data: { id, status: 'APPROVED' } };
   }
 
   async rejectClaim(id: string) {
     const claim = await this.findClaim(id);
     if (claim.status !== 'PENDING') throw new ConflictException('Claim already closed');
-    await this.claims.updateOne({ _id: claim._id, status: 'PENDING' }, { $set: { status: 'REJECTED' } });
+    await this.claims.updateOne(
+      { _id: claim._id, status: 'PENDING' },
+      { $set: { status: 'REJECTED', hasDocument: false }, $unset: { documentData: 1 } },
+    );
     return { data: { id, status: 'REJECTED' } };
   }
 
@@ -174,13 +202,39 @@ export class BusinessAccessService {
     return claim;
   }
 
-  private publicClaim(claim: BusinessClaim & { _id: Types.ObjectId }) {
+  private publicClaim(
+    claim: Pick<BusinessClaim, 'venueSlug' | 'status' | 'hasDocument' | 'createdAt'> & { _id: Types.ObjectId },
+  ) {
     return {
       id: claim._id.toString(),
       venueSlug: claim.venueSlug,
       status: claim.status,
+      hasDocument: claim.hasDocument ?? false,
       createdAt: claim.createdAt,
     };
+  }
+
+  private async processClaimDocument(file: { buffer: Buffer; size: number }): Promise<Buffer> {
+    if (file.size < 1) throw new BadRequestException('Claim document is empty');
+    if (file.size > 3_000_000) throw new PayloadTooLargeException('Claim document exceeds 3 MB');
+    let processed: Buffer;
+    try {
+      const image = sharp(file.buffer, { failOn: 'error', limitInputPixels: 20_000_000 });
+      const metadata = await image.metadata();
+      if (!['jpeg', 'png', 'webp'].includes(metadata.format ?? ''))
+        throw new UnsupportedMediaTypeException('Only JPEG, PNG or WebP images are supported');
+      processed = await image
+        .rotate()
+        .resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toBuffer();
+    } catch (error) {
+      if (error instanceof UnsupportedMediaTypeException) throw error;
+      throw new UnsupportedMediaTypeException('Invalid claim document image');
+    }
+    if (processed.length > 2_000_000)
+      throw new PayloadTooLargeException('Processed claim document exceeds 2 MB');
+    return processed;
   }
 }
 
