@@ -503,11 +503,16 @@ export function BusinessPage() {
               <p role="status" className="notice">
                 Đã được cấp quyền quản lý: <strong>{venue.name}</strong>
               </p>
+              {venue.category !== 'CINEMA' && (
+                <BookingQueue
+                  slug={venue.slug}
+                  name={venue.name}
+                  userId={userId}
+                  enabled={venue.bookingEnabled}
+                />
+              )}
               <BusinessCommunityPanel slug={venue.slug} name={venue.name} />
               <ProfileEditor venue={venue} userId={userId} />
-              {venue.category !== 'CINEMA' && (
-                <BookingQueue slug={venue.slug} userId={userId} enabled={venue.bookingEnabled} />
-              )}
               {venue.plan === 'PREMIUM' && (
                 <>
                   <AvailabilityEditor venue={venue} />

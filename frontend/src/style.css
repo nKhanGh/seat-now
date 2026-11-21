@@ -153,6 +153,10 @@ p { line-height: 1.55; }
 .booking-panel textarea { min-height: 70px; resize: vertical; }
 .map-selected .booking-panel .primary { background: #17654d; color: white; padding: 10px 14px; border-radius: 8px; }
 .booking-card { width: min(100%, 700px); margin: 16px 0; }
+.booking-settings { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-radius: 10px; background: #f4f8f4; }
+.booking-settings label { display: inline-flex; align-items: center; font-weight: 700; }
+.booking-card .booking-settings button { width: auto; }
+.booking-card .booking-settings button:disabled { cursor: not-allowed; }
 .booking-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
 .booking-filters button { border: 1px solid #b8cfc2; border-radius: 999px; background: white; color: #17654d; padding: 8px 12px; font-weight: 700; }
 .booking-filters button[aria-pressed="true"] { background: #17654d; border-color: #17654d; color: white; }

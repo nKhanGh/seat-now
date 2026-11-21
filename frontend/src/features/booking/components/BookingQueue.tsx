@@ -1,27 +1,62 @@
-import { useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useBookingManagement, useVenueBookings } from '../api/bookingQueries';
 
-export function BookingQueue({ slug, userId, enabled }: { slug: string; userId: string; enabled: boolean }) {
+export function BookingQueue({
+  slug,
+  name,
+  userId,
+  enabled,
+}: {
+  slug: string;
+  name: string;
+  userId: string;
+  enabled: boolean;
+}) {
   const bookings = useVenueBookings(slug, userId);
   const { settings, decision } = useBookingManagement(slug, userId);
+  const [draftEnabled, setDraftEnabled] = useState(enabled);
+  const [saved, setSaved] = useState(false);
   const [completingId, setCompletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDraftEnabled(enabled);
+  }, [enabled]);
+
+  function saveSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (draftEnabled === enabled || settings.isPending) return;
+    setSaved(false);
+    settings.mutate(draftEnabled, { onSuccess: () => setSaved(true) });
+  }
+
   return (
     <section className="card booking-card">
-      <h3>Yêu cầu và bàn đã xác nhận · {slug}</h3>
+      <h3>Đặt bàn · {name}</h3>
       <p>
         Chỉ yêu cầu được chủ quán xác nhận mới thành đặt bàn. Hãy kiểm tra khả năng phục vụ trước khi xác
         nhận.
       </p>
-      <label>
-        <input
-          type="checkbox"
-          checked={enabled}
-          disabled={settings.isPending}
-          onChange={(event) => settings.mutate(event.target.checked)}
-        />{' '}
-        Nhận yêu cầu đặt bàn
-      </label>
+      <form className="booking-settings" onSubmit={saveSettings}>
+        <label>
+          <input
+            type="checkbox"
+            checked={draftEnabled}
+            disabled={settings.isPending}
+            onChange={(event) => {
+              setDraftEnabled(event.target.checked);
+              setSaved(false);
+              settings.reset();
+            }}
+          />{' '}
+          Nhận yêu cầu đặt bàn
+        </label>
+        <button type="submit" className="primary" disabled={settings.isPending || draftEnabled === enabled}>
+          {settings.isPending ? 'Đang lưu…' : 'Lưu cài đặt'}
+        </button>
+      </form>
+      {saved && <p role="status">Đã lưu cài đặt nhận yêu cầu đặt bàn.</p>}
       {settings.isError && <p role="alert">{settings.error.message}</p>}
+      <h4>Yêu cầu cần xử lý</h4>
       {bookings.isPending && <p>Đang tải yêu cầu…</p>}
       {bookings.isError && <p role="alert">{bookings.error.message}</p>}
       {bookings.data?.length === 0 && <p>Không có yêu cầu hoặc bàn đã xác nhận cần xử lý.</p>}
