@@ -132,6 +132,10 @@ Nếu trình duyệt báo không lấy được vị trí, kiểm tra quyền Lo
 
 Nếu review lưu thành công nhưng tải ảnh lỗi, app hiện thông báo riêng. Khi đó review chữ/sao đã tồn tại; chọn ảnh hợp lệ và cập nhật lại, không tạo review thứ hai.
 
+### Ảnh được lưu ở đâu?
+
+Ảnh tải lên được backend chuyển thành **WebP** và lưu trực tiếp trong **MongoDB**, không ghi vào `frontend/public` hay thư mục upload trên máy. Ảnh review ở collection `review_photos` (gắn với review), logo ở `venue_logos`, ảnh bìa ở `venue_covers`. Ảnh chứng minh quyền quản lý nằm tạm trong `business_claims`, chỉ admin đọc được và bị xóa sau khi duyệt hoặc từ chối. Khi trình duyệt cần ảnh, backend trả qua URL API `/api/v1/reviews/:id/photo`, `/api/v1/venues/:slug/logo` hoặc `/api/v1/venues/:slug/cover`. Bản đồ nền lấy tile từ dịch vụ bản đồ cấu hình riêng; seed 100 quán không tự tạo ảnh quán.
+
 ### Lưu, chia sẻ, theo dõi
 
 - Trong chi tiết quán, chọn **Lưu quán** hoặc **Bỏ lưu**. Mở **Quán đã lưu** ở header để xem mọi quán đã lưu, kể cả ngoài khu vực bản đồ đang tải; từ đây có thể **Xem trên bản đồ** hoặc **Bỏ lưu**.
@@ -157,7 +161,7 @@ Ba lượt xác nhận là tín hiệu cộng đồng, chưa chứng minh địa
 
 ### Người dùng gửi yêu cầu
 
-1. Đăng nhập, mở **nhà hàng hoặc quán cà phê**. Chỉ quán đã bật **Nhận yêu cầu đặt bàn** mới hiện form **Yêu cầu đặt bàn**; rạp phim không có form.
+1. Đăng nhập, mở **nhà hàng hoặc quán cà phê** rồi kéo trong chi tiết xuống **Yêu cầu đặt bàn**, ngay sau phần tình trạng/lịch sử chỗ ngồi và trước check-in. Chỉ quán đã được chủ quán bật **Nhận yêu cầu đặt bàn** mới hiện form và nút **Gửi yêu cầu**; rạp phim không có form. Nếu quán chưa bật, khu vực đặt bàn bị ẩn hoàn toàn.
 2. Chọn **Thời gian đến** từ ít nhất một giờ tới và không quá 14 ngày, **Số khách** 1–12 và **Ghi chú** nếu cần (tối đa 500 ký tự).
 3. Chọn **Gửi yêu cầu**. Trạng thái đầu tiên là **Chờ xác nhận**. Đây **chưa phải bàn đã giữ**; chủ quán xác nhận hoặc từ chối thủ công. Một tài khoản không gửi trùng thời gian tại cùng quán.
 4. Mở **Đặt bàn của tôi** hoặc `/bookings` để xem thời gian, tên quán, số khách, ghi chú, nhãn **Ưu tiên Premium** nếu có. Dùng **Tất cả**, **Chờ xác nhận**, **Đã xác nhận**, **Đã kết thúc** để lọc. Chọn **Xem quán trên bản đồ** để trở lại quán.
@@ -261,20 +265,20 @@ Chỉ demo check-in thành công với địa điểm thật có tọa độ đ�
 
 ## 14. Xử lý lỗi thường gặp
 
-| Hiện tượng                                                | Cách kiểm tra và xử lý                                                                                                                            |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bản đồ chỉ có màu nền, danh sách quán vẫn hiện            | Tải lại trang. Kiểm tra mạng/tile style (`VITE_MAP_STYLE_URL`) và `MAP_ASSET_ORIGINS`; nếu tile không truy cập được, vẫn dùng danh sách quán.     |
-| Không có quán sau khi bật **Còn bàn**                     | Bỏ bộ lọc khác, tăng bán kính, chuyển tâm về TP.HCM. Bộ lọc chỉ nhận snapshot còn hiệu lực và đang nhận khách; nếu demo cũ, chạy lại `seed:demo`. |
-| Bấm **Vị trí của tôi** không có chấm xanh                 | Cấp quyền Location cho `localhost`/HTTPS, kiểm tra GPS, rồi bấm lại. Thông báo dưới bộ lọc cho biết lỗi quyền hoặc timeout.                       |
-| Bấm **Check-in tại đây** rồi báo “Bạn cần ở gần địa điểm” | API từ chối vì cách tọa độ quán hơn 150 m. Số check-in không đổi. Quán seed thường hư cấu; đọc mục 6.                                             |
-| Check-in báo GPS chưa đủ chính xác                        | Độ chính xác trình duyệt báo lớn hơn 100 m. Đợi GPS ổn định rồi thử.                                                                              |
-| Chủ quán đã được duyệt nhưng chưa thấy quán               | Mở `/business`, bấm **Cập nhật trạng thái**, kiểm tra email đang đăng nhập có đúng email gửi yêu cầu không; tải lại trang nếu cần.                |
-| Form đặt bàn không hiện                                   | Quán là rạp phim hoặc chủ quán chưa bật **Nhận yêu cầu đặt bàn**.                                                                                 |
-| Gửi yêu cầu đặt bàn rồi chưa có bàn                       | **Chờ xác nhận** là yêu cầu, chưa giữ inventory. Chờ chủ quán xác nhận trên `/business`.                                                          |
-| Tab admin **Quán cộng đồng** trống                        | Chưa có đề xuất đủ ba lượt xác nhận của ba tài khoản khác người gửi.                                                                              |
-| Review có sao/chữ nhưng chưa có ảnh                       | Ảnh tải riêng sau review; nếu bước ảnh lỗi, chọn lại JPEG/PNG/WebP dưới 2 MB và cập nhật đánh giá.                                                |
-| Phiên đăng nhập mất sau khi khởi động lại API             | Đăng nhập lại; giữ `JWT_SECRET` cố định trong `backend/.env` khi chạy local.                                                                      |
-| Có thông báo không tải được dữ liệu                       | Bấm **Thử lại** nếu có; kiểm tra API tại `http://localhost:3000/health`, MongoDB Docker và tab Network của trình duyệt.                           |
+| Hiện tượng                                                | Cách kiểm tra và xử lý                                                                                                                                                             |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bản đồ chỉ có màu nền, danh sách quán vẫn hiện            | Tải lại trang. Kiểm tra mạng/tile style (`VITE_MAP_STYLE_URL`) và `MAP_ASSET_ORIGINS`; nếu tile không truy cập được, vẫn dùng danh sách quán.                                      |
+| Không có quán sau khi bật **Còn bàn**                     | Bỏ bộ lọc khác, tăng bán kính, chuyển tâm về TP.HCM. Bộ lọc chỉ nhận snapshot còn hiệu lực và đang nhận khách; nếu demo cũ, chạy lại `seed:demo`.                                  |
+| Bấm **Vị trí của tôi** không có chấm xanh                 | Cấp quyền Location cho `localhost`/HTTPS, kiểm tra GPS, rồi bấm lại. Thông báo dưới bộ lọc cho biết lỗi quyền hoặc timeout.                                                        |
+| Bấm **Check-in tại đây** rồi báo “Bạn cần ở gần địa điểm” | API từ chối vì cách tọa độ quán hơn 150 m. Số check-in không đổi. Quán seed thường hư cấu; đọc mục 6.                                                                              |
+| Check-in báo GPS chưa đủ chính xác                        | Độ chính xác trình duyệt báo lớn hơn 100 m. Đợi GPS ổn định rồi thử.                                                                                                               |
+| Chủ quán đã được duyệt nhưng chưa thấy quán               | Mở `/business`, bấm **Cập nhật trạng thái**, kiểm tra email đang đăng nhập có đúng email gửi yêu cầu không; tải lại trang nếu cần.                                                 |
+| Form đặt bàn không hiện                                   | Quán là rạp phim hoặc chủ quán chưa bật **Nhận yêu cầu đặt bàn**. Chủ quán đã được admin duyệt mở `/business`, vào phần quán của mình và bật ô này; sau đó khách tải lại chi tiết. |
+| Gửi yêu cầu đặt bàn rồi chưa có bàn                       | **Chờ xác nhận** là yêu cầu, chưa giữ inventory. Chờ chủ quán xác nhận trên `/business`.                                                                                           |
+| Tab admin **Quán cộng đồng** trống                        | Chưa có đề xuất đủ ba lượt xác nhận của ba tài khoản khác người gửi.                                                                                                               |
+| Review có sao/chữ nhưng chưa có ảnh                       | Ảnh tải riêng sau review; nếu bước ảnh lỗi, chọn lại JPEG/PNG/WebP dưới 2 MB và cập nhật đánh giá.                                                                                 |
+| Phiên đăng nhập mất sau khi khởi động lại API             | Đăng nhập lại; giữ `JWT_SECRET` cố định trong `backend/.env` khi chạy local.                                                                                                       |
+| Có thông báo không tải được dữ liệu                       | Bấm **Thử lại** nếu có; kiểm tra API tại `http://localhost:3000/health`, MongoDB Docker và tab Network của trình duyệt.                                                            |
 
 ## 15. Khởi động và chuẩn bị dữ liệu local
 
