@@ -52,13 +52,13 @@ async function readData<T>(response: Response): Promise<T> {
 
 export async function getMyClaims(signal?: AbortSignal): Promise<BusinessClaim[]> {
   return readData<BusinessClaim[]>(
-    await fetch('/api/v1/business/claims/me', { signal, credentials: 'same-origin' }),
+    await fetch('/api/v1/business/claims/me', { signal, credentials: 'same-origin', cache: 'no-store' }),
   );
 }
 
 export async function getMyBusinessVenues(signal?: AbortSignal): Promise<BusinessVenue[]> {
   return readData<BusinessVenue[]>(
-    await fetch('/api/v1/business/venues', { signal, credentials: 'same-origin' }),
+    await fetch('/api/v1/business/venues', { signal, credentials: 'same-origin', cache: 'no-store' }),
   );
 }
 

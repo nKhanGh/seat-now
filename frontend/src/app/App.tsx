@@ -3,6 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useLogin, useRegister } from '../features/auth/api/authQueries';
 import { safeReturnTo } from '../features/auth/services/returnTo';
+import { getMyBusinessVenues } from '../features/business/services/business.service';
 const MapExplorer = lazy(() =>
   import('../features/map/pages/MapExplorer').then((module) => ({ default: module.MapExplorer })),
 );
@@ -58,7 +59,15 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         mode === 'login'
           ? await login.mutateAsync({ email, password })
           : await register.mutateAsync({ email, password, displayName });
-      void navigate(user.role === 'ADMIN' ? '/admin' : returnTo, { replace: true });
+      let destination = user.role === 'ADMIN' ? '/admin' : returnTo;
+      if (mode === 'login' && user.role !== 'ADMIN' && returnTo === '/') {
+        try {
+          if ((await getMyBusinessVenues()).length > 0) destination = '/business';
+        } catch {
+          // A business lookup failure must not block a successful login.
+        }
+      }
+      void navigate(destination, { replace: true });
     } catch {
       /* The error is displayed below. */
     }

@@ -456,7 +456,11 @@ export function BusinessPage() {
         SeatNow
       </Link>
       <h1>Dành cho chủ quán</h1>
-      <p>Gửi yêu cầu quản lý địa điểm. Người vận hành sẽ kiểm tra trước khi cấp quyền chỉnh sửa.</p>
+      <p>
+        {venues.data?.length
+          ? 'Quản lý hồ sơ quán, yêu cầu đặt bàn và các công cụ theo gói dịch vụ.'
+          : 'Gửi yêu cầu quản lý địa điểm. Người vận hành sẽ kiểm tra trước khi cấp quyền chỉnh sửa.'}
+      </p>
       {auth.isPending && <p>Đang kiểm tra đăng nhập…</p>}
       {!auth.isPending && !userId && (
         <p>
@@ -465,8 +469,71 @@ export function BusinessPage() {
       )}
       {userId && (
         <>
+          <p className="small">
+            Đang đăng nhập: <strong>{auth.data?.email}</strong>. Quyền quản lý gắn với tài khoản đã gửi yêu
+            cầu.
+          </p>
+          <div className="business-section-heading">
+            <h2>Địa điểm đang quản lý</h2>
+            <button
+              type="button"
+              onClick={() => void Promise.all([claims.refetch(), venues.refetch()])}
+              disabled={claims.isFetching || venues.isFetching}
+            >
+              {claims.isFetching || venues.isFetching ? 'Đang cập nhật…' : 'Cập nhật trạng thái'}
+            </button>
+          </div>
+          {venues.isPending && <p>Đang tải địa điểm…</p>}
+          {venues.isError && <p role="alert">{venues.error.message}</p>}
+          {venues.data?.length === 0 && !venues.isFetching && (
+            <p>
+              {claims.data?.some((claim) => claim.status === 'APPROVED')
+                ? 'Yêu cầu đã duyệt nhưng danh sách quản lý chưa hiện. Bấm Cập nhật trạng thái; nếu vẫn trống, kiểm tra tài khoản đăng nhập ở trên.'
+                : 'Chưa có địa điểm được duyệt. Xem trạng thái yêu cầu bên dưới.'}
+            </p>
+          )}
+          {venues.data?.map((venue) => (
+            <section id={`business-venue-${venue.slug}`} key={venue.slug} className="business-managed-venue">
+              <p role="status" className="notice">
+                Đã được cấp quyền quản lý: <strong>{venue.name}</strong>
+              </p>
+              <ProfileEditor venue={venue} userId={userId} />
+              {venue.category !== 'CINEMA' && (
+                <BookingQueue slug={venue.slug} userId={userId} enabled={venue.bookingEnabled} />
+              )}
+              {venue.plan === 'PREMIUM' && (
+                <>
+                  <AvailabilityEditor venue={venue} />
+                  <Dashboard venue={venue} userId={userId} />
+                  <CampaignEditor venue={venue} userId={userId} />
+                </>
+              )}
+            </section>
+          ))}
+          <h2>Yêu cầu của tôi</h2>
+          {claims.isPending && <p>Đang tải yêu cầu…</p>}
+          {claims.isError && <p role="alert">{claims.error.message}</p>}
+          {claims.data?.length === 0 && <p>Chưa có yêu cầu nào.</p>}
+          {claims.data?.map((claim) => (
+            <p key={claim.id}>
+              {claim.venueSlug}
+              {claim.hasDocument ? ' · Có ảnh chứng minh' : ''} ·{' '}
+              {claim.status === 'PENDING'
+                ? 'Chờ duyệt'
+                : claim.status === 'APPROVED'
+                  ? 'Đã duyệt'
+                  : 'Từ chối'}
+              {claim.status === 'APPROVED' &&
+                venues.data?.some((venue) => venue.slug === claim.venueSlug) && (
+                  <>
+                    {' '}
+                    · <a href={`#business-venue-${claim.venueSlug}`}>Đến phần quản lý</a>
+                  </>
+                )}
+            </p>
+          ))}
           <form className="card business-form" onSubmit={(event) => void submit(event)}>
-            <h2>Yêu cầu quản lý quán</h2>
+            <h2>{venues.data?.length ? 'Yêu cầu quản lý quán khác' : 'Yêu cầu quản lý quán'}</h2>
             <label>
               Slug địa điểm
               <input value={slug} onChange={(event) => setSlug(event.target.value)} required />
@@ -506,40 +573,6 @@ export function BusinessPage() {
             {request.isError && <p role="alert">{request.error.message}</p>}
             {sent && <p role="status">Đã gửi yêu cầu, đang chờ duyệt.</p>}
           </form>
-          <h2>Yêu cầu của tôi</h2>
-          {claims.isPending && <p>Đang tải yêu cầu…</p>}
-          {claims.isError && <p role="alert">{claims.error.message}</p>}
-          {claims.data?.length === 0 && <p>Chưa có yêu cầu nào.</p>}
-          {claims.data?.map((claim) => (
-            <p key={claim.id}>
-              {claim.venueSlug}
-              {claim.hasDocument ? ' · Có ảnh chứng minh' : ''} ·{' '}
-              {claim.status === 'PENDING'
-                ? 'Chờ duyệt'
-                : claim.status === 'APPROVED'
-                  ? 'Đã duyệt'
-                  : 'Từ chối'}
-            </p>
-          ))}
-          <h2>Địa điểm đang quản lý</h2>
-          {venues.isPending && <p>Đang tải địa điểm…</p>}
-          {venues.isError && <p role="alert">{venues.error.message}</p>}
-          {venues.data?.length === 0 && <p>Chưa có địa điểm được duyệt.</p>}
-          {venues.data?.map((venue) => (
-            <div key={venue.slug}>
-              <ProfileEditor venue={venue} userId={userId} />
-              {venue.category !== 'CINEMA' && (
-                <BookingQueue slug={venue.slug} userId={userId} enabled={venue.bookingEnabled} />
-              )}
-              {venue.plan === 'PREMIUM' && (
-                <>
-                  <AvailabilityEditor venue={venue} />
-                  <Dashboard venue={venue} userId={userId} />
-                  <CampaignEditor venue={venue} userId={userId} />
-                </>
-              )}
-            </div>
-          ))}
         </>
       )}
     </main>
