@@ -4,7 +4,7 @@
   "servers": [{ "url": "/api/v1" }],
   "paths": {
     "/venues/{slug}/check-ins": {
-      "get": { "summary": "Read distinct check-ins in the last hour", "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Aggregate count, latest timestamp and SELF_REPORTED source" } } },
+      "get": { "summary": "Read distinct check-ins and a coarse community activity signal in the last hour", "parameters": [{ "$ref": "#/components/parameters/slug" }], "responses": { "200": { "description": "Aggregate count, latest timestamp, SELF_REPORTED source and activitySignal NONE/LOW/MODERATE/HIGH; never overrides seat availability" } } },
       "post": { "summary": "Check in near a venue", "security": [{ "sessionCookie": [] }], "parameters": [{ "$ref": "#/components/parameters/slug" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CheckInInput" } } } }, "responses": { "200": { "description": "Check-in recorded or deduplicated" }, "400": { "description": "Location accuracy too low" }, "401": { "description": "Login required" }, "403": { "description": "Too far from venue" } } }
     },
     "/me/favorites": { "get": { "summary": "List the signed-in user's saved venues", "security": [{ "sessionCookie": [] }], "responses": { "200": { "description": "Up to 100 favorite venue summaries" }, "401": { "description": "Login required" } } } },

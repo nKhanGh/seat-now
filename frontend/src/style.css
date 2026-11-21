@@ -101,6 +101,7 @@ p { line-height: 1.55; }
 .check-in-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
 .check-in-panel h2 { font-size: 1rem; margin: 4px 0; }
 .check-in-panel p { margin: 4px 0 8px; }
+.community-activity { padding: 9px 12px; border-radius: 9px; background: #e3f6e8; color: #14533f; font-weight: 700; }
 .favorite-action { display: flex; gap: 8px; align-items: center; }
 .share-action { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .directions-link, .parking-directions { display: inline-flex; width: fit-content; align-items: center; border: 1px solid #17654d; border-radius: 8px; padding: 8px 11px; color: #17654d; background: #e3f6e8; font-weight: 700; text-decoration: none; }

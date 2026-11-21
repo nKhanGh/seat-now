@@ -1,4 +1,9 @@
-export type CheckInSummary = { lastHourUsers: number; latestAt: string | null; source: 'SELF_REPORTED' };
+export type CheckInSummary = {
+  lastHourUsers: number;
+  latestAt: string | null;
+  source: 'SELF_REPORTED';
+  activitySignal: 'NONE' | 'LOW' | 'MODERATE' | 'HIGH';
+};
 
 export async function getCheckInSummary(slug: string, signal?: AbortSignal): Promise<CheckInSummary> {
   const response = await fetch(`/api/v1/venues/${encodeURIComponent(slug)}/check-ins`, { signal });

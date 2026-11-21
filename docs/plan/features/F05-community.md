@@ -12,7 +12,7 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 
 ## Đầu ra đã triển khai
 
-- Check-in xác thực khoảng cách trong 150 m và độ chính xác vị trí trong 100 m; chỉ giữ user/venue/thời gian trong 7 ngày. Số lượt một giờ là tín hiệu tự báo cáo, không tác động trực tiếp đến số bàn trống.
+- Check-in xác thực khoảng cách trong 150 m và độ chính xác vị trí trong 100 m; chỉ giữ user/venue/thời gian trong 7 ngày. Số tài khoản duy nhất trong giờ qua tạo tín hiệu hoạt động cộng đồng `NONE` (0), `LOW` (1–2), `MODERATE` (3–5), `HIGH` (từ 6). UI ghi rõ đây là ước lượng thô từ người tự báo cáo để đối chiếu độ đông; không tác động trực tiếp đến số bàn trống hoặc snapshot chủ quán/POS.
 - Danh sách quán đã lưu chỉ cho chủ tài khoản đọc; review công khai có phân trang cursor và người viết tự xóa được.
 - Endpoint `GET /me/reviews/:slug` chỉ trả review công khai của phiên hiện tại để form đánh giá điền lại điểm/nội dung khi sửa; nếu chưa có trả `null`.
 - UI đặt thao tác xóa review cạnh form của chính tác giả và yêu cầu xác nhận trước khi gọi API xóa; ảnh gắn review cũng được xóa.
