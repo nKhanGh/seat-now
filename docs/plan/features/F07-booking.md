@@ -15,7 +15,7 @@ Trạng thái: **demo** ngày 19/11/2026. [OpenAPI](../../../contracts/openapi/b
 
 ## Giới hạn demo
 
-- Yêu cầu `PENDING` chưa giữ bàn. Số bàn còn trống hiện tại từ F02 là snapshot tham khảo, không dự báo sức chứa ở giờ đặt trong tương lai. UI cảnh báo nếu hiện đã hết bàn nhưng vẫn cho gửi yêu cầu giờ khác. Bước xác nhận dùng **tổng bàn/ghế** gần nhất để chặn vượt sức chứa do các lượt trong app; nếu chưa có tổng sức chứa, chủ quán phải tự kiểm tra.
+- Yêu cầu `PENDING` chưa giữ bàn. Số bàn còn trống hiện tại từ F02 là snapshot tham khảo, không dự báo sức chứa ở giờ đặt trong tương lai; form không lặp lại cảnh báo hết bàn hiện tại. Bước xác nhận dùng **tổng bàn/ghế** gần nhất để chặn vượt sức chứa do các lượt trong app; nếu chưa có tổng sức chứa, chủ quán phải tự kiểm tra.
 - Kiểm tra đồng thời chỉ được tuần tự hóa trong một tiến trình API. Nhiều instance backend, thay đổi sức chứa, khách vãng lai và POS chưa được đồng bộ; đây chưa phải inventory bảo đảm cho môi trường production.
 - Chưa có thông báo push/email/SMS, thanh toán, đặt chỗ xe hay chính sách no-show. Người dùng theo dõi trạng thái trong app.
 - Gói Premium demo được operator cấp theo F04, chưa mở thanh toán. `priority` chỉ thay đổi thứ tự hàng chờ, không bảo đảm chủ quán chấp nhận.

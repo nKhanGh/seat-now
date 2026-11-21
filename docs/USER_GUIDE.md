@@ -163,7 +163,7 @@ Ba lượt xác nhận là tín hiệu cộng đồng, chưa chứng minh địa
 
 1. Đăng nhập, mở **nhà hàng hoặc quán cà phê** rồi kéo trong chi tiết xuống **Yêu cầu đặt bàn**, ngay sau phần tình trạng/lịch sử chỗ ngồi và trước check-in. Chỉ quán đã được chủ quán bật **Nhận yêu cầu đặt bàn** mới hiện form và nút **Gửi yêu cầu**; rạp phim không có form. Nếu quán chưa bật, phần này giải thích rõ **Quán này chưa mở nhận yêu cầu đặt bàn** và dẫn chủ quán đến trang quản lý.
 2. Chọn **Bắt đầu (giờ đến)** từ ít nhất một giờ tới và không quá 14 ngày. Ô **Kết thúc (giờ rời quán)** được gợi ý sau 2 giờ; có thể chỉnh để lượt kéo dài 30 phút đến 4 giờ. Chọn **Số khách** 1–12 và **Ghi chú** nếu cần (tối đa 500 ký tự).
-3. Chọn **Gửi yêu cầu**. Trạng thái đầu tiên là **Chờ xác nhận**. Đây **chưa phải bàn đã giữ**; chủ quán xác nhận hoặc từ chối thủ công. Một tài khoản không gửi trùng giờ bắt đầu tại cùng quán. Nếu quán hiện hết bàn, app cảnh báo; bạn vẫn có thể xin giờ khác vì số bàn hiện tại không dự báo chỗ trong tương lai.
+3. Chọn **Gửi yêu cầu**. Trạng thái đầu tiên là **Chờ xác nhận**. Đây **chưa phải bàn đã giữ**; chủ quán xác nhận hoặc từ chối thủ công. Một tài khoản không gửi trùng giờ bắt đầu tại cùng quán. Tình trạng chỗ ngồi phía trên là số liệu hiện tại, không dự báo chỗ trống ở giờ bạn xin đặt.
 4. Mở **Đặt bàn của tôi** hoặc `/bookings` để xem giờ bắt đầu–kết thúc, tên quán, số khách, ghi chú, nhãn **Ưu tiên Premium** nếu có. Dùng **Tất cả**, **Chờ xác nhận**, **Đã xác nhận**, **Đã kết thúc** để lọc. Chọn **Xem quán trên bản đồ** để trở lại quán.
 5. Nếu yêu cầu đang chờ hoặc đã xác nhận và cần hủy, bấm **Hủy yêu cầu** → **Xác nhận hủy**. **Giữ yêu cầu** quay lại. Yêu cầu đã đón khách/từ chối/đã hủy không thể hủy tiếp.
 
@@ -284,7 +284,7 @@ Chỉ demo check-in thành công với địa điểm thật có tọa độ đ�
 | Tab admin **Quán cộng đồng** trống                        | Chưa có đề xuất đủ ba lượt xác nhận của ba tài khoản khác người gửi.                                                                                                                                                                               |
 | Review có sao/chữ nhưng chưa có ảnh                       | Ảnh tải riêng sau review; nếu bước ảnh lỗi, chọn lại JPEG/PNG/WebP dưới 2 MB và cập nhật đánh giá.                                                                                                                                                 |
 | Phiên đăng nhập mất sau khi khởi động lại API             | Đăng nhập lại; giữ `JWT_SECRET` cố định trong `backend/.env` khi chạy local.                                                                                                                                                                       |
-| Có thông báo không tải được dữ liệu                       | Bấm **Thử lại** nếu có; kiểm tra API tại `http://localhost:3000/health`, MongoDB Docker và tab Network của trình duyệt.                                                                                                                            |
+| Có thông báo không tải được dữ liệu                       | Bấm **Thử lại** nếu có; kiểm tra API tại `http://localhost:3000/api/v1/health`, MongoDB Docker và tab Network của trình duyệt.                                                                                                                     |
 
 ## 15. Khởi động và chuẩn bị dữ liệu local
 
@@ -329,7 +329,7 @@ Cho **quán đã được admin duyệt quyền quản lý**, cấu hình `BUSIN
 
 ### Kiểm tra nhanh sau khi chạy
 
-1. Mở `http://localhost:3000/health` để kiểm tra API/MongoDB; mở trang chủ để thấy bản đồ và danh sách quán.
+1. Mở `http://localhost:3000/api/v1/health` để kiểm tra API/MongoDB; mở trang chủ để thấy bản đồ và danh sách quán.
 2. Chọn quán, xem tình trạng chỗ ngồi, bãi xe và review.
 3. Đăng ký tài khoản thử, lưu quán và viết review. Kiểm tra review xuất hiện sau khi gửi.
 4. Nếu cần test tự động, xem lệnh trong [README](../README.md#chạy-demo-local). Integration test dùng database `seatnow_test_*` và xóa database tạm sau khi chạy.

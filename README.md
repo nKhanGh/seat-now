@@ -81,6 +81,8 @@ Kiểm tra nhanh: tại thư mục gốc chạy `npm ci; npm run format:check; n
 
 Dockerfile ở root build cả hai app và chạy cùng một origin. Khi deploy Render, đặt `MONGODB_URI` bằng MongoDB Atlas, `PUBLIC_ORIGIN` bằng URL HTTPS thực của service và `JWT_SECRET` dài ít nhất 32 ký tự. Nếu dùng map style/tiles khác, đặt `VITE_MAP_STYLE_URL` lúc build frontend và `MAP_ASSET_ORIGINS` (danh sách origin phân cách dấu phẩy) cho Content Security Policy.
 
+Tài liệu để chia sẻ: [Hướng dẫn sử dụng (PDF)](output/pdf/seatnow-user-guide.pdf) và [Hướng dẫn deploy (PDF)](output/pdf/seatnow-deploy-guide.pdf). Bản nguồn có thể cập nhật tại [USER_GUIDE.md](docs/USER_GUIDE.md) và [DEPLOY_GUIDE.md](docs/DEPLOY_GUIDE.md); chạy `scripts/build_pdf_guides.py` bằng Python có ReportLab để xuất lại PDF.
+
 Lát cắt auth hiện mới là demo: chưa có xác minh email và khôi phục mật khẩu. Không mở đăng ký công khai cho người dùng thật trước khi hoàn thiện các flow đó. Realtime hiện chạy trên một API instance; nếu scale ngang cần adapter Socket.IO dùng chung và cơ chế phát sự kiện bền vững.
 
 Chi tiết lựa chọn stack và trade-off nằm tại [ADR 001](docs/adr/001-stack-and-architecture.md).
