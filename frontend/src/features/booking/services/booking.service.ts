@@ -1,13 +1,17 @@
 export type BookingRequest = {
   id: string;
   venueSlug: string;
+  venueName?: string;
+  venueLocation?: { type: 'Point'; coordinates: [number, number] } | null;
   requestedAt: string;
+  endsAt: string;
   guestCount: number;
   note: string;
   priority: boolean;
-  status: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELED';
+  status: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELED' | 'COMPLETED';
   createdAt: string;
   resolvedAt: string | null;
+  completedAt: string | null;
   guestDisplayName?: string;
 };
 
@@ -31,7 +35,7 @@ export async function getBookingStatus(slug: string, signal?: AbortSignal) {
 
 export async function createBooking(
   slug: string,
-  input: { requestedAt: string; guestCount: number; note: string },
+  input: { requestedAt: string; endsAt: string; guestCount: number; note: string },
 ) {
   return readData<BookingRequest>(
     await fetch(`${venuePath(slug)}/bookings`, {
@@ -75,7 +79,11 @@ export async function setBookingEnabled(slug: string, enabled: boolean) {
   );
 }
 
-export async function resolveBooking(slug: string, id: string, status: 'CONFIRMED' | 'DECLINED') {
+export async function resolveBooking(
+  slug: string,
+  id: string,
+  status: 'CONFIRMED' | 'DECLINED' | 'COMPLETED',
+) {
   return readData<BookingRequest>(
     await fetch(`${businessPath(slug)}/bookings/${encodeURIComponent(id)}`, {
       method: 'PATCH',

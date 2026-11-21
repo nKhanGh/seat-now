@@ -6,16 +6,22 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 
 1. Check-in tại venue: user đăng nhập, browser gửi vị trí khi bấm nút, server kiểm tra gần venue; lưu user/venue/thời điểm, không lưu tọa độ người dùng. Giới hạn một check-in mỗi venue trong cửa sổ ba giờ. Public summary chỉ đếm người dùng duy nhất trong giờ qua, ghi rõ nguồn tự báo cáo; không tự sửa `tablesAvailable` hoặc `crowdLevel` từ POS/chủ quán.
 2. Favorites: user đăng nhập có thể lưu/bỏ lưu venue, xem danh sách của chính mình. Không để user khác đọc danh sách riêng.
-3. Review ngắn và ảnh thực tế: tối đa một review và một ảnh cho mỗi user/venue; ảnh JPEG/PNG/WebP tối đa 2 MB được chuyển thành WebP và bỏ metadata. Người đăng nhập có thể báo cáo review; API nội bộ xem hàng đợi và ẩn review/ảnh.
+3. Chấm 1–5 sao với nhận xét tùy chọn và ảnh thực tế: tối đa một đánh giá và một ảnh cho mỗi user/venue; ảnh JPEG/PNG/WebP tối đa 2 MB được chuyển thành WebP và bỏ metadata. Điểm sao trên bản đồ cập nhật theo các đánh giá công khai. Người đăng nhập có thể báo cáo review; API nội bộ xem hàng đợi và ẩn review/ảnh.
 4. Theo dõi tài khoản và chia sẻ địa điểm: link chia sẻ công khai không chứa dữ liệu riêng; follow phải có kiểm soát spam và quyền riêng tư.
 5. Đề xuất venue: lưu ở trạng thái chờ xác nhận; vote của cộng đồng không tự đưa venue lên bản đồ trước khi đạt ngưỡng/kiểm duyệt.
 
 ## Đầu ra đã triển khai
 
-- Check-in xác thực khoảng cách trong 150 m và độ chính xác vị trí trong 100 m; chỉ giữ user/venue/thời gian trong 7 ngày. Số lượt một giờ là tín hiệu tự báo cáo, không tác động trực tiếp đến số bàn trống.
+- Check-in xác thực khoảng cách trong 150 m và độ chính xác vị trí trong 100 m; chỉ giữ user/venue/thời gian trong 7 ngày. Số tài khoản duy nhất trong giờ qua tạo tín hiệu hoạt động cộng đồng `NONE` (0), `LOW` (1–2), `MODERATE` (3–5), `HIGH` (từ 6). UI ghi rõ đây là ước lượng thô từ người tự báo cáo để đối chiếu độ đông; không tác động trực tiếp đến số bàn trống hoặc snapshot chủ quán/POS.
 - Danh sách quán đã lưu chỉ cho chủ tài khoản đọc; review công khai có phân trang cursor và người viết tự xóa được.
-- Hồ sơ công khai chỉ gồm tên hiển thị và số người theo dõi, không gồm email. Link chia sẻ dùng tọa độ venue công khai và slug.
-- Đề xuất cần ba tài khoản khác nhau xác nhận, sau đó người vận hành duyệt bằng token nội bộ mới xuất hiện trên bản đồ.
+- Endpoint `GET /me/reviews/:slug` chỉ trả review công khai của phiên hiện tại để form đánh giá điền lại điểm/nội dung khi sửa; nếu chưa có trả `null`.
+- UI đặt thao tác xóa review cạnh form của chính tác giả và yêu cầu xác nhận trước khi gọi API xóa; ảnh gắn review cũng được xóa.
+- Khi không còn review công khai, projection ghi rating `0` và UI diễn giải là **Chưa có đánh giá**, không hiện “0 sao”.
+- Người dùng đăng nhập có thể bật **Chỉ quán đã lưu** trên bản đồ để lọc danh sách và ghim trong dữ liệu đã tải; trang **Quán đã lưu** vẫn hiển thị toàn bộ mục đã lưu.
+- Hồ sơ công khai gồm tên hiển thị, số người theo dõi và danh sách review công khai có phân trang; review bị ẩn/xóa không xuất hiện. Review gắn tên và liên kết bản đồ nếu quán còn hoạt động, không lộ email. Link chia sẻ dùng tọa độ venue công khai và slug.
+- Trang **Đang theo dõi** lấy tối đa 20 review công khai mới nhất từ 100 tài khoản theo dõi gần nhất bằng một truy vấn review, kèm tác giả, quán và ảnh nếu có; phản hồi ghi rõ khi bị cắt bớt.
+- Đề xuất cần ba tài khoản khác nhau xác nhận, sau đó admin duyệt trong tab **Quán cộng đồng** tại `/admin` mới xuất hiện trên bản đồ. Hàng chờ chỉ đọc được bằng phiên admin, hiện người gửi, nội dung và tọa độ; quyết định có bước xác nhận. Token nội bộ vẫn dùng được cho vận hành qua API. Người gửi theo dõi tiến độ và kết quả trong “Đề xuất của tôi”.
+- Form đề xuất có bản đồ để chọn vị trí bằng cách bấm hoặc kéo ghim, nút lấy vị trí thiết bị theo yêu cầu của người dùng; tọa độ cập nhật vào ô nhập để chỉnh chính xác. Nếu bản đồ nền lỗi, vẫn có thể nhập tọa độ thủ công.
 - Contract API: [community.json](../../../contracts/openapi/community.json). Quy trình kiểm duyệt: [local-demo.md](../../runbooks/local-demo.md).
 
 ## Quy tắc chung
@@ -25,4 +31,4 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 - Không công bố lịch sử vị trí chính xác. User có thể xóa nội dung mình tạo theo chính sách retention sẽ chốt trước public launch.
 - Dữ liệu cộng đồng phải phân biệt với dữ liệu cập nhật bởi chủ quán/POS; không dùng từ “realtime còn bàn” cho một check-in.
 - Mỗi phần có MongoDB integration test, trạng thái loading/error/empty trên UI và contract API cập nhật cùng code.
-- Trước public launch cần quy định SLA kiểm duyệt, cách xử lý báo cáo sai và chính sách lưu/xóa nội dung; demo hiện duyệt qua API nội bộ.
+- Trước public launch cần quy định SLA kiểm duyệt, cách xử lý báo cáo sai và chính sách lưu/xóa nội dung; demo hiện duyệt đề xuất qua trang admin hoặc API nội bộ.

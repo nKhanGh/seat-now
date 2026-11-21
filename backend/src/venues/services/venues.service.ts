@@ -57,6 +57,13 @@ export class VenuesService {
     return venue.category;
   }
 
+  async updateCommunityRating(slug: string, rating: number) {
+    await Promise.all([
+      this.venues.updateOne({ slug, status: 'ACTIVE' }, { $set: { rating } }),
+      this.views.updateOne({ slug, status: 'ACTIVE' }, { $set: { rating } }),
+    ]);
+  }
+
   async updateBusinessProfile(slug: string, input: UpdateBusinessProfileDto) {
     const profile = {
       name: input.name.trim(),

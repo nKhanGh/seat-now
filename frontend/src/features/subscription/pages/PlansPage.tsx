@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useEntitlements, useSubscription } from '../api/subscriptionQueries';
 
@@ -8,7 +9,7 @@ const features = [
   { name: 'Check-in, review và lưu địa điểm', free: true, premium: true, available: true },
   { name: 'Gửi yêu cầu đặt bàn tại quán đối tác', free: true, premium: true, available: true },
   { name: 'Ưu tiên xử lý yêu cầu đặt bàn', free: false, premium: true, available: true },
-  { name: 'Không quảng cáo', free: false, premium: true, available: false },
+  { name: 'Không quảng cáo trên bản đồ', free: false, premium: true, available: true },
   { name: 'Giữ chỗ xe trước', free: false, premium: true, available: false },
   { name: 'Voucher độc quyền và gợi ý AI nâng cao', free: false, premium: true, available: false },
 ] as const;
@@ -31,7 +32,7 @@ export function PlansPage() {
         <h1>Chọn cách khám phá phù hợp</h1>
         <p>
           Bản đồ, cộng đồng và yêu cầu đặt bàn tại quán đối tác dùng miễn phí. Premium demo được ưu tiên trong
-          hàng chờ; chưa mở thanh toán.
+          hàng chờ và xem bản đồ không có quảng cáo; chưa mở thanh toán.
         </p>
       </section>
       {enabled ? (
@@ -65,7 +66,7 @@ export function PlansPage() {
         </section>
       ) : (
         <p className="plan-current">
-          Bạn có thể dùng các tính năng Free ngay. <Link to="/login">Đăng nhập</Link> để xem gói của mình.
+          Bạn có thể dùng các tính năng Free ngay. <AuthLink>Đăng nhập</AuthLink> để xem gói của mình.
         </p>
       )}
       <div className="plan-grid">
@@ -86,7 +87,7 @@ export function PlansPage() {
         </section>
         <section className="plan-card">
           <h2>Premium</h2>
-          <p>Ưu tiên xử lý yêu cầu đặt bàn trong bản demo; các quyền khác sẽ mở sau.</p>
+          <p>Ưu tiên yêu cầu đặt bàn và ẩn quảng cáo trên bản đồ trong bản demo.</p>
           <strong>Chưa mở bán</strong>
           <ul>
             {features

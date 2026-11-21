@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCheckInSummary, useCreateCheckIn } from '../api/checkInQueries';
+import { activitySignalLabels } from '../services/activitySignal';
 
 export function CheckInPanel({ slug, signedIn }: { slug: string; signedIn: boolean }) {
   const summary = useCheckInSummary(slug);
@@ -40,19 +41,24 @@ export function CheckInPanel({ slug, signedIn }: { slug: string; signedIn: boole
         </p>
       )}
       {summary.data && (
-        <p>
-          {summary.data.lastHourUsers === 0
-            ? 'Chưa có check-in trong giờ qua.'
-            : `${summary.data.lastHourUsers} người đã check-in trong giờ qua.`}
-        </p>
+        <>
+          <p>
+            {summary.data.lastHourUsers === 0
+              ? 'Chưa có check-in trong giờ qua.'
+              : `${summary.data.lastHourUsers} người đã check-in trong giờ qua.`}
+          </p>
+          <p className="community-activity">{activitySignalLabels[summary.data.activitySignal]}</p>
+        </>
       )}
-      <p className="small">Lượt check-in tự báo cáo, không thay thế tình trạng bàn trống.</p>
+      <p className="small">
+        Ước lượng từ check-in tự báo cáo, chỉ để đối chiếu độ đông ở trên; không thay thế số bàn trống.
+      </p>
       {signedIn ? (
         <button onClick={checkIn} disabled={create.isPending}>
           {create.isPending ? 'Đang ghi nhận…' : 'Check-in tại đây'}
         </button>
       ) : (
-        <Link to="/login">Đăng nhập để check-in</Link>
+        <AuthLink>Đăng nhập để check-in</AuthLink>
       )}
       {message && <p role="status">{message}</p>}
     </section>

@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { confirmProposal, createProposal, getProposals, ProposalInput } from '../services/proposals.service';
+import {
+  confirmProposal,
+  createProposal,
+  getMyProposals,
+  getProposals,
+  ProposalInput,
+} from '../services/proposals.service';
 
 const proposalsKey = ['community', 'proposals'] as const;
 
@@ -11,11 +17,23 @@ export function useProposals() {
   });
 }
 
+export function useMyProposals(userId: string | null) {
+  return useQuery({
+    queryKey: ['community', 'proposals', 'mine', userId],
+    queryFn: ({ signal }) => getMyProposals(signal),
+    enabled: Boolean(userId),
+  });
+}
+
 export function useCreateProposal() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (input: ProposalInput) => createProposal(input),
-    onSuccess: () => client.invalidateQueries({ queryKey: proposalsKey }),
+    onSuccess: () =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: proposalsKey }),
+        client.invalidateQueries({ queryKey: ['community', 'proposals', 'mine'] }),
+      ]),
   });
 }
 
@@ -23,6 +41,10 @@ export function useConfirmProposal() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => confirmProposal(id),
-    onSuccess: () => client.invalidateQueries({ queryKey: proposalsKey }),
+    onSuccess: () =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: proposalsKey }),
+        client.invalidateQueries({ queryKey: ['community', 'proposals', 'mine'] }),
+      ]),
   });
 }

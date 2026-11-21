@@ -1,29 +1,85 @@
-import { FormEvent, useState } from 'react';
-import { Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { FormEvent, lazy, Suspense, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useLogin, useRegister } from '../features/auth/api/authQueries';
-import { MapExplorer } from '../features/map/pages/MapExplorer';
-import { PlansPage } from '../features/subscription/pages/PlansPage';
-import { FavoritesPage } from '../features/community/pages/FavoritesPage';
-import { PublicProfilePage } from '../features/community/pages/PublicProfilePage';
-import { FollowingPage } from '../features/community/pages/FollowingPage';
-import { ProposalsPage } from '../features/community/pages/ProposalsPage';
-import { BusinessPage } from '../features/business/pages/BusinessPage';
-import { MyBookingsPage } from '../features/booking/pages/MyBookingsPage';
+import { loginDestination } from '../features/auth/services/loginDestination';
+import { safeReturnTo } from '../features/auth/services/returnTo';
+import { getMyBusinessVenues } from '../features/business/services/business.service';
+const MapExplorer = lazy(() =>
+  import('../features/map/pages/MapExplorer').then((module) => ({ default: module.MapExplorer })),
+);
+const PlansPage = lazy(() =>
+  import('../features/subscription/pages/PlansPage').then((module) => ({ default: module.PlansPage })),
+);
+const FavoritesPage = lazy(() =>
+  import('../features/community/pages/FavoritesPage').then((module) => ({ default: module.FavoritesPage })),
+);
+const PublicProfilePage = lazy(() =>
+  import('../features/community/pages/PublicProfilePage').then((module) => ({
+    default: module.PublicProfilePage,
+  })),
+);
+const FollowingPage = lazy(() =>
+  import('../features/community/pages/FollowingPage').then((module) => ({ default: module.FollowingPage })),
+);
+const ProposalsPage = lazy(() =>
+  import('../features/community/pages/ProposalsPage').then((module) => ({ default: module.ProposalsPage })),
+);
+const BusinessPage = lazy(() =>
+  import('../features/business/pages/BusinessPage').then((module) => ({ default: module.BusinessPage })),
+);
+const BusinessOverviewPage = lazy(() =>
+  import('../features/business/pages/BusinessOverviewPage').then((module) => ({
+    default: module.BusinessOverviewPage,
+  })),
+);
+const BusinessClaimsPage = lazy(() =>
+  import('../features/business/pages/BusinessClaimsPage').then((module) => ({
+    default: module.BusinessClaimsPage,
+  })),
+);
+const BusinessVenuePage = lazy(() =>
+  import('../features/business/pages/BusinessVenuePage').then((module) => ({
+    default: module.BusinessVenuePage,
+  })),
+);
+const MyBookingsPage = lazy(() =>
+  import('../features/booking/pages/MyBookingsPage').then((module) => ({ default: module.MyBookingsPage })),
+);
+const AdminPage = lazy(() =>
+  import('../features/admin/pages/AdminPage').then((module) => ({ default: module.AdminPage })),
+);
 
 function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = safeReturnTo((location.state as { returnTo?: unknown } | null)?.returnTo);
   const login = useLogin();
   const register = useRegister();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState('');
   const [displayName, setDisplayName] = useState('');
   const mutation = mode === 'login' ? login : register;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError('');
+    if (mode === 'register' && password !== confirmPassword) {
+      setFormError('Mật khẩu xác nhận chưa khớp.');
+      return;
+    }
     try {
-      if (mode === 'login') await login.mutateAsync({ email, password });
-      else await register.mutateAsync({ email, password, displayName });
-      void navigate('/');
+      const user =
+        mode === 'login'
+          ? await login.mutateAsync({ email, password })
+          : await register.mutateAsync({ email, password, displayName });
+      const destination =
+        mode === 'login'
+          ? await loginDestination(user.role, returnTo, async () => (await getMyBusinessVenues()).length > 0)
+          : returnTo;
+      void navigate(destination, { replace: true });
     } catch {
       /* The error is displayed below. */
     }
@@ -61,15 +117,42 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         </label>
         <label>
           Mật khẩu
-          <input
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            type="password"
-            minLength={mode === 'register' ? 12 : undefined}
-            required
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-          />
+          <span className="password-field">
+            <input
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              type={showPassword ? 'text' : 'password'}
+              minLength={mode === 'register' ? 12 : undefined}
+              required
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              onClick={() => setShowPassword((visible) => !visible)}
+            >
+              {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+            </button>
+          </span>
         </label>
+        {mode === 'register' && (
+          <label>
+            Xác nhận mật khẩu
+            <input
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              type={showPassword ? 'text' : 'password'}
+              minLength={12}
+              required
+              autoComplete="new-password"
+            />
+          </label>
+        )}
+        {formError && (
+          <p role="alert" className="error">
+            {formError}
+          </p>
+        )}
         {mutation.error && (
           <p role="alert" className="error">
             {mutation.error.message}
@@ -81,11 +164,17 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         <p>
           {mode === 'login' ? (
             <>
-              Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+              Chưa có tài khoản?{' '}
+              <Link to="/register" state={{ returnTo }}>
+                Đăng ký
+              </Link>
             </>
           ) : (
             <>
-              Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+              Đã có tài khoản?{' '}
+              <Link to="/login" state={{ returnTo }}>
+                Đăng nhập
+              </Link>
             </>
           )}
         </p>
@@ -96,17 +185,30 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
 export function App() {
   return (
-    <Routes>
-      <Route path="/" element={<MapExplorer />} />
-      <Route path="/login" element={<AuthForm mode="login" />} />
-      <Route path="/register" element={<AuthForm mode="register" />} />
-      <Route path="/plans" element={<PlansPage />} />
-      <Route path="/favorites" element={<FavoritesPage />} />
-      <Route path="/following" element={<FollowingPage />} />
-      <Route path="/users/:id" element={<PublicProfilePage />} />
-      <Route path="/proposals" element={<ProposalsPage />} />
-      <Route path="/business" element={<BusinessPage />} />
-      <Route path="/bookings" element={<MyBookingsPage />} />
-    </Routes>
+    <Suspense
+      fallback={
+        <p className="route-loading" role="status">
+          Đang tải trang…
+        </p>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<MapExplorer />} />
+        <Route path="/login" element={<AuthForm mode="login" />} />
+        <Route path="/register" element={<AuthForm mode="register" />} />
+        <Route path="/plans" element={<PlansPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/following" element={<FollowingPage />} />
+        <Route path="/users/:id" element={<PublicProfilePage />} />
+        <Route path="/proposals" element={<ProposalsPage />} />
+        <Route path="/business" element={<BusinessPage />}>
+          <Route index element={<BusinessOverviewPage />} />
+          <Route path="claims" element={<BusinessClaimsPage />} />
+          <Route path="venues/:slug/:section" element={<BusinessVenuePage />} />
+        </Route>
+        <Route path="/bookings" element={<MyBookingsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+      </Routes>
+    </Suspense>
   );
 }

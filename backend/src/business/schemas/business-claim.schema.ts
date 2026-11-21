@@ -8,6 +8,8 @@ export class BusinessClaim {
   @Prop({ required: true, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' })
   status!: 'PENDING' | 'APPROVED' | 'REJECTED';
   @Prop({ required: true, trim: true, maxlength: 300 }) evidence!: string;
+  @Prop({ default: false }) hasDocument!: boolean;
+  @Prop({ type: Buffer, select: false }) documentData?: Buffer;
   @Prop() createdAt!: Date;
   @Prop() updatedAt!: Date;
 }

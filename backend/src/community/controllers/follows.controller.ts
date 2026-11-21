@@ -28,6 +28,11 @@ export class FollowsController {
     return this.follows.list(await this.userId(request));
   }
 
+  @Get('me/following/reviews')
+  async feed(@Req() request: CookieRequest) {
+    return this.follows.feed(await this.userId(request));
+  }
+
   @Get('me/follows/:id')
   async status(@Req() request: CookieRequest, @Param('id') id: string) {
     return this.follows.isFollowing(await this.userId(request), id);

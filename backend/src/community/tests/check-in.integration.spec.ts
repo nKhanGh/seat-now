@@ -27,6 +27,7 @@ describeWithMongo('community check-in with MongoDB', () => {
     const service = new CheckInService(model, venues);
     const userId = new Types.ObjectId().toString();
     const position = { lat: 10.7769, lng: 106.7009, accuracyM: 20 };
+    expect((await service.summary('demo-cafe')).activitySignal).toBe('NONE');
 
     await expect(service.checkIn(userId, 'demo-cafe', { ...position, lat: 10.8 })).rejects.toThrow(
       'Move closer',
@@ -38,8 +39,12 @@ describeWithMongo('community check-in with MongoDB', () => {
     const second = await service.checkIn(userId, 'demo-cafe', position);
     expect(first.data.duplicate).toBe(false);
     expect(second.data.duplicate).toBe(true);
-    expect((await service.summary('demo-cafe')).lastHourUsers).toBe(1);
-    expect(await model.countDocuments({ venueSlug: 'demo-cafe' })).toBe(1);
+    expect(await service.summary('demo-cafe')).toMatchObject({ lastHourUsers: 1, activitySignal: 'LOW' });
+    for (let i = 0; i < 2; i++) await service.checkIn(new Types.ObjectId().toString(), 'demo-cafe', position);
+    expect((await service.summary('demo-cafe')).activitySignal).toBe('MODERATE');
+    for (let i = 0; i < 3; i++) await service.checkIn(new Types.ObjectId().toString(), 'demo-cafe', position);
+    expect(await service.summary('demo-cafe')).toMatchObject({ lastHourUsers: 6, activitySignal: 'HIGH' });
+    expect(await model.countDocuments({ venueSlug: 'demo-cafe' })).toBe(6);
     expect(await model.findOne({ venueSlug: 'demo-cafe' }).lean()).not.toHaveProperty('location');
   });
 });

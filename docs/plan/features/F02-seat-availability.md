@@ -53,7 +53,7 @@ Public read:
 
 ```http
 GET /api/v1/venues/{slug}/availability
-GET /api/v1/venues/{slug}/availability/history?from=...&to=...  # kế hoạch, chưa triển khai
+GET /api/v1/venues/{slug}/availability/history  # 10 lần ghi nhận mới nhất trong 24 giờ
 ```
 
 Internal write:
@@ -85,7 +85,7 @@ Public response hiện có `freshness`, `capturedAt`, `expiresAt`, `source`, `co
 
 Event `venue.availability.updated.v1` cần tiếp tục được chuẩn hóa theo envelope ở COMMON khi mở rộng tích hợp.
 
-Hiện tại event chỉ chứa `eventId`, `slug`, `version`; client refetch REST sau khi nhận event. WebSocket namespace `/live`, client gửi `watch` với `venueSlugs[]`. Lệnh `npm run rebuild:projections` phục hồi latest/map từ snapshot. Chưa có history API hay POS connector. `sourceRecordId` trong body là khóa idempotency.
+Hiện tại event chỉ chứa `eventId`, `slug`, `version`; client refetch REST sau khi nhận event. WebSocket namespace `/live`, client gửi `watch` với `venueSlugs[]`. Lệnh `npm run rebuild:projections` phục hồi latest/map từ snapshot. History API chỉ trả tối đa 10 snapshot trong 24 giờ của quán công khai, kèm cờ `truncated`; UI tải khi người dùng mở mục lịch sử và làm mới khi có event mới cho quán đó. Chưa có POS connector. `sourceRecordId` trong body là khóa idempotency.
 
 ## 5. UI
 

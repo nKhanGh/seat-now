@@ -16,6 +16,12 @@ async function bootstrap() {
   if (process.env.NODE_ENV === 'production' && !process.env.PUBLIC_ORIGIN.startsWith('https://')) {
     throw new Error('PUBLIC_ORIGIN must use HTTPS in production');
   }
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32)
+  ) {
+    throw new Error('JWT_SECRET must contain at least 32 characters in production');
+  }
   app.setGlobalPrefix('api/v1');
   const mapAssetOrigins = (
     process.env.MAP_ASSET_ORIGINS ?? 'https://tiles.openfreemap.org,https://assets.openfreemap.com'
@@ -88,9 +94,10 @@ async function bootstrap() {
             '/favorites',
             '/following',
             '/proposals',
-            '/business',
             '/bookings',
+            '/admin',
           ].includes(request.path) ||
+            /^\/business(?:\/.*)?$/.test(request.path) ||
             /^\/users\/[a-f0-9]{24}$/.test(request.path))
         ) {
           response.sendFile(join(frontendDist, 'index.html'));

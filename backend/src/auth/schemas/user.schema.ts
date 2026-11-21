@@ -14,6 +14,9 @@ export class User {
   @Prop({ required: true, trim: true })
   displayName!: string;
 
+  @Prop({ required: true, enum: ['USER', 'ADMIN'], default: 'USER' })
+  role!: 'USER' | 'ADMIN';
+
   @Prop({ required: true, enum: ['ACTIVE', 'DISABLED'], default: 'ACTIVE' })
   status!: 'ACTIVE' | 'DISABLED';
 

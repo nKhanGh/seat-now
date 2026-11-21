@@ -20,6 +20,7 @@ import { VenueProposal, VenueProposalSchema } from './schemas/venue-proposal.sch
 import { ProposalConfirmation, ProposalConfirmationSchema } from './schemas/proposal-confirmation.schema';
 import { ProposalsService } from './services/proposals.service';
 import { ProposalsController } from './controllers/proposals.controller';
+import { Venue, VenueSchema } from '../map/schemas/venue.schema';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ProposalsController } from './controllers/proposals.controller';
       { name: CheckIn.name, schema: CheckInSchema },
       { name: Favorite.name, schema: FavoriteSchema },
       { name: Review.name, schema: ReviewSchema },
+      { name: Venue.name, schema: VenueSchema },
       { name: ReviewPhoto.name, schema: ReviewPhotoSchema },
       { name: ReviewReport.name, schema: ReviewReportSchema },
       { name: Follow.name, schema: FollowSchema },

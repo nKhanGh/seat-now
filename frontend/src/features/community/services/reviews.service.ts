@@ -8,6 +8,22 @@ export type VenueReview = {
   photoUrl: string | null;
 };
 export type ReviewsPage = { data: VenueReview[]; meta: { nextCursor: string | null } };
+export type UserReview = Pick<VenueReview, 'id' | 'rating' | 'body' | 'createdAt' | 'photoUrl'> & {
+  venueSlug: string;
+  venueName: string;
+  venueLocation: { type: 'Point'; coordinates: [number, number] } | null;
+};
+export type UserReviewsPage = { data: UserReview[]; meta: { nextCursor: string | null } };
+export type MyReview = Pick<VenueReview, 'id' | 'rating' | 'body' | 'photoUrl'>;
+
+export async function getMyReview(slug: string, signal?: AbortSignal): Promise<MyReview | null> {
+  const response = await fetch(`/api/v1/me/reviews/${encodeURIComponent(slug)}`, {
+    signal,
+    credentials: 'same-origin',
+  });
+  if (!response.ok) throw new Error(`Không tải được đánh giá của bạn (${response.status}).`);
+  return ((await response.json()) as { data: MyReview | null }).data;
+}
 
 export async function getReviews(
   slug: string,
@@ -19,6 +35,18 @@ export async function getReviews(
   const response = await fetch(`/api/v1/venues/${encodeURIComponent(slug)}/reviews?${params}`, { signal });
   if (!response.ok) throw new Error(`Không tải được review (${response.status}).`);
   return response.json() as Promise<ReviewsPage>;
+}
+
+export async function getUserReviews(
+  id: string,
+  cursor: string | null,
+  signal?: AbortSignal,
+): Promise<UserReviewsPage> {
+  const params = new URLSearchParams();
+  if (cursor) params.set('cursor', cursor);
+  const response = await fetch(`/api/v1/users/${encodeURIComponent(id)}/reviews?${params}`, { signal });
+  if (!response.ok) throw new Error(`Không tải được đánh giá công khai (${response.status}).`);
+  return response.json() as Promise<UserReviewsPage>;
 }
 
 export async function saveReview(slug: string, input: { rating: number; body: string }): Promise<void> {

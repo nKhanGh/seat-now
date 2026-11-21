@@ -1,15 +1,17 @@
 # SeatNow
 
+[Hướng dẫn sử dụng chi tiết](docs/USER_GUIDE.md) · [Kiểm kê tính năng](docs/FEATURES.md) · [Cách chạy local](#chạy-demo-local)
+
 SeatNow là ứng dụng giúp người dùng tìm địa điểm và bãi đỗ xe gần đó, xem mức độ đông/vắng cùng số chỗ còn trống gần thời gian thực, rồi ra quyết định trước khi di chuyển.
 
-Repository hiện có **đăng nhập, bản đồ, tình trạng chỗ ngồi, bãi đỗ xe, gói người dùng, cộng đồng, quản lý chủ quán và yêu cầu đặt bàn**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được triển khai theo đúng thứ tự ưu tiên:
+Repository hiện có **đăng nhập, bản đồ và tìm quán theo tên/địa chỉ, tình trạng chỗ ngồi, bãi đỗ xe, gói người dùng, cộng đồng, quản lý chủ quán và yêu cầu đặt bàn**. Dữ liệu địa điểm/chỗ trống mặc định là mô phỏng; chưa có kết nối POS hay nguồn bãi xe thực. Phạm vi MVP được triển khai theo đúng thứ tự ưu tiên:
 
 1. Bản đồ địa điểm thời gian thực và bộ lọc cơ bản.
 2. Tình trạng bàn/chỗ ngồi và thời gian chờ dự kiến.
 3. Bãi đỗ xe gần địa điểm và tình trạng chỗ trống.
 4. Nền tảng gói Free/Premium dành cho người dùng; ưu tiên xử lý yêu cầu đặt bàn đã có ở bản demo, các quyền Premium khác thuộc release sau.
 
-Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm ảnh và báo cáo, theo dõi thành viên, chia sẻ địa điểm, đề xuất quán với ba lượt xác nhận và duyệt nội bộ. Nhóm chủ quán có yêu cầu nhận quản lý, hồ sơ/logo miễn phí và gói Premium demo gồm chỗ trống thủ công, dashboard, ảnh bìa, ưu đãi hẹn giờ và vị trí tài trợ. Kết nối dữ liệu thực và thanh toán vẫn thuộc release sau.
+Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm ảnh và báo cáo, theo dõi thành viên, chia sẻ địa điểm, đề xuất quán với ba lượt xác nhận và trang admin xét duyệt. Nhóm chủ quán có yêu cầu nhận quản lý, hồ sơ/logo và mục tương tác khách hàng miễn phí; gói Premium demo gồm chỗ trống thủ công, dashboard, ảnh bìa, ưu đãi hẹn giờ và vị trí tài trợ. Kết nối dữ liệu thực và thanh toán vẫn thuộc release sau.
 
 ## Quyết định kỹ thuật hiện tại
 
@@ -19,7 +21,7 @@ Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm 
 - Frontend: React + Vite + TypeScript, React Router, TanStack Query, MapLibre GL.
 - Kiến trúc: modular monolith theo feature để ra MVP nhanh, nhưng giữ boundary đủ rõ để tách service khi có dữ liệu tải thực tế.
 - Local infrastructure: Docker Compose cho MongoDB; Redis chỉ thêm khi cần scale nhiều API instance hoặc rate limit phân tán.
-- Đăng nhập: NestJS + MongoDB tự quản lý user/session; xem [ADR 002](docs/adr/002-first-party-auth.md). Dockerfile phục vụ React và API cùng origin để cookie hoạt động ổn định.
+- Đăng nhập: NestJS cấp JWT trong cookie HttpOnly; MongoDB giữ phiên để thu hồi ngay khi đăng xuất. Xem [ADR 002](docs/adr/002-first-party-auth.md). Dockerfile phục vụ React và API cùng origin để cookie hoạt động ổn định.
 
 ## Chạy demo local
 
@@ -28,6 +30,7 @@ Yêu cầu: Node.js 20.19+, npm, Docker Desktop.
 ```powershell
 docker compose -f infra/compose.yaml up -d
 Copy-Item backend/.env.example backend/.env
+# Đặt JWT_SECRET dài ít nhất 32 ký tự trong backend/.env và giữ cố định.
 cd backend
 npm ci
 npm run build
@@ -43,14 +46,17 @@ npm ci
 npm run dev
 ```
 
-Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
+Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Chi tiết quán còn gợi ý tối đa bốn địa điểm trong bán kính 2 km, ưu tiên nhiều loại địa điểm rồi xếp theo khoảng cách đường chim bay; chạm vào gợi ý để chuyển quán. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
 
-`seed:demo` chỉ chạy ở local/test, tạo 5 địa điểm và 4 bãi xe hư cấu tại TP.HCM. Snapshot mẫu hết hạn sau 10 phút; chạy lại `npm run seed:demo` trong `backend` để làm mới. Khi hết hạn, UI ghi **Dữ liệu cũ** và không coi số chỗ đó là còn trống hiện tại.
+Để xét duyệt, tạo tài khoản admin một lần sau khi build backend. Đặt `ADMIN_EMAIL` và mật khẩu ngẫu nhiên dài ít nhất 20 ký tự vào `backend/.env.admin` (tệp này được Git bỏ qua), rồi chạy `npm run admin:create` trong `backend`. Đăng nhập bằng tài khoản đó và mở `/admin` hoặc chọn **Xét duyệt** trên thanh đầu trang. Tab **Chủ quán** hiện bằng chứng nhận quản lý; tab **Quán cộng đồng** hiện các đề xuất đủ ba lượt xác nhận. Kiểm tra rồi chọn **Duyệt** hoặc **Từ chối** và xác nhận. Tài khoản đăng ký trong app luôn là người dùng thường; script từ chối chuyển email đã tồn tại thành admin. Không đưa mật khẩu admin vào repository hay biến `VITE_*`.
+
+`seed:demo` chỉ chạy ở local/test, tạo 100 địa điểm hư cấu với tên quán đa dạng (chủ yếu quán ăn/cà phê ở nhiều quận TP.HCM) và 4 bãi xe. Slug cố định nên chạy lại cập nhật tên và trạng thái mà không nhân đôi quán. Snapshot mẫu có hiệu lực 7 ngày để dễ thử bộ lọc **Còn bàn**; chạy lại `npm run seed:demo` trong `backend` để làm mới. Nguồn `DEMO` vẫn là số liệu mô phỏng, không dùng để quyết định di chuyển thật. Snapshot chủ quán và POS vẫn có thời hạn riêng.
 
 Public API chính:
 
 - `GET /health` (kiểm tra API và MongoDB)
 - `GET /map/venues?lat=10.7769&lng=106.7009&radiusM=3000`
+- `GET /map/search?q=ben%20thanh` (tìm quán công khai theo tên/địa chỉ, tối đa 12 kết quả)
 - `GET /venues/:slug` (chi tiết địa điểm)
 - `GET /venues/:slug/availability`
 - `GET /venues/:slug/parking` hoặc `GET /parking-facilities?lat=...&lng=...`
@@ -73,7 +79,9 @@ Kiểm tra nhanh: tại thư mục gốc chạy `npm ci; npm run format:check; n
 
 Đặt bàn demo: chủ quán đã được duyệt quyền quản lý mở trang `/business` và bật nhận yêu cầu cho quán ăn/cà phê. Người dùng đăng nhập mở quán trên bản đồ, gửi yêu cầu và theo dõi tại `/bookings`; chủ quán xác nhận hoặc từ chối trong hàng chờ. Yêu cầu đang chờ chưa giữ bàn. [Chi tiết F07](docs/plan/features/F07-booking.md).
 
-Dockerfile ở root build cả hai app và chạy cùng một origin. Khi deploy Render, đặt `MONGODB_URI` bằng MongoDB Atlas và `PUBLIC_ORIGIN` bằng URL HTTPS thực của service. Nếu dùng map style/tiles khác, đặt `VITE_MAP_STYLE_URL` lúc build frontend và `MAP_ASSET_ORIGINS` (danh sách origin phân cách dấu phẩy) cho Content Security Policy.
+Dockerfile ở root build cả hai app và chạy cùng một origin. Khi deploy Render, đặt `MONGODB_URI` bằng MongoDB Atlas, `PUBLIC_ORIGIN` bằng URL HTTPS thực của service và `JWT_SECRET` dài ít nhất 32 ký tự. Nếu dùng map style/tiles khác, đặt `VITE_MAP_STYLE_URL` lúc build frontend và `MAP_ASSET_ORIGINS` (danh sách origin phân cách dấu phẩy) cho Content Security Policy.
+
+Tài liệu để chia sẻ: [Hướng dẫn sử dụng theo 3 vai trò (PDF)](output/pdf/seatnow-role-guide.pdf), [Hướng dẫn sử dụng đầy đủ (PDF)](output/pdf/seatnow-user-guide.pdf) và [Hướng dẫn deploy (PDF)](output/pdf/seatnow-deploy-guide.pdf). Bản nguồn có thể cập nhật tại [ROLE_GUIDE.md](docs/ROLE_GUIDE.md), [USER_GUIDE.md](docs/USER_GUIDE.md) và [DEPLOY_GUIDE.md](docs/DEPLOY_GUIDE.md); chạy `scripts/build_pdf_guides.py` bằng Python có ReportLab để xuất lại PDF.
 
 Lát cắt auth hiện mới là demo: chưa có xác minh email và khôi phục mật khẩu. Không mở đăng ký công khai cho người dùng thật trước khi hoàn thiện các flow đó. Realtime hiện chạy trên một API instance; nếu scale ngang cần adapter Socket.IO dùng chung và cơ chế phát sự kiện bền vững.
 

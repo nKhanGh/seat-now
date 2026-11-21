@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { AuthLink } from '../../auth/components/AuthLink';
 import { useCurrentUser } from '../../auth/api/authQueries';
 import { useFavorites, useSetFavorite } from '../api/favoritesQueries';
+import { ratingLabel } from '../../map/services/ratingLabel';
 
 export function FavoritesPage() {
   const auth = useCurrentUser();
@@ -15,7 +17,7 @@ export function FavoritesPage() {
       {auth.isPending && <p>Đang kiểm tra đăng nhập…</p>}
       {!auth.isPending && !auth.data && (
         <p>
-          <Link to="/login">Đăng nhập</Link> để xem danh sách của bạn.
+          <AuthLink>Đăng nhập</AuthLink> để xem danh sách của bạn.
         </p>
       )}
       {auth.data && favorites.isPending && <p>Đang tải quán đã lưu…</p>}
@@ -30,7 +32,7 @@ export function FavoritesPage() {
           <h2>{venue.name}</h2>
           <p>{venue.address}</p>
           <p>
-            ★ {venue.rating.toFixed(1)} · {'₫'.repeat(venue.priceTier)}
+            {ratingLabel(venue.rating)} · {'₫'.repeat(venue.priceTier)}
           </p>
           <div className="favorite-actions">
             <Link

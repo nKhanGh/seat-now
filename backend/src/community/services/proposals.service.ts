@@ -71,6 +71,30 @@ export class ProposalsService {
     };
   }
 
+  async readyForReview() {
+    const rows = await this.proposals
+      .find({ status: 'READY_FOR_REVIEW' })
+      .sort({ createdAt: 1, _id: 1 })
+      .limit(101)
+      .lean();
+    return {
+      data: rows.slice(0, 100).map((row) => ({
+        ...this.toPublic(row),
+        createdBy: row.createdBy.toString(),
+      })),
+      meta: { truncated: rows.length > 100 },
+    };
+  }
+
+  async mine(userId: string) {
+    const rows = await this.proposals
+      .find({ createdBy: new Types.ObjectId(userId) })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(100)
+      .lean();
+    return { data: rows.map((row) => this.toPublic(row)) };
+  }
+
   async confirm(userId: string, id: string) {
     const proposal = await this.findOpen(id);
     if (proposal.createdBy.toString() === userId)

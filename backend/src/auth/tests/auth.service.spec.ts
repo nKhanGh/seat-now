@@ -23,7 +23,7 @@ describe('AuthService', () => {
     service = new AuthService(users as never, sessions as never);
   });
 
-  it('hashes the password and stores only a session verifier hash', async () => {
+  it('hashes the password and stores only the hash of a signed JWT', async () => {
     users.create.mockImplementation(async (input: typeof user) => ({ ...user, ...input }));
     sessions.create.mockResolvedValue({});
     const result = await service.register({
@@ -37,32 +37,40 @@ describe('AuthService', () => {
     expect(await argon2.verify(users.create.mock.calls[0][0].passwordHash, 'long-secret-password')).toBe(
       true,
     );
-    expect(sessions.create.mock.calls[0][0].verifierHash).not.toBe(result.token.split('.')[1]);
+    expect(result.token.split('.')).toHaveLength(3);
+    expect(sessions.create.mock.calls[0][0].verifierHash).toBe(
+      createHash('sha256').update(result.token).digest('hex'),
+    );
     expect(result.user).not.toHaveProperty('passwordHash');
   });
 
   it('rejects an expired session even before TTL cleanup', async () => {
-    const verifier = 'a'.repeat(64);
+    users.create.mockImplementation(async (input: typeof user) => ({ ...user, ...input }));
+    sessions.create.mockResolvedValue({});
+    const result = await service.register({
+      email: 'test@example.com',
+      password: 'long-secret-password',
+      displayName: 'Test User',
+    });
     sessions.findOne.mockResolvedValue({
-      selector: 'b'.repeat(32),
+      selector: sessions.create.mock.calls[0][0].selector,
       userId,
-      verifierHash: createHash('sha256').update(verifier).digest('hex'),
+      verifierHash: createHash('sha256').update(result.token).digest('hex'),
       expiresAt: new Date(Date.now() - 1000),
     });
-    await expect(service.authenticate(`${'b'.repeat(32)}.${verifier}`)).rejects.toBeInstanceOf(
-      UnauthorizedException,
-    );
+    await expect(service.authenticate(result.token)).rejects.toBeInstanceOf(UnauthorizedException);
     expect(users.findById).not.toHaveBeenCalled();
   });
 
-  it('does not let a selector alone revoke a session', async () => {
-    sessions.findOne.mockResolvedValue({
-      selector: 'b'.repeat(32),
-      userId,
-      verifierHash: createHash('sha256').update('a'.repeat(64)).digest('hex'),
-      expiresAt: new Date(Date.now() + 100000),
+  it('does not let a tampered JWT revoke a session', async () => {
+    users.create.mockImplementation(async (input: typeof user) => ({ ...user, ...input }));
+    sessions.create.mockResolvedValue({});
+    const result = await service.register({
+      email: 'test@example.com',
+      password: 'long-secret-password',
+      displayName: 'Test User',
     });
-    await service.logout(`${'b'.repeat(32)}.${'c'.repeat(64)}`);
+    await service.logout(`x${result.token.slice(1)}`);
     expect(sessions.updateOne).not.toHaveBeenCalled();
   });
 });

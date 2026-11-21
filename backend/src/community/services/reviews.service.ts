@@ -14,6 +14,7 @@ import { UpsertReviewDto } from '../dto/review.dto';
 import { Review } from '../schemas/review.schema';
 import { ReviewPhoto } from '../schemas/review-photo.schema';
 import { ReviewReport } from '../schemas/review-report.schema';
+import { Venue } from '../../map/schemas/venue.schema';
 import sharp from 'sharp';
 
 const PAGE_SIZE = 20;
@@ -24,6 +25,7 @@ export class ReviewsService {
     @InjectModel(Review.name) private readonly reviews: Model<Review>,
     @InjectModel(ReviewPhoto.name) private readonly photos: Model<ReviewPhoto>,
     @InjectModel(ReviewReport.name) private readonly reports: Model<ReviewReport>,
+    @InjectModel(Venue.name) private readonly venueModel: Model<Venue>,
     private readonly venues: VenuesService,
     private readonly auth: AuthService,
   ) {}
@@ -93,11 +95,135 @@ export class ReviewsService {
     };
   }
 
+  async listByUser(userId: string, encodedCursor?: string) {
+    await this.auth.publicProfileById(userId);
+    let cursor: { createdAt: Date; id: Types.ObjectId } | null = null;
+    if (encodedCursor) {
+      try {
+        const parsed = JSON.parse(Buffer.from(encodedCursor, 'base64url').toString('utf8')) as Record<
+          string,
+          unknown
+        >;
+        if (
+          parsed.userId !== userId ||
+          typeof parsed.createdAt !== 'string' ||
+          typeof parsed.id !== 'string' ||
+          !/^[a-f0-9]{24}$/.test(parsed.id) ||
+          !Number.isFinite(Date.parse(parsed.createdAt))
+        )
+          throw new Error('invalid');
+        cursor = { createdAt: new Date(parsed.createdAt), id: new Types.ObjectId(parsed.id) };
+      } catch {
+        throw new BadRequestException({ code: 'REVIEW_INVALID_CURSOR', message: 'Invalid review cursor' });
+      }
+    }
+    const filter: Record<string, unknown> = { userId: new Types.ObjectId(userId), status: 'PUBLISHED' };
+    if (cursor)
+      filter.$or = [
+        { createdAt: { $lt: cursor.createdAt } },
+        { createdAt: cursor.createdAt, _id: { $lt: cursor.id } },
+      ];
+    const rows = await this.reviews
+      .find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(PAGE_SIZE + 1)
+      .lean();
+    const page = rows.slice(0, PAGE_SIZE);
+    const [photos, venues] = await Promise.all([
+      this.photos.find({ reviewId: { $in: page.map((row) => row._id) } }, { reviewId: 1 }).lean(),
+      this.venueModel
+        .find({ slug: { $in: page.map((row) => row.venueSlug) }, status: 'ACTIVE' })
+        .select({ slug: 1, name: 1, location: 1 })
+        .lean(),
+    ]);
+    const photoIds = new Set(photos.map((photo) => photo.reviewId.toString()));
+    const venueBySlug = new Map(venues.map((venue) => [venue.slug, venue]));
+    const last = page.at(-1);
+    return {
+      data: page.map((row) => {
+        const venue = venueBySlug.get(row.venueSlug);
+        return {
+          id: row._id.toString(),
+          venueSlug: row.venueSlug,
+          venueName: venue?.name ?? row.venueSlug,
+          venueLocation: venue?.location ?? null,
+          rating: row.rating,
+          body: row.body,
+          createdAt: row.createdAt,
+          photoUrl: photoIds.has(row._id.toString()) ? `/api/v1/reviews/${row._id.toString()}/photo` : null,
+        };
+      }),
+      meta: {
+        nextCursor:
+          rows.length > PAGE_SIZE && last
+            ? Buffer.from(
+                JSON.stringify({ userId, createdAt: last.createdAt.toISOString(), id: last._id.toString() }),
+              ).toString('base64url')
+            : null,
+      },
+    };
+  }
+
+  async mine(userId: string, slug: string) {
+    const review = await this.reviews
+      .findOne({ userId: new Types.ObjectId(userId), venueSlug: slug, status: 'PUBLISHED' })
+      .lean();
+    if (!review) return { data: null };
+    const photo = await this.photos.exists({ reviewId: review._id });
+    return {
+      data: {
+        id: review._id.toString(),
+        rating: review.rating,
+        body: review.body,
+        photoUrl: photo ? `/api/v1/reviews/${review._id.toString()}/photo` : null,
+      },
+    };
+  }
+
+  async listForUsers(userIds: Types.ObjectId[]) {
+    if (userIds.length === 0) return { data: [], meta: { truncated: false } };
+    const rows = await this.reviews
+      .find({ userId: { $in: userIds }, status: 'PUBLISHED' })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(PAGE_SIZE + 1)
+      .lean();
+    const page = rows.slice(0, PAGE_SIZE);
+    const [authors, photos, venues] = await Promise.all([
+      this.auth.publicUsersByIds(page.map((row) => row.userId)),
+      this.photos.find({ reviewId: { $in: page.map((row) => row._id) } }, { reviewId: 1 }).lean(),
+      this.venueModel
+        .find({ slug: { $in: page.map((row) => row.venueSlug) }, status: 'ACTIVE' })
+        .select({ slug: 1, name: 1, location: 1 })
+        .lean(),
+    ]);
+    const authorById = new Map(authors.map((author) => [author.id, author.displayName]));
+    const photoIds = new Set(photos.map((photo) => photo.reviewId.toString()));
+    const venueBySlug = new Map(venues.map((venue) => [venue.slug, venue]));
+    return {
+      data: page.map((row) => {
+        const venue = venueBySlug.get(row.venueSlug);
+        return {
+          id: row._id.toString(),
+          author: {
+            id: row.userId.toString(),
+            displayName: authorById.get(row.userId.toString()) ?? 'Thành viên SeatNow',
+          },
+          venueSlug: row.venueSlug,
+          venueName: venue?.name ?? row.venueSlug,
+          venueLocation: venue?.location ?? null,
+          rating: row.rating,
+          body: row.body,
+          createdAt: row.createdAt,
+          photoUrl: photoIds.has(row._id.toString()) ? `/api/v1/reviews/${row._id.toString()}/photo` : null,
+        };
+      }),
+      meta: { truncated: rows.length > PAGE_SIZE },
+    };
+  }
+
   async upsert(userId: string, slug: string, input: UpsertReviewDto) {
     await this.venues.activeLocation(slug);
-    const body = input.body.trim();
-    if (body.length < 10)
-      throw new BadRequestException({ code: 'REVIEW_TOO_SHORT', message: 'Review is too short' });
+    const body = input.body?.trim() ?? '';
     const existing = await this.reviews
       .findOne({ userId: new Types.ObjectId(userId), venueSlug: slug }, { status: 1 })
       .lean();
@@ -110,6 +236,7 @@ export class ReviewsService {
         { upsert: true, new: true },
       )
       .lean();
+    await this.refreshRating(slug);
     return {
       data: {
         id: review._id.toString(),
@@ -138,6 +265,7 @@ export class ReviewsService {
         this.photos.deleteOne({ reviewId: review._id }),
         this.reports.deleteMany({ reviewId: review._id }),
       ]);
+    if (review) await this.refreshRating(slug);
     return { data: { deleted: true } };
   }
 
@@ -188,7 +316,16 @@ export class ReviewsService {
     if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Review not found');
     const review = await this.reviews.findByIdAndUpdate(id, { $set: { status: 'HIDDEN' } }, { new: true });
     if (!review) throw new NotFoundException('Review not found');
+    await this.refreshRating(review.venueSlug);
     return { data: { id, status: 'HIDDEN' } };
+  }
+
+  private async refreshRating(slug: string) {
+    const [summary] = await this.reviews.aggregate<{ average: number }>([
+      { $match: { venueSlug: slug, status: 'PUBLISHED' } },
+      { $group: { _id: null, average: { $avg: '$rating' } } },
+    ]);
+    await this.venues.updateCommunityRating(slug, summary ? Math.round(summary.average * 10) / 10 : 0);
   }
 
   async uploadPhoto(userId: string, slug: string, file: { buffer: Buffer; size: number } | undefined) {

@@ -88,6 +88,7 @@ Query có filter availability chạy trực tiếp trên `parking_facilities`, n
 - Parking FULL không làm venue FULL và ngược lại.
 - Empty state phân biệt “không có bãi trong bán kính” và “có bãi nhưng chưa có availability”.
 - Entrance note phải được sanitize; URL/navigation link chỉ tạo từ tọa độ an toàn.
+- UI hiện có liên kết Google Maps đến bãi đang chọn; tọa độ đích được kiểm tra miền hợp lệ và vị trí người dùng chỉ làm điểm bắt đầu khi họ đã cấp quyền.
 
 ## 6. Failure paths
 

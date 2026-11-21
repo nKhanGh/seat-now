@@ -17,7 +17,13 @@ Guest hoặc user đăng nhập có thể tìm địa điểm quanh vị trí hi
 
 F01 sở hữu trải nghiệm tìm kiếm/bản đồ. Số liệu availability lấy từ F02; khi F02 chưa hoàn tất, fixture phải tuân cùng DTO.
 
-Ngoài scope: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, route navigation và booking.
+Chi tiết địa điểm hiển thị tối đa bốn gợi ý lân cận từ các địa điểm đã tải trên bản đồ, trong bán kính 2 km theo đường chim bay. Mỗi loại địa điểm được chọn gần nhất trước, các chỗ còn lại lấy theo khoảng cách, rồi danh sách xếp theo khoảng cách. Không dùng khẩu vị cá nhân hay dữ liệu AI; chọn một gợi ý sẽ mở chi tiết địa điểm đó.
+
+Ô tìm theo tên/địa chỉ lọc tức thì danh sách đã tải ở client và lưu từ khóa trong URL. Sau 300 ms, `GET /map/search` tìm thêm trong toàn bộ projection địa điểm công khai bằng so khớp không phân biệt dấu/chữ hoa; mỗi lần trả tối đa 12 kết quả và cờ `truncated`. Chọn kết quả ngoài vùng sẽ đưa bản đồ tới tọa độ quán và bỏ các bộ lọc loại/giá/chỗ trống có thể che quán. Truy vấn regex phù hợp dataset demo; cần index tìm kiếm chuyên dụng trước khi tăng quy mô dữ liệu.
+
+Danh sách đã tải có lựa chọn sắp theo gần tâm bản đồ, điểm đánh giá hoặc mức giá. Khoảng cách tính lại từ tọa độ hiện tại sau khi pan; mặc định quán Sponsored đứng trước, còn lựa chọn đánh giá/giá theo đúng tiêu chí. Khi tìm từ khóa, kết quả địa phương giữ độ khớp và lựa chọn sắp xếp tạm dừng; kết quả toàn hệ thống vẫn ở nhóm riêng.
+
+Ngoài scope F01: recommendation cá nhân hóa, review/community, favorite, sponsored ranking, điều hướng từng chặng trong app và booking. Chi tiết hiện có liên kết ra Google Maps đến tọa độ quán.
 
 ## 2. Màn hình và hành vi
 
@@ -33,7 +39,7 @@ Desktop:
 └────────────────────────────────────┴──────────────────────────────┘
 ```
 
-Mobile: map toàn màn hình, filter chips ở trên, result/detail trong bottom sheet. Danh sách là alternative bắt buộc cho accessibility, không chỉ có marker.
+Mobile demo: thanh điều hướng cuộn ngang, bộ lọc phía trên, rồi bản đồ, chi tiết và danh sách xếp dọc. Khi chọn một thẻ/ghim, trang cuộn đến chi tiết; danh sách vẫn là cách chọn quán bằng bàn phím mà không cần tương tác với ghim.
 
 State bắt buộc:
 
@@ -119,5 +125,5 @@ Thứ tự lát cắt: venue seed/index → REST map query → list/map UI → a
 - Screenshot/video desktop/mobile cho happy/empty/error/location-denied.
 - Playwright critical flow và kết quả lint/typecheck/build.
 
-Evidence hiện tại: MongoDB `2dsphere` integration test pass cho radius, cuisine, availability và cursor; API local trả 4 địa điểm trong 3 km. Bản đồ OpenFreeMap, marker, detail và bộ lọc đã được kiểm tra trực tiếp trên browser. Frontend có unit test cho stale/unknown. Chưa có Playwright automation, cluster cho tập dữ liệu lớn hoặc nguồn availability thật.
+Evidence hiện tại: MongoDB `2dsphere` integration test pass cho radius, cuisine, availability và cursor; API local trả địa điểm trong 3 km. Bản đồ OpenFreeMap, cụm ghim ở mức zoom thấp, ghim/logo riêng khi phóng gần, detail và bộ lọc đã được kiểm tra trực tiếp trên browser. Frontend có unit test cho stale/unknown. Chưa có Playwright automation hoặc nguồn availability thật.
 

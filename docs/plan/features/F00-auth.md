@@ -1,6 +1,6 @@
 # F00 — Đăng nhập và phiên người dùng
 
-Ưu tiên: **P0 cho gói người dùng**. Trạng thái: **PARTIAL — backend register/login/me/logout và React form đã code; MongoDB integration/E2E và public-launch flow chưa xong**.
+Ưu tiên: **P0 cho gói người dùng**. Trạng thái: **MVP demo chạy được — backend register/login/me/logout, React form và MongoDB integration test đã có; public-launch flow chưa xong**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md) · [ADR 002](../../adr/002-first-party-auth.md)
 
@@ -21,10 +21,10 @@ User
 Session
   id/selector (unique), userId
   verifierHash, expiresAt, revokedAt | null
-  createdAt, lastSeenAt
+  createdAt, updatedAt
 ```
 
-- Session cookie chứa selector + verifier ngẫu nhiên; database lưu hash verifier. So sánh bằng constant-time comparison.
+- Session cookie chứa JWT ký HS256; database lưu hash JWT và mã phiên `sid` để có thể thu hồi ngay. So sánh hash bằng constant-time comparison.
 - `emailNormalized` unique ở MongoDB; DTO chỉ nhận email/displayName/password, không cho client đặt role, plan hay `emailVerifiedAt`.
 - Index cho session selector và userId; TTL cleanup theo `expiresAt` chỉ là dọn rác, guard vẫn tự kiểm tra thời hạn.
 - Argon2id parameters được benchmark trên máy deploy thực tế; không dùng SHA-256/bcrypt mặc định chỉ vì dễ code.
@@ -38,7 +38,9 @@ GET  /api/v1/auth/me
 POST /api/v1/auth/logout
 ```
 
-Request register: `{ email, password, displayName }`. Login: `{ email, password }`. Thành công trả public user DTO, server set session cookie. `/me` trả `{ id, email, displayName, emailVerified }`; chưa đăng nhập trả 401. Logout revoke session server-side, clear cookie và trả 204.
+Request register: `{ email, password, displayName }`. Giao diện yêu cầu xác nhận mật khẩu trước khi gửi. Login: `{ email, password }`. Thành công trả public user DTO, server set JWT cookie. `/me` trả `{ id, email, displayName, emailVerified }`; chưa đăng nhập trả 401. Logout revoke session server-side, clear cookie và trả 204.
+
+Liên kết đăng nhập/đăng ký trong app giữ đường dẫn nội bộ hiện tại bằng router state. Sau khi xác thực, người dùng quay lại màn hình và quán đã chọn; client từ chối đích ngoài origin hoặc quay vòng vào trang auth. Luồng này đã được kiểm tra trên browser local bằng tài khoản thử rồi dọn tài khoản đó.
 
 Email trùng và credential sai dùng response an toàn, không lộ password hash hay chi tiết nội bộ. Nếu bật public registration có email verification, response đăng ký không tiết lộ email đã tồn tại; demo seed flow có thể trả lỗi email trùng rõ cho nhóm phát triển nhưng phải thay trước public launch.
 
@@ -82,4 +84,4 @@ Email trùng và credential sai dùng response an toàn, không lộ password ha
 
 Task T12 trong [registry](../README.md#4-task-registry). Chia thành schema/index → auth service → controller/guard → frontend forms/provider → socket integration → API/E2E tests. Chỉ chuyển DONE khi code, test và chạy local thực sự đạt; tài liệu này không phải implementation.
 
-Evidence hiện tại: backend typecheck/build và 3 service tests pass; frontend build pass. Chưa kiểm thử với MongoDB thật vì Docker Desktop trên máy chưa chạy. Rate limit hiện là in-memory theo IP (phù hợp một Render instance demo), chưa có per-account policy. Socket integration sẽ làm cùng F02 realtime.
+Evidence hiện tại: backend typecheck/build, unit và MongoDB integration tests, frontend build và kiểm tra browser thủ công đã chạy. Rate limit hiện là in-memory theo IP (phù hợp một Render instance demo), chưa có per-account policy.

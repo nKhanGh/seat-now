@@ -1,4 +1,10 @@
-export type User = { id: string; email: string; displayName: string; emailVerified: boolean };
+export type User = {
+  id: string;
+  email: string;
+  displayName: string;
+  role: 'USER' | 'ADMIN';
+  emailVerified: boolean;
+};
 type Envelope<T> = { data: T };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

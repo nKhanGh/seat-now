@@ -2,6 +2,7 @@ export type BusinessClaim = {
   id: string;
   venueSlug: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  hasDocument: boolean;
   createdAt: string;
 };
 export type BusinessVenue = {
@@ -51,23 +52,29 @@ async function readData<T>(response: Response): Promise<T> {
 
 export async function getMyClaims(signal?: AbortSignal): Promise<BusinessClaim[]> {
   return readData<BusinessClaim[]>(
-    await fetch('/api/v1/business/claims/me', { signal, credentials: 'same-origin' }),
+    await fetch('/api/v1/business/claims/me', { signal, credentials: 'same-origin', cache: 'no-store' }),
   );
 }
 
 export async function getMyBusinessVenues(signal?: AbortSignal): Promise<BusinessVenue[]> {
   return readData<BusinessVenue[]>(
-    await fetch('/api/v1/business/venues', { signal, credentials: 'same-origin' }),
+    await fetch('/api/v1/business/venues', { signal, credentials: 'same-origin', cache: 'no-store' }),
   );
 }
 
-export async function requestBusinessClaim(slug: string, evidence: string): Promise<BusinessClaim> {
+export async function requestBusinessClaim(
+  slug: string,
+  evidence: string,
+  document: File | null,
+): Promise<BusinessClaim> {
+  const form = new FormData();
+  form.set('evidence', evidence);
+  if (document) form.set('document', document);
   return readData<BusinessClaim>(
     await fetch(`/api/v1/business/claims/${encodeURIComponent(slug)}`, {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ evidence }),
+      body: form,
     }),
   );
 }

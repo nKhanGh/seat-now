@@ -72,6 +72,35 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     expect(result.data[0].distanceM).toBe(0);
   });
 
+  it('searches published venues by Vietnamese name outside the current map radius', async () => {
+    const model = mongoose.model(VenueMapView.name);
+    await model.insertMany([
+      {
+        slug: 'outside-search',
+        name: 'Cà phê Thảo Điền',
+        category: 'CAFE',
+        address: 'Thủ Đức',
+        location: { type: 'Point', coordinates: [106.95, 10.95] },
+        priceTier: 2,
+        rating: 4.4,
+      },
+      {
+        slug: 'inactive-search',
+        name: 'Cà phê Thảo Điền đóng cửa',
+        category: 'CAFE',
+        address: 'Thủ Đức',
+        status: 'INACTIVE',
+        location: { type: 'Point', coordinates: [106.95, 10.95] },
+        priceTier: 2,
+        rating: 4,
+      },
+    ]);
+    const result = await service.searchPublished('thao dien');
+    expect(result.data.map((venue) => venue.slug)).toEqual(['outside-search']);
+    expect((await service.searchPublished('.*')).data).toEqual([]);
+    await model.deleteMany({ slug: { $in: ['outside-search', 'inactive-search'] } });
+  });
+
   it('applies category and availability filters inside the geo query', async () => {
     const result = await service.findNearby({
       lat: 10.7769,
@@ -168,6 +197,12 @@ describeWithMongo('MapService with MongoDB 2dsphere', () => {
     const second = await service.findNearby({ ...query, cursor: first.meta.nextCursor! });
     expect(first.data[0]).toMatchObject({ slug: 'far-cafe', promotion: { sponsored: true } });
     expect(second.data[0].slug).toBe('near-cafe');
+    const adFree = await service.findNearby({ ...query, limit: 3 }, true);
+    expect(adFree.data.map((venue) => venue.slug)).toEqual(['near-cafe', 'near-restaurant', 'far-cafe']);
+    expect(adFree.data[2].promotion).toBeNull();
+    await expect(service.findNearby({ ...query, cursor: first.meta.nextCursor! }, true)).rejects.toThrow(
+      'Invalid map cursor',
+    );
     await model.updateOne(
       { slug: 'far-cafe' },
       { $set: { businessPremiumExpiresAt: new Date(Date.now() - 60_000) } },

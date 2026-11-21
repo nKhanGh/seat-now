@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Search, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
-import { useNearbyVenues, useVenueDetail } from '../api/mapQueries';
+import { AuthLink } from '../../auth/components/AuthLink';
+import { useHcmVenuePins, useNearbyVenues, usePublishedVenueSearch, useVenueDetail } from '../api/mapQueries';
 import { VenueMap } from '../components/VenueMap';
 import { AvailabilityStatus } from '../components/AvailabilityStatus';
-import { MapFilters } from '../services/map.service';
+import { AvailabilityHistory } from '../components/AvailabilityHistory';
+import { MapFilters, VenueMapItem } from '../services/map.service';
 import { useParkingForVenue } from '../../parking/api/parkingQueries';
 import { ParkingList } from '../../parking/components/ParkingList';
 import { ParkingFilters } from '../../parking/components/ParkingFilters';
@@ -12,9 +15,18 @@ import { ParkingFilters as ParkingFilterValues } from '../../parking/services/pa
 import { useLiveUpdates } from '../../live/useLiveUpdates';
 import { CheckInPanel } from '../../community/components/CheckInPanel';
 import { FavoriteButton } from '../../community/components/FavoriteButton';
+import { useFavorites } from '../../community/api/favoritesQueries';
 import { ReviewPanel } from '../../community/components/ReviewPanel';
 import { ShareVenueButton } from '../../community/components/ShareVenueButton';
 import { BookingPanel } from '../../booking/components/BookingPanel';
+import { NearbySuggestions } from '../components/NearbySuggestions';
+import { nearbySuggestions } from '../services/nearbySuggestions';
+import { searchVenues } from '../services/venueSearch';
+import { directionsUrl } from '../services/directions';
+import { distanceMeters } from '../services/geo';
+import { sortVenues, VenueSort } from '../services/sortVenues';
+import { ratingLabel } from '../services/ratingLabel';
+import { useEntitlements } from '../../subscription/api/subscriptionQueries';
 
 const DEFAULT_LAT = 10.7769;
 const DEFAULT_LNG = 106.7009;
@@ -29,7 +41,6 @@ const cuisineLabels = {
 
 export function MapExplorer() {
   const [params, setParams] = useSearchParams();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectionSerial, setSelectionSerial] = useState(0);
   const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
   const [parkingFilters, setParkingFilters] = useState<ParkingFilterValues>({
@@ -39,7 +50,17 @@ export function MapExplorer() {
     freeOnly: false,
   });
   const [locationMessage, setLocationMessage] = useState('');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; accuracyM: number } | null>(
+    null,
+  );
+  const [seenVenues, setSeenVenues] = useState<VenueMapItem[]>([]);
+  const detailRef = useRef<HTMLElement | null>(null);
+  const logoutDialog = useRef<HTMLDialogElement | null>(null);
   const auth = useCurrentUser();
+  const entitlements = useEntitlements(Boolean(auth.data));
+  const adsHidden = entitlements.data?.entitlements['ads.hidden'] ?? false;
+  const mapReady = !auth.isPending && (!auth.data || !entitlements.isPending);
+  const favorites = useFavorites(auth.data?.id ?? null);
   const logout = useLogout();
   const filters = useMemo<MapFilters>(
     () => ({
@@ -52,21 +73,118 @@ export function MapExplorer() {
       ratingGte: Number(params.get('ratingGte')) || undefined,
       crowdLevel: params.get('crowdLevel') || undefined,
       hasAvailability: params.get('hasAvailability') === 'true',
+      adsHidden,
     }),
-    [params],
+    [params, adsHidden],
   );
-  const venues = useNearbyVenues(filters);
+  const venues = useNearbyVenues(filters, mapReady);
+  const catalog = useHcmVenuePins(filters, mapReady);
   const venueItems = useMemo(() => venues.data?.pages.flatMap((page) => page.data) ?? [], [venues.data]);
-  const displayedVenues = useMemo(
-    () =>
-      [...venueItems].sort(
-        (a, b) =>
-          Number(Boolean(b.promotion?.sponsored)) - Number(Boolean(a.promotion?.sponsored)) ||
-          a.distanceM - b.distanceM,
-      ),
-    [venueItems],
+  const filterSignature = JSON.stringify([
+    filters.category,
+    filters.cuisine,
+    filters.priceTier,
+    filters.ratingGte,
+    filters.crowdLevel,
+    filters.hasAvailability,
+    filters.adsHidden,
+  ]);
+  const lastFilterSignature = useRef(filterSignature);
+  useEffect(() => {
+    const changed = lastFilterSignature.current !== filterSignature;
+    lastFilterSignature.current = filterSignature;
+    setSeenVenues((current) => {
+      const bySlug = new Map((changed ? [] : current).map((venue) => [venue.slug, venue]));
+      for (const venue of [...(catalog.data ?? []), ...venueItems]) bySlug.set(venue.slug, venue);
+      return [...bySlug.values()].slice(-500);
+    });
+  }, [catalog.data, venueItems, filterSignature]);
+  const searchText = params.get('q') ?? '';
+  const searching = Boolean(searchText.trim());
+  const requestedSort = params.get('sort');
+  const sortOrder: VenueSort =
+    requestedSort === 'rating' || requestedSort === 'price' ? requestedSort : 'distance';
+  const savedRequested = params.get('saved') === 'true';
+  const savedOnly = savedRequested && Boolean(auth.data);
+  const favoriteSlugs = useMemo(
+    () => new Set(favorites.data?.map((venue) => venue.slug) ?? []),
+    [favorites.data],
   );
-  const selected = venueItems.find((item) => item.id === selectedId);
+  const hasActiveFilters =
+    searching ||
+    savedRequested ||
+    sortOrder !== 'distance' ||
+    filters.radiusM !== 3000 ||
+    Boolean(
+      filters.category ||
+      filters.cuisine ||
+      filters.priceTier ||
+      filters.ratingGte ||
+      filters.crowdLevel ||
+      filters.hasAvailability,
+    );
+  const { query: publishedSearch, activeQuery } = usePublishedVenueSearch(searchText);
+  const remoteReady = searching && activeQuery === searchText.trim();
+  const displayedVenues = useMemo(() => {
+    const nearbyItems =
+      venues.isError && venueItems.length === 0
+        ? seenVenues.filter(
+            (venue) =>
+              distanceMeters([filters.lng, filters.lat], venue.location.coordinates) <= filters.radiusM,
+          )
+        : venueItems;
+    const candidates = searching
+      ? searchVenues(seenVenues, searchText)
+      : savedOnly
+        ? seenVenues
+        : nearbyItems;
+    const filtered = savedOnly ? candidates.filter((venue) => favoriteSlugs.has(venue.slug)) : candidates;
+    return searching ? filtered : sortVenues(filtered, sortOrder, [filters.lng, filters.lat]);
+  }, [
+    searching,
+    searchText,
+    savedOnly,
+    seenVenues,
+    venueItems,
+    venues.isError,
+    favoriteSlugs,
+    sortOrder,
+    filters.lng,
+    filters.lat,
+    filters.radiusM,
+  ]);
+  const mapVenues = useMemo(
+    () =>
+      savedOnly
+        ? seenVenues.filter((venue) => favoriteSlugs.has(venue.slug) || venue.slug === params.get('venue'))
+        : seenVenues,
+    [savedOnly, seenVenues, favoriteSlugs, params],
+  );
+  const publishedOnly = useMemo(() => {
+    if (!remoteReady) return [];
+    const knownSlugs = new Set(displayedVenues.map((venue) => venue.slug));
+    return (
+      publishedSearch.data?.data.filter(
+        (venue) => !knownSlugs.has(venue.slug) && (!savedOnly || favoriteSlugs.has(venue.slug)),
+      ) ?? []
+    );
+  }, [displayedVenues, publishedSearch.data, remoteReady, savedOnly, favoriteSlugs]);
+  const selected = seenVenues.find((item) => item.slug === params.get('venue'));
+  const selectedId = selected?.id ?? null;
+  useEffect(() => {
+    if (!selectedId || !window.matchMedia('(max-width: 760px)').matches) return;
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    const frame = requestAnimationFrame(() => detailRef.current?.scrollIntoView({ behavior }));
+    return () => cancelAnimationFrame(frame);
+  }, [selectedId, selectionSerial]);
+  const userCoordinates: [number, number] | undefined = userLocation
+    ? [userLocation.lng, userLocation.lat]
+    : undefined;
+  const selectedDirections = selected ? directionsUrl(selected.location.coordinates, userCoordinates) : null;
+  const suggestions = useMemo(
+    () => (selected ? nearbySuggestions(selected, seenVenues) : []),
+    [selected, seenVenues],
+  );
   const venueDetail = useVenueDetail(selected?.slug ?? null);
   const parking = useParkingForVenue(selected?.slug ?? null, parkingFilters);
   const parkingItems = useMemo(() => parking.data?.pages.flatMap((page) => page.data) ?? [], [parking.data]);
@@ -80,10 +198,9 @@ export function MapExplorer() {
   );
   const selectVenue = useCallback(
     (id: string) => {
-      setSelectedId(id);
       setSelectedParkingSlug(null);
       setSelectionSerial((current) => current + 1);
-      const slug = venueItems.find((item) => item.id === id)?.slug;
+      const slug = seenVenues.find((item) => item.id === id)?.slug;
       if (slug)
         setParams(
           (current) => {
@@ -94,16 +211,8 @@ export function MapExplorer() {
           { replace: true },
         );
     },
-    [venueItems, setParams],
+    [seenVenues, setParams],
   );
-  useEffect(() => {
-    const requestedSlug = params.get('venue');
-    const requested = venueItems.find((item) => item.slug === requestedSlug);
-    if (requested && requested.id !== selectedId) {
-      setSelectedId(requested.id);
-      setSelectionSerial((current) => current + 1);
-    }
-  }, [params, venueItems, selectedId]);
   const update = useCallback(
     (patch: Record<string, string | null>) => {
       setParams(
@@ -120,9 +229,30 @@ export function MapExplorer() {
     },
     [setParams],
   );
-  const onCenterChange = useCallback(
-    (lat: number, lng: number) => update({ lat: String(lat), lng: String(lng) }),
+  const selectPublishedVenue = useCallback(
+    (venue: { slug: string; location: { coordinates: [number, number] } }) => {
+      setSelectedParkingSlug(null);
+      setSelectionSerial((current) => current + 1);
+      update({
+        venue: venue.slug,
+        lat: String(venue.location.coordinates[1]),
+        lng: String(venue.location.coordinates[0]),
+        category: null,
+        cuisine: null,
+        priceTier: null,
+        ratingGte: null,
+        crowdLevel: null,
+        hasAvailability: null,
+      });
+    },
     [update],
+  );
+  const onCenterChange = useCallback(
+    (lat: number, lng: number) => {
+      if (Math.abs(lat - filters.lat) < 0.00001 && Math.abs(lng - filters.lng) < 0.00001) return;
+      update({ lat: String(lat), lng: String(lng) });
+    },
+    [update, filters.lat, filters.lng],
   );
 
   function locate() {
@@ -132,13 +262,23 @@ export function MapExplorer() {
     }
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        setUserLocation({ lat: coords.latitude, lng: coords.longitude, accuracyM: coords.accuracy });
         update({
           lat: String(Number(coords.latitude.toFixed(5))),
           lng: String(Number(coords.longitude.toFixed(5))),
         });
-        setLocationMessage('Đã cập nhật vị trí.');
+        setLocationMessage(
+          `Đã đánh dấu vị trí của bạn (độ chính xác khoảng ${Math.round(coords.accuracy)} m).`,
+        );
       },
-      () => setLocationMessage('Không lấy được vị trí. Bạn vẫn có thể khám phá khu vực mặc định.'),
+      (error) =>
+        setLocationMessage(
+          error.code === error.PERMISSION_DENIED
+            ? 'Bạn chưa cấp quyền vị trí. Hãy cho phép vị trí cho trang này rồi thử lại.'
+            : error.code === error.TIMEOUT
+              ? 'Hết thời gian lấy vị trí. Hãy thử lại khi thiết bị có tín hiệu tốt hơn.'
+              : 'Không lấy được vị trí. Hãy mở trang bằng localhost hoặc HTTPS và thử lại.',
+        ),
       { timeout: 8000 },
     );
   }
@@ -146,9 +286,14 @@ export function MapExplorer() {
   return (
     <main className="explorer">
       <header className="explorer-header">
-        <Link to="/" className="brand">
-          SeatNow
-        </Link>
+        <div className="header-primary">
+          <Link to="/" className="brand">
+            SeatNow
+          </Link>
+          <Link to="/business" className="header-business-link">
+            Quản lý quán
+          </Link>
+        </div>
         <nav>
           <span className="sync-status" role="status">
             {liveStatus === 'connected'
@@ -159,26 +304,64 @@ export function MapExplorer() {
           </span>
           <Link to="/plans">Gói người dùng</Link>
           <Link to={`/proposals?lat=${filters.lat}&lng=${filters.lng}`}>Đề xuất quán</Link>
-          <Link to="/business">Chủ quán</Link>
           {auth.data ? (
             <>
               <Link to="/favorites">Quán đã lưu</Link>
               <Link to="/bookings">Đặt bàn của tôi</Link>
               <Link to="/following">Đang theo dõi</Link>
+              {auth.data.role === 'ADMIN' && <Link to="/admin">Xét duyệt</Link>}
               <span>Chào {auth.data.displayName}</span>
-              <button onClick={() => logout.mutate()} disabled={logout.isPending}>
+              <button
+                onClick={() => {
+                  logout.reset();
+                  logoutDialog.current?.showModal();
+                }}
+                disabled={logout.isPending}
+              >
                 Đăng xuất
               </button>
             </>
           ) : (
             <>
-              <Link to="/login">Đăng nhập</Link>
-              <Link to="/register">Đăng ký</Link>
+              <AuthLink>Đăng nhập</AuthLink>
+              <AuthLink mode="register">Đăng ký</AuthLink>
             </>
           )}
         </nav>
       </header>
+      <dialog ref={logoutDialog} className="logout-dialog" aria-labelledby="logout-title">
+        <h2 id="logout-title">Đăng xuất khỏi SeatNow?</h2>
+        <p>Bạn có thể đăng nhập lại bất cứ lúc nào.</p>
+        {logout.isError && (
+          <p role="alert" className="error">
+            {logout.error.message}
+          </p>
+        )}
+        <div className="logout-actions">
+          <button type="button" onClick={() => logoutDialog.current?.close()} disabled={logout.isPending}>
+            Ở lại
+          </button>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => logout.mutate(undefined, { onSuccess: () => logoutDialog.current?.close() })}
+            disabled={logout.isPending}
+          >
+            {logout.isPending ? 'Đang đăng xuất…' : 'Xác nhận đăng xuất'}
+          </button>
+        </div>
+      </dialog>
       <section className="filterbar" aria-label="Bộ lọc địa điểm">
+        <label className="venue-search">
+          <Search size={18} aria-hidden="true" />
+          <input
+            type="search"
+            aria-label="Tìm địa điểm theo tên hoặc địa chỉ"
+            placeholder="Tìm tên quán, địa chỉ…"
+            value={searchText}
+            onChange={(event) => update({ q: event.target.value || null })}
+          />
+        </label>
         <select
           aria-label="Loại địa điểm"
           value={filters.category || ''}
@@ -241,6 +424,18 @@ export function MapExplorer() {
           <option value="BUSY">Đông</option>
           <option value="FULL">Đầy</option>
         </select>
+        <select
+          aria-label="Sắp xếp danh sách"
+          value={sortOrder}
+          onChange={(event) =>
+            update({ sort: event.target.value === 'distance' ? null : event.target.value })
+          }
+          disabled={searching}
+        >
+          <option value="distance">Gần nhất</option>
+          <option value="rating">Đánh giá cao</option>
+          <option value="price">Giá thấp</option>
+        </select>
         <label className="filter-check">
           <input
             type="checkbox"
@@ -249,27 +444,93 @@ export function MapExplorer() {
           />{' '}
           Còn bàn
         </label>
+        {auth.data && (
+          <label className="filter-check">
+            <input
+              type="checkbox"
+              checked={savedOnly}
+              onChange={(event) => update({ saved: event.target.checked ? 'true' : null })}
+            />{' '}
+            Chỉ quán đã lưu
+          </label>
+        )}
+        {adsHidden && <span className="small">Premium · bản đồ không quảng cáo</span>}
         <button onClick={locate}>Vị trí của tôi</button>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            className="filter-reset"
+            onClick={() =>
+              update({
+                q: null,
+                category: null,
+                cuisine: null,
+                radiusM: null,
+                priceTier: null,
+                ratingGte: null,
+                crowdLevel: null,
+                hasAvailability: null,
+                saved: null,
+                sort: null,
+              })
+            }
+          >
+            Xóa bộ lọc
+          </button>
+        )}
       </section>
       {locationMessage && (
         <p role="status" className="location-message">
           {locationMessage}
         </p>
       )}
+      {auth.data && entitlements.isError && (
+        <p role="alert" className="location-message">
+          Không kiểm tra được quyền Premium; đang hiển thị bản đồ thông thường.{' '}
+          <button onClick={() => void entitlements.refetch()}>Thử lại</button>
+        </p>
+      )}
       <div className="explorer-body">
         <section className="venue-list" aria-label="Danh sách địa điểm">
           <h1>Khám phá quanh bạn</h1>
           <p className="small">
-            Dữ liệu mẫu hư cấu tại Quận 1, TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.
+            Dữ liệu mẫu hư cấu tại nhiều khu vực TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.
           </p>
-          {venues.isPending && <p>Đang tìm địa điểm…</p>}
-          {venues.isError && (
+          {searching && (
+            <p className="small">Tìm trong các địa điểm đã tải · {displayedVenues.length} kết quả.</p>
+          )}
+          {!searching && sortOrder !== 'distance' && (
+            <p className="small">Sắp xếp các địa điểm đã tải; bấm Xem thêm để bổ sung kết quả.</p>
+          )}
+          {savedOnly && favorites.isPending && <p>Đang tải quán đã lưu…</p>}
+          {savedOnly && favorites.isError && (
+            <p role="alert">
+              {favorites.error.message} <button onClick={() => void favorites.refetch()}>Thử lại</button>
+            </p>
+          )}
+          {savedOnly && favorites.data && displayedVenues.length === 0 && (
+            <p>
+              Chưa có quán đã lưu phù hợp trong dữ liệu đang xem.{' '}
+              <Link to="/favorites">Xem tất cả quán đã lưu</Link>.
+            </p>
+          )}
+          {searching && catalog.isPending && seenVenues.length === 0 && <p>Đang tải dữ liệu để tìm…</p>}
+          {searching && catalog.isError && seenVenues.length === 0 && (
+            <p role="alert">
+              Không tải được danh sách để tìm. <button onClick={() => void catalog.refetch()}>Thử lại</button>
+            </p>
+          )}
+          {!searching && venues.isPending && <p>Đang tìm địa điểm…</p>}
+          {!searching && venues.isError && displayedVenues.length === 0 && (
             <p role="alert">
               {venues.error.message} <button onClick={() => void venues.refetch()}>Thử lại</button>
             </p>
           )}
-          {venues.data?.pages[0]?.data.length === 0 && (
+          {!searching && !savedOnly && !venues.isError && venues.data?.pages[0]?.data.length === 0 && (
             <p>Không có địa điểm trong khu vực hoặc bộ lọc này.</p>
+          )}
+          {searching && !savedOnly && !catalog.isPending && displayedVenues.length === 0 && (
+            <p>Không tìm thấy địa điểm đã tải. Hãy thử tên khác hoặc bỏ bớt bộ lọc.</p>
           )}
           {displayedVenues.map((venue) => (
             <button
@@ -292,7 +553,11 @@ export function MapExplorer() {
               </strong>
               <span>{venue.address}</span>
               <span>
-                ★ {venue.rating.toFixed(1)} · {venue.distanceM} m · {'₫'.repeat(venue.priceTier)}
+                {ratingLabel(venue.rating)} ·{' '}
+                {searching
+                  ? 'Xem trên bản đồ'
+                  : `${distanceMeters([filters.lng, filters.lat], venue.location.coordinates)} m`}{' '}
+                · {'₫'.repeat(venue.priceTier)}
               </span>
               {venue.promotion && <span className="promotion-label">{venue.promotion.text}</span>}
               {venue.verified &&
@@ -308,7 +573,38 @@ export function MapExplorer() {
               <AvailabilityStatus availability={venue.availability} compact />
             </button>
           ))}
-          {venues.hasNextPage && venueItems.length < 100 && (
+          {remoteReady && publishedSearch.isFetching && <p className="small">Đang tìm trên toàn hệ thống…</p>}
+          {remoteReady && publishedSearch.isError && (
+            <p role="alert">
+              {publishedSearch.error.message}{' '}
+              <button onClick={() => void publishedSearch.refetch()}>Thử lại</button>
+            </p>
+          )}
+          {searching && publishedOnly.length > 0 && (
+            <section className="published-results" aria-label="Kết quả ngoài vùng đã tải">
+              <h2>Quán khác trên hệ thống</h2>
+              {publishedOnly.map((venue) => (
+                <button key={venue.slug} className="venue-card" onClick={() => selectPublishedVenue(venue)}>
+                  <span className="venue-category">
+                    {venue.category === 'CAFE'
+                      ? 'Cà phê'
+                      : venue.category === 'CINEMA'
+                        ? 'Rạp phim'
+                        : 'Nhà hàng'}
+                  </span>
+                  <strong>{venue.name}</strong>
+                  <span>{venue.address}</span>
+                  <span>
+                    {ratingLabel(venue.rating)} · Xem trên bản đồ · {'₫'.repeat(venue.priceTier)}
+                  </span>
+                </button>
+              ))}
+            </section>
+          )}
+          {remoteReady && publishedSearch.data?.meta.truncated && (
+            <p className="small">Có thêm kết quả. Hãy nhập tên hoặc địa chỉ cụ thể hơn.</p>
+          )}
+          {!searching && !savedOnly && venues.hasNextPage && venueItems.length < 100 && (
             <button
               className="load-more"
               onClick={() => void venues.fetchNextPage()}
@@ -317,7 +613,7 @@ export function MapExplorer() {
               {venues.isFetchingNextPage ? 'Đang tải thêm…' : 'Xem thêm địa điểm'}
             </button>
           )}
-          {venues.hasNextPage && venueItems.length >= 100 && (
+          {!searching && !savedOnly && venues.hasNextPage && venueItems.length >= 100 && (
             <p>Đã hiển thị 100 địa điểm. Hãy thu nhỏ khu vực để tìm cụ thể hơn.</p>
           )}
         </section>
@@ -325,7 +621,8 @@ export function MapExplorer() {
           <VenueMap
             lat={filters.lat}
             lng={filters.lng}
-            venues={venueItems}
+            venues={mapVenues}
+            userLocation={userLocation}
             selectedId={selectedId}
             selectionSerial={selectionSerial}
             parkingFacilities={parkingItems}
@@ -335,7 +632,7 @@ export function MapExplorer() {
             onSelectParking={setSelectedParkingSlug}
           />
           {selected && (
-            <div className="map-selected">
+            <aside ref={detailRef} className="map-selected" aria-label={`Chi tiết ${selected.name}`}>
               {venueDetail.data?.coverUrl && (
                 <img
                   className="venue-cover"
@@ -344,14 +641,19 @@ export function MapExplorer() {
                 />
               )}
               <div className="selected-heading">
-                <strong>{selected.name}</strong>
+                <div>
+                  <span className="eyebrow">Địa điểm đang xem</span>
+                  <h2>{selected.name}</h2>
+                </div>
                 <button
+                  type="button"
+                  className="close-detail"
+                  aria-label="Đóng chi tiết"
                   onClick={() => {
-                    setSelectedId(null);
                     update({ venue: null });
                   }}
                 >
-                  Đóng
+                  <X size={18} /> Đóng
                 </button>
               </div>
               <span>{selected.address}</span>
@@ -365,7 +667,7 @@ export function MapExplorer() {
                 <span className="small">Giờ mở cửa: {venueDetail.data.openingHours}</span>
               )}
               {venueDetail.data?.menuSummary && <p className="small">Menu: {venueDetail.data.menuSummary}</p>}
-              {venueDetail.data?.promotion && (
+              {!adsHidden && venueDetail.data?.promotion && (
                 <p className="promotion-label">
                   {venueDetail.data.promotion.sponsored && 'Được tài trợ · '}
                   {venueDetail.data.promotion.text}
@@ -377,10 +679,27 @@ export function MapExplorer() {
                 lat={selected.location.coordinates[1]}
                 lng={selected.location.coordinates[0]}
               />
-              <Link to={`/business?slug=${encodeURIComponent(selected.slug)}`}>Bạn là chủ quán này?</Link>
+              {selectedDirections && (
+                <a
+                  className="directions-link"
+                  href={selectedDirections}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Chỉ đường đến địa điểm ↗
+                </a>
+              )}
+              <Link to={`/business/claims?slug=${encodeURIComponent(selected.slug)}`}>
+                Bạn là chủ quán này?
+              </Link>
               <AvailabilityStatus availability={selected.availability} />
+              <AvailabilityHistory key={`history-${selected.slug}`} slug={selected.slug} />
               {selected.category !== 'CINEMA' && (
-                <BookingPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
+                <BookingPanel
+                  key={`booking-${selected.slug}`}
+                  slug={selected.slug}
+                  userId={auth.data?.id ?? null}
+                />
               )}
               <CheckInPanel slug={selected.slug} signedIn={Boolean(auth.data)} />
               <ParkingFilters value={parkingFilters} onChange={updateParkingFilters} />
@@ -396,6 +715,7 @@ export function MapExplorer() {
                     facilities={parkingItems}
                     selectedSlug={selectedParkingSlug}
                     onSelect={setSelectedParkingSlug}
+                    userCoordinates={userCoordinates}
                   />
                   {parking.hasNextPage && parkingItems.length < 100 && (
                     <button
@@ -411,8 +731,13 @@ export function MapExplorer() {
                   )}
                 </>
               )}
-              <ReviewPanel key={selected.slug} slug={selected.slug} userId={auth.data?.id ?? null} />
-            </div>
+              <NearbySuggestions items={suggestions} onSelect={selectVenue} />
+              <ReviewPanel
+                key={`review-${selected.slug}`}
+                slug={selected.slug}
+                userId={auth.data?.id ?? null}
+              />
+            </aside>
           )}
         </div>
       </div>

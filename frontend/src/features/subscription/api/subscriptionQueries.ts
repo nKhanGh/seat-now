@@ -19,5 +19,6 @@ export function useEntitlements(enabled: boolean) {
     queryKey: subscriptionQueryKeys.entitlements,
     queryFn: ({ signal }) => subscriptionService.entitlements(signal),
     enabled,
+    refetchInterval: 60_000,
   });
 }

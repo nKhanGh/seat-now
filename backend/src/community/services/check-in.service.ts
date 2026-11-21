@@ -9,6 +9,13 @@ const EARTH_RADIUS_M = 6_371_000;
 const CHECK_IN_RADIUS_M = 150;
 const CHECK_IN_WINDOW_MS = 3 * 60 * 60 * 1000;
 
+function activitySignal(count: number): 'NONE' | 'LOW' | 'MODERATE' | 'HIGH' {
+  if (count === 0) return 'NONE';
+  if (count < 3) return 'LOW';
+  if (count < 6) return 'MODERATE';
+  return 'HIGH';
+}
+
 function distanceM(latA: number, lngA: number, latB: number, lngB: number): number {
   const radians = Math.PI / 180;
   const deltaLat = (latB - latA) * radians;
@@ -70,10 +77,12 @@ export class CheckInService {
         .sort({ checkedAt: -1 })
         .lean(),
     ]);
+    const lastHourUsers = counts[0]?.count ?? 0;
     return {
-      lastHourUsers: counts[0]?.count ?? 0,
+      lastHourUsers,
       latestAt: newest?.checkedAt ?? null,
       source: 'SELF_REPORTED' as const,
+      activitySignal: activitySignal(lastHourUsers),
     };
   }
 }
