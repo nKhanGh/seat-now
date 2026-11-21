@@ -60,7 +60,7 @@ Trang **Gói người dùng** cho biết quyền Free và các quyền Premium. 
 
 ## 8. Khi trang không hiển thị đúng
 
-- Nếu bản đồ nền không tải, danh sách quán vẫn dùng được. Kiểm tra kết nối mạng và tải lại trang.
+- Nếu vùng bản đồ chỉ hiện màu trơn dù danh sách có quán, tải lại trang để nhận bản giao diện mới. Nếu vẫn trống, kiểm tra kết nối đến nguồn bản đồ hoặc `VITE_MAP_STYLE_URL`; danh sách quán vẫn dùng được.
 - Nếu không thấy quán, bỏ bớt bộ lọc, tăng bán kính hoặc kéo bản đồ sang khu vực có dữ liệu mẫu ở TP.HCM.
 - Nếu chỗ ngồi hiện **Dữ liệu cũ**, người chạy demo có thể chạy lại `npm run seed:demo` trong thư mục `backend`; thao tác này làm mới snapshot mẫu nhưng không tạo trùng quán.
 - Nếu đăng nhập bị mất sau khi khởi động lại API, đăng nhập lại. Khi chạy local, giữ `JWT_SECRET` cố định trong `backend/.env` để phiên không đổi ngoài ý muốn.
