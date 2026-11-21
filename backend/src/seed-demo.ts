@@ -16,7 +16,7 @@ import { ParkingSnapshot, ParkingSnapshotSchema } from './parking/schemas/parkin
 const demoVenues = [
   {
     slug: 'demo-cafe-nguyen-hue',
-    name: 'SeatNow Demo Café Nguyễn Huệ',
+    name: 'Cà phê Nguyễn Huệ',
     category: 'CAFE',
     cuisineTypes: ['COFFEE', 'DESSERT'],
     description: 'Quán cà phê mô phỏng gần phố đi bộ Nguyễn Huệ.',
@@ -32,7 +32,7 @@ const demoVenues = [
   },
   {
     slug: 'demo-bistro-dong-khoi',
-    name: 'SeatNow Demo Bistro Đồng Khởi',
+    name: 'Bistro Đồng Khởi',
     category: 'RESTAURANT',
     cuisineTypes: ['WESTERN'],
     description: 'Bistro mô phỏng phục vụ món Âu tại Đồng Khởi.',
@@ -48,7 +48,7 @@ const demoVenues = [
   },
   {
     slug: 'demo-cinema-le-loi',
-    name: 'SeatNow Demo Cinema Lê Lợi',
+    name: 'Rạp Ánh Dương · Lê Lợi',
     category: 'CINEMA',
     cuisineTypes: [],
     description: 'Rạp chiếu phim mô phỏng trên đường Lê Lợi.',
@@ -64,7 +64,7 @@ const demoVenues = [
   },
   {
     slug: 'demo-cafe-ben-thanh',
-    name: 'SeatNow Demo Café Bến Thành',
+    name: 'Cà phê Bến Thành',
     category: 'CAFE',
     cuisineTypes: ['COFFEE'],
     description: 'Quán cà phê mô phỏng gần chợ Bến Thành.',
@@ -80,7 +80,7 @@ const demoVenues = [
   },
   {
     slug: 'demo-restaurant-thao-dien',
-    name: 'SeatNow Demo Restaurant Thảo Điền',
+    name: 'Bếp Thảo Điền',
     category: 'RESTAURANT',
     cuisineTypes: ['VIETNAMESE'],
     description: 'Nhà hàng món Việt mô phỏng tại Thảo Điền.',
@@ -109,17 +109,29 @@ const hcmAreas = [
   { name: 'Tân Bình', lat: 10.8012, lng: 106.6523 },
 ] as const;
 
+const cafeFirst = ['Mây', 'Nắng', 'Lá', 'Gió', 'Mộc', 'Sương', 'Hẻm', 'Hiên'];
+const cafeLast = ['Ban Mai', 'Phố Nhỏ', 'Ven Sông', 'Tháng Tư'];
+const restaurantFirst = [
+  'Bếp Nhà', 'Cơm Phố', 'Mâm Việt', 'Góc Bếp',
+  'Nồi Đất', 'Bếp Mộc', 'Hương Quê', 'Món Nhà',
+];
+const restaurantLast = ['Sài Gòn', 'Ven Sông', 'An Nhiên', 'Phố Nhỏ'];
+
 const generatedVenues = Array.from({ length: 95 }, (_, index) => {
   const area = hcmAreas[index % hcmAreas.length];
   const number = String(index + 1).padStart(3, '0');
   const cafe = index % 3 !== 0;
+  const nameIndex = Math.floor(index / 3);
+  const name = cafe
+    ? `Cà phê ${cafeFirst[nameIndex % cafeFirst.length]} ${cafeLast[Math.floor(nameIndex / cafeFirst.length)]}`
+    : `${restaurantFirst[nameIndex % restaurantFirst.length]} ${restaurantLast[Math.floor(nameIndex / restaurantFirst.length)]}`;
   const angle = index * 2.39996;
   const radius = 0.002 + (index % 7) * 0.0012;
   const total = 12 + (index % 8) * 4;
   const available = index % 9 === 0 ? 0 : Math.max(1, Math.floor(total * (0.15 + (index % 5) * 0.12)));
   return {
     slug: `demo-hcm-${number}`,
-    name: `SeatNow Demo ${cafe ? 'Café' : 'Quán ăn'} ${number} · ${area.name}`,
+    name: `${name} · ${area.name}`,
     category: cafe ? ('CAFE' as const) : ('RESTAURANT' as const),
     cuisineTypes: cafe ? ['COFFEE', 'DESSERT'] : [index % 2 === 0 ? 'VIETNAMESE' : 'WESTERN'],
     description: `Địa điểm hư cấu để thử bản đồ, bộ lọc và đánh giá tại ${area.name}, TP.HCM.`,
@@ -147,7 +159,7 @@ const allDemoVenues = [...demoVenues, ...generatedVenues];
 const demoParking = [
   {
     slug: 'demo-nguyen-hue-parking',
-    name: 'SeatNow Demo Bãi xe Nguyễn Huệ',
+    name: 'Bãi xe Nguyễn Huệ',
     address: 'Nguyễn Huệ, Quận 1, TP.HCM',
     lng: 106.7041,
     lat: 10.7756,
@@ -162,7 +174,7 @@ const demoParking = [
   },
   {
     slug: 'demo-dong-khoi-parking',
-    name: 'SeatNow Demo Bãi xe Đồng Khởi',
+    name: 'Bãi xe Đồng Khởi',
     address: 'Đồng Khởi, Quận 1, TP.HCM',
     lng: 106.7052,
     lat: 10.7785,
@@ -177,7 +189,7 @@ const demoParking = [
   },
   {
     slug: 'demo-le-loi-public-parking',
-    name: 'SeatNow Demo Bãi xe Lê Lợi',
+    name: 'Bãi xe Lê Lợi',
     address: 'Lê Lợi, Quận 1, TP.HCM',
     lng: 106.6994,
     lat: 10.7741,
@@ -192,7 +204,7 @@ const demoParking = [
   },
   {
     slug: 'demo-ben-thanh-public-parking',
-    name: 'SeatNow Demo Bãi xe Bến Thành',
+    name: 'Bãi xe Bến Thành',
     address: 'Bến Thành, Quận 1, TP.HCM',
     lng: 106.6962,
     lat: 10.7718,
@@ -220,7 +232,7 @@ async function seedDemo() {
     const parking = mongoose.model(ParkingFacility.name, ParkingFacilitySchema);
     const parkingSnapshots = mongoose.model(ParkingSnapshot.name, ParkingSnapshotSchema);
     const capturedAt = new Date();
-    const expiresAt = new Date(capturedAt.getTime() + 10 * 60_000);
+    const expiresAt = new Date(capturedAt.getTime() + 7 * 24 * 60 * 60_000);
     const version = capturedAt.getTime();
     for (const item of allDemoVenues) {
       const location = { type: 'Point', coordinates: [item.lng, item.lat] };
