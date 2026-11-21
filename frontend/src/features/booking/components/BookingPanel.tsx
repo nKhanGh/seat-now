@@ -2,22 +2,13 @@ import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthLink } from '../../auth/components/AuthLink';
 import { useBookingStatus, useCreateBooking } from '../api/bookingQueries';
-import { VenueMapItem } from '../../map/services/map.service';
 
 function localDateTime(offsetMs: number, from = Date.now()) {
   const date = new Date(from + offsetMs);
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 }
 
-export function BookingPanel({
-  slug,
-  userId,
-  availability,
-}: {
-  slug: string;
-  userId: string | null;
-  availability?: VenueMapItem['availability'];
-}) {
+export function BookingPanel({ slug, userId }: { slug: string; userId: string | null }) {
   const status = useBookingStatus(slug);
   const create = useCreateBooking(slug, userId);
   const [requestedAt, setRequestedAt] = useState(() => localDateTime(2 * 60 * 60_000));
@@ -72,13 +63,6 @@ export function BookingPanel({
       {status.data?.enabled && (
         <>
           <p className="small">Quán sẽ xác nhận thủ công. Gửi yêu cầu chưa đồng nghĩa đã có bàn.</p>
-          {availability?.freshness === 'FRESH' &&
-            (availability.tablesAvailable === 0 || availability.acceptingGuests === false) && (
-              <p className="booking-unavailable" role="status">
-                Hiện quán đã hết bàn hoặc tạm ngừng nhận khách. Bạn vẫn có thể gửi yêu cầu cho giờ khác; chủ
-                quán chỉ xác nhận nếu phục vụ được lúc đó.
-              </p>
-            )}
           {!userId ? (
             <p>
               <AuthLink>Đăng nhập</AuthLink> để gửi yêu cầu.

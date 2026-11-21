@@ -73,14 +73,18 @@ export function BookingQueue({
           </span>
           {booking.note && <span>Ghi chú: {booking.note}</span>}
           {booking.status === 'PENDING' && (
-            <div>
+            <div className="booking-row-actions">
               <button
+                type="button"
+                className="booking-action booking-action-confirm"
                 disabled={decision.isPending}
                 onClick={() => decision.mutate({ id: booking.id, status: 'CONFIRMED' })}
               >
                 Xác nhận
-              </button>{' '}
+              </button>
               <button
+                type="button"
+                className="booking-action booking-action-decline"
                 disabled={decision.isPending}
                 onClick={() => decision.mutate({ id: booking.id, status: 'DECLINED' })}
               >
@@ -93,11 +97,17 @@ export function BookingQueue({
               <div className="booking-cancel-confirm">
                 <p>Đã đón {booking.guestCount} khách của yêu cầu này?</p>
                 <div>
-                  <button type="button" disabled={decision.isPending} onClick={() => setCompletingId(null)}>
+                  <button
+                    type="button"
+                    className="booking-action booking-action-secondary"
+                    disabled={decision.isPending}
+                    onClick={() => setCompletingId(null)}
+                  >
                     Chưa đón khách
                   </button>
                   <button
                     type="button"
+                    className="booking-action booking-action-confirm"
                     disabled={decision.isPending}
                     onClick={() =>
                       decision.mutate(
@@ -111,7 +121,12 @@ export function BookingQueue({
                 </div>
               </div>
             ) : (
-              <button type="button" disabled={decision.isPending} onClick={() => setCompletingId(booking.id)}>
+              <button
+                type="button"
+                className="booking-action booking-action-secondary"
+                disabled={decision.isPending}
+                onClick={() => setCompletingId(booking.id)}
+              >
                 Đánh dấu đã đón khách
               </button>
             ))}
