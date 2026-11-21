@@ -1,6 +1,6 @@
 # SeatNow
 
-[Hướng dẫn sử dụng bản demo](docs/USER_GUIDE.md) · [Cách chạy local](#chạy-demo-local)
+[Hướng dẫn sử dụng chi tiết](docs/USER_GUIDE.md) · [Kiểm kê tính năng](docs/FEATURES.md) · [Cách chạy local](#chạy-demo-local)
 
 SeatNow là ứng dụng giúp người dùng tìm địa điểm và bãi đỗ xe gần đó, xem mức độ đông/vắng cùng số chỗ còn trống gần thời gian thực, rồi ra quyết định trước khi di chuyển.
 
@@ -11,7 +11,7 @@ Repository hiện có **đăng nhập, bản đồ và tìm quán theo tên/đ�
 3. Bãi đỗ xe gần địa điểm và tình trạng chỗ trống.
 4. Nền tảng gói Free/Premium dành cho người dùng; ưu tiên xử lý yêu cầu đặt bàn đã có ở bản demo, các quyền Premium khác thuộc release sau.
 
-Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm ảnh và báo cáo, theo dõi thành viên, chia sẻ địa điểm, đề xuất quán với ba lượt xác nhận và duyệt nội bộ. Nhóm chủ quán có yêu cầu nhận quản lý, hồ sơ/logo miễn phí và gói Premium demo gồm chỗ trống thủ công, dashboard, ảnh bìa, ưu đãi hẹn giờ và vị trí tài trợ. Kết nối dữ liệu thực và thanh toán vẫn thuộc release sau.
+Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm ảnh và báo cáo, theo dõi thành viên, chia sẻ địa điểm, đề xuất quán với ba lượt xác nhận và trang admin xét duyệt. Nhóm chủ quán có yêu cầu nhận quản lý, hồ sơ/logo và mục tương tác khách hàng miễn phí; gói Premium demo gồm chỗ trống thủ công, dashboard, ảnh bìa, ưu đãi hẹn giờ và vị trí tài trợ. Kết nối dữ liệu thực và thanh toán vẫn thuộc release sau.
 
 ## Quyết định kỹ thuật hiện tại
 
@@ -48,7 +48,7 @@ npm run dev
 
 Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Chi tiết quán còn gợi ý tối đa bốn địa điểm trong bán kính 2 km, ưu tiên nhiều loại địa điểm rồi xếp theo khoảng cách đường chim bay; chạm vào gợi ý để chuyển quán. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
 
-Để xét duyệt yêu cầu nhận quản lý quán, tạo tài khoản admin một lần sau khi build backend. Đặt `ADMIN_EMAIL` và mật khẩu ngẫu nhiên dài ít nhất 20 ký tự vào `backend/.env.admin` (tệp này được Git bỏ qua), rồi chạy `cd backend; npm run admin:create`. Đăng nhập bằng tài khoản đó và mở `/admin` hoặc chọn **Xét duyệt** trên thanh đầu trang. Trang hiển thị người gửi, nội dung và ảnh chứng minh; kiểm tra rồi chọn **Duyệt** hoặc **Từ chối** và xác nhận. Tài khoản đăng ký trong app luôn là người dùng thường; script từ chối chuyển một email đã tồn tại thành admin. Không đưa mật khẩu admin vào repository hay biến `VITE_*`.
+Để xét duyệt, tạo tài khoản admin một lần sau khi build backend. Đặt `ADMIN_EMAIL` và mật khẩu ngẫu nhiên dài ít nhất 20 ký tự vào `backend/.env.admin` (tệp này được Git bỏ qua), rồi chạy `npm run admin:create` trong `backend`. Đăng nhập bằng tài khoản đó và mở `/admin` hoặc chọn **Xét duyệt** trên thanh đầu trang. Tab **Chủ quán** hiện bằng chứng nhận quản lý; tab **Quán cộng đồng** hiện các đề xuất đủ ba lượt xác nhận. Kiểm tra rồi chọn **Duyệt** hoặc **Từ chối** và xác nhận. Tài khoản đăng ký trong app luôn là người dùng thường; script từ chối chuyển email đã tồn tại thành admin. Không đưa mật khẩu admin vào repository hay biến `VITE_*`.
 
 `seed:demo` chỉ chạy ở local/test, tạo 100 địa điểm hư cấu với tên quán đa dạng (chủ yếu quán ăn/cà phê ở nhiều quận TP.HCM) và 4 bãi xe. Slug cố định nên chạy lại cập nhật tên và trạng thái mà không nhân đôi quán. Snapshot mẫu có hiệu lực 7 ngày để dễ thử bộ lọc **Còn bàn**; chạy lại `npm run seed:demo` trong `backend` để làm mới. Nguồn `DEMO` vẫn là số liệu mô phỏng, không dùng để quyết định di chuyển thật. Snapshot chủ quán và POS vẫn có thời hạn riêng.
 
