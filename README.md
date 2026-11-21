@@ -48,6 +48,8 @@ npm run dev
 
 Mở `http://localhost:5173` để xem bản đồ, chọn địa điểm để xem bàn/ghế, bãi xe, check-in, review và chia sẻ. Chi tiết quán còn gợi ý tối đa bốn địa điểm trong bán kính 2 km, ưu tiên nhiều loại địa điểm rồi xếp theo khoảng cách đường chim bay; chạm vào gợi ý để chuyển quán. Sau đăng nhập có thể mở `/favorites`, `/following`, `/proposals`, `/business`, `/bookings` và `/plans`. Backend ở `http://localhost:3000/api/v1`. Khi gọi POST đăng nhập bằng curl, gửi header `Origin: http://localhost:5173`; browser tự gửi header này.
 
+Để xét duyệt yêu cầu nhận quản lý quán, tạo tài khoản admin một lần sau khi build backend. Đặt `ADMIN_EMAIL` và mật khẩu ngẫu nhiên dài ít nhất 20 ký tự vào `backend/.env.admin` (tệp này được Git bỏ qua), rồi chạy `cd backend; npm run admin:create`. Đăng nhập bằng tài khoản đó và mở `/admin` hoặc chọn **Xét duyệt** trên thanh đầu trang. Trang hiển thị người gửi, nội dung và ảnh chứng minh; kiểm tra rồi chọn **Duyệt** hoặc **Từ chối** và xác nhận. Tài khoản đăng ký trong app luôn là người dùng thường; script từ chối chuyển một email đã tồn tại thành admin. Không đưa mật khẩu admin vào repository hay biến `VITE_*`.
+
 `seed:demo` chỉ chạy ở local/test, tạo 100 địa điểm hư cấu với tên quán đa dạng (chủ yếu quán ăn/cà phê ở nhiều quận TP.HCM) và 4 bãi xe. Slug cố định nên chạy lại cập nhật tên và trạng thái mà không nhân đôi quán. Snapshot mẫu có hiệu lực 7 ngày để dễ thử bộ lọc **Còn bàn**; chạy lại `npm run seed:demo` trong `backend` để làm mới. Nguồn `DEMO` vẫn là số liệu mô phỏng, không dùng để quyết định di chuyển thật. Snapshot chủ quán và POS vẫn có thời hạn riêng.
 
 Public API chính:

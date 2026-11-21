@@ -40,6 +40,15 @@ for an existing venue, including evidence for operator review. Set a strong
 `BUSINESS_ADMIN_TOKEN` only in the backend environment. The operator reviews
 the claim and approves or rejects it; a slug alone never grants edit access.
 
+For browser review, create a separate admin account once. Put `ADMIN_EMAIL`
+and a random password of at least 20 characters in ignored `backend/.env.admin`,
+then run `cd backend; npm run build; npm run admin:create`. The command refuses
+an email that already belongs to a normal account. Sign in with that account,
+open `/admin`, inspect applicant identity, evidence and any attached image,
+then choose **Duyệt** or **Từ chối** and confirm. A normal user cannot call the
+admin endpoints. The owner refreshes `/business` to see the outcome. The token
+commands below remain available for operator scripts.
+
 ```powershell
 $base = 'http://localhost:3000/api/v1'
 $headers = @{ Authorization = "Bearer $env:BUSINESS_ADMIN_TOKEN" }

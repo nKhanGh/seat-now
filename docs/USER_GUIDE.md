@@ -54,6 +54,10 @@ Các thao tác sau cần đăng nhập:
 
 Đăng nhập, mở quán đã có trên bản đồ rồi chọn **Bạn là chủ quán này?** để gửi yêu cầu nhận quản lý. Mô tả cách chứng minh quyền quản lý và có thể đính kèm ảnh giấy tờ JPEG, PNG hoặc WebP tối đa 3 MB; ảnh chỉ dành cho người vận hành xét duyệt. Sau khi người vận hành duyệt, quán xuất hiện trong danh sách quản lý. Gói cơ bản cho phép sửa hồ sơ và tải logo; các chức năng Premium demo gồm cập nhật chỗ ngồi thủ công, ảnh bìa, dashboard và ưu đãi theo lịch. Chủ quán có thể bật nhận yêu cầu đặt bàn, xử lý hàng chờ và chọn **Đánh dấu đã đón khách** cho yêu cầu đã xác nhận; cần bấm **Xác nhận đã đón** ở bước tiếp theo. Yêu cầu hoàn tất rời hàng chờ, khách xem được trong **Đặt bàn của tôi** và không thể hủy. Bản demo chưa có thanh toán gói, kết nối POS hay thông báo đẩy.
 
+### Xét duyệt yêu cầu bằng tài khoản admin
+
+Người vận hành tạo tài khoản admin theo [README](../README.md#chạy-demo-local), đăng nhập và mở **Xét duyệt** hoặc `/admin`. Trang hiển thị yêu cầu đang chờ cùng tên, email người gửi, nội dung chứng minh và ảnh riêng tư nếu có. Sau khi đối chiếu thông tin, chọn **Duyệt** hoặc **Từ chối**, rồi bấm **Xác nhận**. Yêu cầu rời hàng chờ; chủ quán tải lại `/business` để thấy kết quả. Chỉ tài khoản admin có quyền xem bằng chứng và quyết định; ảnh chứng minh được xóa khỏi yêu cầu sau khi xử lý. Không duyệt chỉ dựa trên tên quán hoặc nội dung tự khai nếu chưa xác minh quyền quản lý.
+
 ## 7. Gói người dùng và giới hạn bản demo
 
 Trang **Gói người dùng** cho biết quyền Free và các quyền Premium. Tài khoản Premium demo được người vận hành cấp sẽ thấy **Premium · bản đồ không quảng cáo**: quán không được đẩy lên đầu vì tài trợ và không hiện nhãn/ưu đãi quảng cáo trên bản đồ. Tài khoản Free vẫn thấy nhãn tài trợ rõ ràng. Nếu không kiểm tra được quyền Premium, app báo lỗi và dùng bản đồ thông thường cho đến khi thử lại. Giữ bãi xe, voucher và AI cá nhân hóa vẫn được ghi **Sắp ra mắt**, chưa thể mua hoặc sử dụng thật. Dữ liệu quán và bãi xe mặc định là mô phỏng. Đừng dùng số chỗ mẫu để quyết định di chuyển ngoài đời.
