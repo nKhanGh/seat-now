@@ -144,6 +144,9 @@ p { line-height: 1.55; }
 .business-dashboard { max-width: 700px; margin: 20px 0; }
 .booking-panel { border-top: 1px solid #deebe1; padding-top: 8px; }
 .booking-panel h3 { margin: 4px 0; }
+.booking-unavailable { padding: 12px; border: 1px solid #d8e7dd; border-radius: 10px; background: #f4f8f4; }
+.booking-unavailable p { margin: 6px 0; }
+.booking-unavailable a { color: #17654d; font-weight: 700; }
 .booking-panel form, .booking-panel label { display: grid; gap: 6px; }
 .booking-panel form { gap: 10px; }
 .booking-panel input, .booking-panel textarea { width: 100%; padding: 9px; border: 1px solid #b8cfc2; border-radius: 8px; }
