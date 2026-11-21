@@ -32,13 +32,20 @@ export function AvailabilityStatus({
     .join(' · ');
   if (compact)
     return (
-      <span className={stale ? 'availability-stale' : 'availability-fresh'}>
+      <span
+        className={
+          stale ? 'availability-stale' : `availability-fresh crowd-${availability.crowdLevel.toLowerCase()}`
+        }
+      >
         {stale ? 'Dữ liệu cũ' : crowdLabels[availability.crowdLevel]}
         {capacity && ` · ${capacity}`}
       </span>
     );
   return (
-    <section className="availability-detail" aria-label="Tình trạng chỗ ngồi">
+    <section
+      className={`availability-detail${stale ? '' : ` crowd-${availability.crowdLevel.toLowerCase()}`}`}
+      aria-label="Tình trạng chỗ ngồi"
+    >
       <strong>{stale ? 'Dữ liệu chỗ ngồi đã cũ' : `Độ đông: ${crowdLabels[availability.crowdLevel]}`}</strong>
       <span>
         {stale ? 'Lần cuối ghi nhận' : 'Hiện ghi nhận'}: {capacity || 'chưa rõ số chỗ'}

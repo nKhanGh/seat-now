@@ -1,4 +1,4 @@
-:root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #152520; background: #f4f8f4; }
+:root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #152520; background: #f7f7f1; }
 * { box-sizing: border-box; }
 body { margin: 0; }
 a { color: #17654d; }
@@ -15,9 +15,11 @@ h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 1.06; margin: 10px 0 20
 p { line-height: 1.55; }
 .eyebrow { color: #2b8e68; letter-spacing: .12em; text-transform: uppercase; font-size: .75rem; font-weight: 800; }
 .notice { background: #e3f6e8; padding: 14px 18px; border-radius: 12px; }
-.primary { display: inline-block; border: 0; background: #17654d; color: white; border-radius: 10px; padding: 13px 20px; text-decoration: none; font-weight: 700; }
+.primary { display: inline-block; border: 0; background: #17654d; color: white; border-radius: 10px; padding: 13px 20px; text-decoration: none; font-weight: 700; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
+.primary:hover:not(:disabled) { background: #0e4d39; box-shadow: 0 6px 16px #17654d30; transform: translateY(-1px); }
+.primary:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .primary:disabled { opacity: .6; cursor: wait; }
-.auth-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 24px; }
+.auth-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 24px; background: radial-gradient(circle at 18% 22%, #dff3e8 0, transparent 34%), radial-gradient(circle at 86% 82%, #ffebd4 0, transparent 32%), #f7f7f1; }
 .route-loading { min-height: 100vh; display: grid; place-items: center; margin: 0; color: #17654d; font-weight: 700; }
 .card { width: min(100%, 420px); padding: 32px; background: white; border: 1px solid #deebe1; border-radius: 20px; box-shadow: 0 15px 45px #173b2a12; }
 .card h1 { font-size: 2rem; }
@@ -39,7 +41,7 @@ p { line-height: 1.55; }
 .logout-actions button { border: 1px solid #b8cfc2; border-radius: 9px; padding: 10px 14px; background: white; color: #17654d; font-weight: 700; }
 .logout-actions .primary { border-color: #17654d; background: #17654d; color: white; }
 .logout-actions button:hover { box-shadow: 0 4px 12px #17654d38; }
-.explorer-header { padding: 16px 24px; background: white; border-bottom: 1px solid #deebe1; align-items: flex-start; gap: 16px; }
+.explorer-header { padding: 16px 24px; background: linear-gradient(105deg, #f0f9f2 0%, #fffdf7 72%, #fff2de 100%); border-top: 3px solid #e8ae5d; border-bottom: 1px solid #deebe1; align-items: flex-start; gap: 16px; }
 .explorer-header .header-primary { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
 .explorer-header .brand { flex: 0 0 auto; }
 .explorer-header .header-business-link, .business-home-link { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 12px; border: 1px solid #17654d; border-radius: 9px; background: #17654d; color: white; text-decoration: none; font-weight: 700; transition: background .18s ease, transform .18s ease, box-shadow .18s ease; }
@@ -48,10 +50,14 @@ p { line-height: 1.55; }
 .explorer-header nav { flex: 1; min-width: 0; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .explorer-header nav a, .explorer-header nav button { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 12px; border: 1px solid #17654d; border-radius: 9px; background: #17654d; color: white; text-decoration: none; font-weight: 650; transition: background .18s ease, transform .18s ease, box-shadow .18s ease; }
 .explorer-header nav a:hover, .explorer-header nav button:hover { background: #0e4d39; box-shadow: 0 4px 12px #17654d38; transform: translateY(-1px); }
+.explorer-header nav a[href="/register"] { border-color: #a94c2d; background: #a94c2d; }
+.explorer-header nav a[href="/register"]:hover { background: #86391f; box-shadow: 0 4px 12px #a94c2d38; }
 .explorer-header nav a:focus-visible, .explorer-header nav button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .explorer-header nav button:disabled { opacity: .55; cursor: wait; }
-.filterbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: white; border-bottom: 1px solid #deebe1; }
+.filterbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: #fffdf9; border-bottom: 1px solid #deebe1; }
 .filterbar select, .filterbar button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 9px 12px; color: #152520; }
+.filterbar select:hover, .filterbar button:hover { border-color: #5f9c79; }
+.filterbar select:focus-visible, .filterbar button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .filterbar .price-filter { min-width: 165px; }
 .filterbar select:disabled { opacity: .55; cursor: not-allowed; }
 .filterbar .filter-reset { border-color: #17654d; color: #17654d; font-weight: 700; }
@@ -62,18 +68,18 @@ p { line-height: 1.55; }
 .filter-check { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
 .location-message { margin: 0; padding: 6px 24px; background: #e3f6e8; }
 .explorer-body { display: grid; grid-template-columns: minmax(300px, 390px) 1fr; flex: 1; min-height: 0; }
-.venue-list { background: #f7faf7; padding: 22px; overflow-y: auto; min-height: 0; }
+.venue-list { background: linear-gradient(165deg, #eef8f1 0%, #f7faf7 38%, #fffaf1 100%); padding: 22px; overflow-y: auto; min-height: 0; }
 .venue-list h1 { font-size: 1.7rem; }
 .published-results { border-top: 1px solid #deebe1; margin-top: 16px; padding-top: 12px; }
 .published-results h2 { font-size: 1.05rem; margin: 0; }
 .small { font-size: .84rem; color: #5b6a60; }
-.venue-card { display: flex; flex-direction: column; gap: 7px; text-align: left; width: 100%; padding: 18px; margin: 12px 0; background: white; border: 1px solid #dce8df; border-radius: 14px; color: inherit; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
-.venue-card:hover { border-color: #91bba3; box-shadow: 0 8px 22px #173b2a12; transform: translateY(-2px); }
+.venue-card { display: flex; flex-direction: column; gap: 7px; text-align: left; width: 100%; padding: 18px; margin: 12px 0; background: white; border: 1px solid #dce8df; border-left: 4px solid #e8ae5d; border-radius: 14px; color: inherit; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.venue-card:hover { border-color: #91bba3; border-left-color: #d88442; box-shadow: 0 8px 22px #173b2a1c; transform: translateY(-2px); }
 .venue-card:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
-.venue-card.selected { border-color: #17654d; box-shadow: 0 0 0 2px #17654d29; }
+.venue-card.selected { border-color: #17654d; border-left-color: #17654d; box-shadow: 0 0 0 2px #17654d29; }
 .venue-card strong { font-size: 1.04rem; }
 .venue-card span { font-size: .9rem; }
-.venue-card .venue-category { color: #17654d; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.venue-card .venue-category { align-self: flex-start; padding: 4px 8px; border-radius: 999px; background: #e5f4e9; color: #17654d; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
 .load-more { display: block; width: 100%; padding: 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #17654d; font-weight: 700; }
 .map-pane { position: relative; min-height: 0; }
 .map-pane > .venue-map { position: absolute; inset: 0; }
@@ -88,8 +94,8 @@ p { line-height: 1.55; }
 .verified-badge { display: inline-grid; place-items: center; border-radius: 50%; width: 18px; height: 18px; background: #2467c8; color: white; font-size: .75rem; }
 .parking-pin { border: 2px solid white; background: #2854a1; color: white; border-radius: 9px; width: 31px; height: 31px; box-shadow: 0 3px 10px #0004; font-weight: 800; }
 .parking-pin.selected { background: #d35c31; }
-.map-selected { position: absolute; z-index: 2; bottom: 18px; left: 18px; width: min(440px, calc(100% - 36px)); display: flex; flex-direction: column; gap: 12px; padding: 18px; background: white; border: 1px solid #dce8df; border-radius: 18px; box-shadow: 0 12px 36px #173b2a30; max-height: min(76vh, 620px); overflow-y: auto; }
-.selected-heading { position: sticky; z-index: 1; top: -18px; display: flex; gap: 12px; justify-content: space-between; align-items: start; padding: 8px 0; background: white; border-bottom: 1px solid #edf2ed; }
+.map-selected { position: absolute; z-index: 2; bottom: 18px; left: 18px; width: min(440px, calc(100% - 36px)); display: flex; flex-direction: column; gap: 12px; padding: 18px; background: #fffefa; border: 1px solid #dce8df; border-top: 4px solid #e8ae5d; border-radius: 18px; box-shadow: 0 12px 36px #173b2a30; max-height: min(76vh, 620px); overflow-y: auto; }
+.selected-heading { position: sticky; z-index: 1; top: -18px; display: flex; gap: 12px; justify-content: space-between; align-items: start; padding: 8px 0; background: #fffefa; border-bottom: 1px solid #edf2ed; }
 .selected-heading h2 { font-size: 1.25rem; line-height: 1.25; margin: 5px 0 0; }
 .map-selected button { border: 1px solid #b8cfc2; border-radius: 8px; background: #f7faf7; color: #17654d; padding: 7px 10px; font-weight: 650; }
 .map-selected button:hover { background: #e3f6e8; }
@@ -200,6 +206,14 @@ p { line-height: 1.55; }
 .review-card p { margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .review-photo { display: block; width: min(100%, 280px); max-height: 220px; object-fit: cover; border-radius: 8px; margin: 8px 0; }
 .availability-fresh { color: #17654d; }
+.venue-card .availability-fresh, .venue-card .availability-stale, .venue-card .availability-unknown { align-self: flex-start; padding: 5px 9px; border-radius: 8px; background: #e5f4e9; font-weight: 700; }
+.venue-card .crowd-moderate { color: #79500d; background: #fff0ca; }
+.venue-card .crowd-busy { color: #984522; background: #ffead9; }
+.venue-card .crowd-full { color: #a32929; background: #fff0ef; }
+.venue-card .crowd-unknown, .venue-card .availability-stale, .venue-card .availability-unknown { color: #59665e; background: #edf0eb; }
+.availability-detail.crowd-moderate strong { color: #79500d; }
+.availability-detail.crowd-busy strong { color: #984522; }
+.availability-detail.crowd-full strong { color: #a32929; }
 .parking-list { border-top: 1px solid #deebe1; padding-top: 8px; }
 .parking-list h2 { font-size: 1rem; margin: 4px 0; }
 .parking-list p { margin: 4px 0 8px; }
