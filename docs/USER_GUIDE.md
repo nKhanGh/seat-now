@@ -58,7 +58,12 @@ Sau khi admin duyệt, đăng nhập lại bằng **đúng email đã gửi yêu
 
 ### Xét duyệt yêu cầu bằng tài khoản admin
 
-Người vận hành tạo tài khoản admin theo [README](../README.md#chạy-demo-local), đăng nhập và mở **Xét duyệt** hoặc `/admin`. Trang hiển thị yêu cầu đang chờ cùng tên, email người gửi, nội dung chứng minh và ảnh riêng tư nếu có. Sau khi đối chiếu thông tin, chọn **Duyệt** hoặc **Từ chối**, rồi bấm **Xác nhận**. Yêu cầu rời hàng chờ; chủ quán tải lại `/business` để thấy kết quả. Chỉ tài khoản admin có quyền xem bằng chứng và quyết định; ảnh chứng minh được xóa khỏi yêu cầu sau khi xử lý. Không duyệt chỉ dựa trên tên quán hoặc nội dung tự khai nếu chưa xác minh quyền quản lý.
+Người vận hành tạo tài khoản admin theo [README](../README.md#chạy-demo-local), đăng nhập và mở **Xét duyệt** hoặc `/admin`.
+
+- Tab **Chủ quán** hiển thị yêu cầu quản lý đang chờ cùng tên, email người gửi, nội dung chứng minh và ảnh riêng tư nếu có. Sau khi đối chiếu, chọn **Duyệt** hoặc **Từ chối**, rồi bấm **Xác nhận**. Chủ quán tải lại `/business` để thấy kết quả. Ảnh chứng minh được xóa khỏi yêu cầu sau khi xử lý. Không duyệt chỉ dựa trên tên quán hoặc nội dung tự khai nếu chưa xác minh quyền quản lý.
+- Tab **Quán cộng đồng** hiển thị các đề xuất đã đủ ba tài khoản khác xác nhận. Kiểm tra người gửi, địa chỉ, mô tả và mở tọa độ trên bản đồ ngoài để đối chiếu. Chọn **Duyệt** hoặc **Từ chối**, rồi bấm **Xác nhận**. Quán được duyệt xuất hiện trên bản đồ sau khi tải lại; người đề xuất thấy trạng thái trong **Đề xuất của tôi**. Ba lượt xác nhận là điều kiện vào hàng chờ, chưa tự chứng minh quán có thật hay còn bàn.
+
+Chỉ tài khoản admin đọc được hàng chờ và ra quyết định.
 
 ## 7. Gói người dùng và giới hạn bản demo
 

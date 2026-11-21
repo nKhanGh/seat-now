@@ -20,7 +20,7 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 - Người dùng đăng nhập có thể bật **Chỉ quán đã lưu** trên bản đồ để lọc danh sách và ghim trong dữ liệu đã tải; trang **Quán đã lưu** vẫn hiển thị toàn bộ mục đã lưu.
 - Hồ sơ công khai gồm tên hiển thị, số người theo dõi và danh sách review công khai có phân trang; review bị ẩn/xóa không xuất hiện. Review gắn tên và liên kết bản đồ nếu quán còn hoạt động, không lộ email. Link chia sẻ dùng tọa độ venue công khai và slug.
 - Trang **Đang theo dõi** lấy tối đa 20 review công khai mới nhất từ 100 tài khoản theo dõi gần nhất bằng một truy vấn review, kèm tác giả, quán và ảnh nếu có; phản hồi ghi rõ khi bị cắt bớt.
-- Đề xuất cần ba tài khoản khác nhau xác nhận, sau đó người vận hành duyệt bằng token nội bộ mới xuất hiện trên bản đồ. Người gửi theo dõi tiến độ và kết quả trong “Đề xuất của tôi”.
+- Đề xuất cần ba tài khoản khác nhau xác nhận, sau đó admin duyệt trong tab **Quán cộng đồng** tại `/admin` mới xuất hiện trên bản đồ. Hàng chờ chỉ đọc được bằng phiên admin, hiện người gửi, nội dung và tọa độ; quyết định có bước xác nhận. Token nội bộ vẫn dùng được cho vận hành qua API. Người gửi theo dõi tiến độ và kết quả trong “Đề xuất của tôi”.
 - Form đề xuất có bản đồ để chọn vị trí bằng cách bấm hoặc kéo ghim, nút lấy vị trí thiết bị theo yêu cầu của người dùng; tọa độ cập nhật vào ô nhập để chỉnh chính xác. Nếu bản đồ nền lỗi, vẫn có thể nhập tọa độ thủ công.
 - Contract API: [community.json](../../../contracts/openapi/community.json). Quy trình kiểm duyệt: [local-demo.md](../../runbooks/local-demo.md).
 
@@ -31,4 +31,4 @@ Trạng thái: **DEMO COMPLETE** ngày 19/11/2026. Các chức năng cộng đ�
 - Không công bố lịch sử vị trí chính xác. User có thể xóa nội dung mình tạo theo chính sách retention sẽ chốt trước public launch.
 - Dữ liệu cộng đồng phải phân biệt với dữ liệu cập nhật bởi chủ quán/POS; không dùng từ “realtime còn bàn” cho một check-in.
 - Mỗi phần có MongoDB integration test, trạng thái loading/error/empty trên UI và contract API cập nhật cùng code.
-- Trước public launch cần quy định SLA kiểm duyệt, cách xử lý báo cáo sai và chính sách lưu/xóa nội dung; demo hiện duyệt qua API nội bộ.
+- Trước public launch cần quy định SLA kiểm duyệt, cách xử lý báo cáo sai và chính sách lưu/xóa nội dung; demo hiện duyệt đề xuất qua trang admin hoặc API nội bộ.

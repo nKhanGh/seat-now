@@ -115,6 +115,9 @@ inspected and acted on from the operator terminal:
 
 The submitter can track pending confirmations, operator review, approval or
 rejection under **Đề xuất của tôi**. After approval, the venue appears on the map.
+An admin can also sign in at `/admin`, open **Quán cộng đồng**, inspect the
+applicant, description, address and coordinates, then approve or reject with
+a confirmation step. Only proposals with three confirmations enter this queue.
 To manage an existing venue, submit an ownership claim at `/business`.
 
 ```powershell
@@ -131,7 +134,7 @@ Invoke-RestMethod "$base/internal/community/proposals/<proposalId>/reject" -Meth
 
 Hiding a review removes it and its photo from public reads. Proposal approval
 publishes the venue profile and map projection; repeat approval is idempotent.
-There is no public moderation dashboard in this demo.
+The admin proposal queue is private; review-report moderation remains terminal-only.
 
 ## Quality gate
 
