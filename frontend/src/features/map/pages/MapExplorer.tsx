@@ -149,10 +149,7 @@ export function MapExplorer() {
   const { query: publishedSearch, activeQuery } = usePublishedVenueSearch(searchText);
   const remoteReady = searching && activeQuery === searchText.trim();
   const displayedVenues = useMemo(() => {
-    const nearbyItems =
-      venues.isError && venueItems.length === 0
-        ? venuesInRadius
-        : venueItems;
+    const nearbyItems = venues.isError && venueItems.length === 0 ? venuesInRadius : venueItems;
     const candidates = searching
       ? searchVenues(venuesInRadius, searchText)
       : savedOnly
@@ -176,7 +173,9 @@ export function MapExplorer() {
   const mapVenues = useMemo(
     () =>
       savedOnly
-        ? venuesInRadius.filter((venue) => favoriteSlugs.has(venue.slug) || venue.slug === params.get('venue'))
+        ? venuesInRadius.filter(
+            (venue) => favoriteSlugs.has(venue.slug) || venue.slug === params.get('venue'),
+          )
         : venuesInRadius,
     [savedOnly, venuesInRadius, favoriteSlugs, params],
   );
@@ -191,7 +190,16 @@ export function MapExplorer() {
           distanceMeters([filters.lng, filters.lat], venue.location.coordinates) <= filters.radiusM,
       ) ?? []
     );
-  }, [displayedVenues, publishedSearch.data, remoteReady, savedOnly, favoriteSlugs, filters.lng, filters.lat, filters.radiusM]);
+  }, [
+    displayedVenues,
+    publishedSearch.data,
+    remoteReady,
+    savedOnly,
+    favoriteSlugs,
+    filters.lng,
+    filters.lat,
+    filters.radiusM,
+  ]);
   const selected = seenVenues.find((item) => item.slug === params.get('venue'));
   const selectedId = selected?.id ?? null;
   useEffect(() => {
@@ -341,7 +349,9 @@ export function MapExplorer() {
                 ? 'Đồng bộ định kỳ'
                 : 'Đang kết nối'}
           </span>
-          <Link to="/business" className="mobile-business-link">Quản lý quán</Link>
+          <Link to="/business" className="mobile-business-link">
+            Quản lý quán
+          </Link>
           <Link to="/plans">Gói người dùng</Link>
           {entitlements.data?.plan === 'PREMIUM' && (
             <Link to="/plans" className="header-premium-link">

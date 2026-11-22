@@ -42,10 +42,13 @@ describe('Admin Premium demo grants', () => {
 
   it('lists only active users with effective Premium state and no password fields', async () => {
     const result = await service.listUsers({ q: 'demo@example.com', page: 1 });
-    expect(users.find).toHaveBeenCalledWith(expect.objectContaining({ role: { $in: ['USER', null] }, status: 'ACTIVE' }), {
-      emailNormalized: 1,
-      displayName: 1,
-    });
+    expect(users.find).toHaveBeenCalledWith(
+      expect.objectContaining({ role: { $in: ['USER', null] }, status: 'ACTIVE' }),
+      {
+        emailNormalized: 1,
+        displayName: 1,
+      },
+    );
     expect(result.data[0]).toEqual(expect.objectContaining({ email: 'demo@example.com', plan: 'PREMIUM' }));
     expect(result.data[0]).not.toHaveProperty('passwordHash');
     expect(result.meta).toEqual({ page: 1, total: 1, hasNext: false });
