@@ -75,6 +75,14 @@ export function PlansPage() {
               .
             </p>
           )}
+          {entitlements.isError && (
+            <p role="alert" className="error">
+              Không kiểm tra được quyền của gói: {entitlements.error.message}{' '}
+              <button type="button" onClick={() => void entitlements.refetch()}>
+                Thử lại
+              </button>
+            </p>
+          )}
         </section>
       ) : (
         <p className="plan-current">

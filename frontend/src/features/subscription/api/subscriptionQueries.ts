@@ -20,5 +20,6 @@ export function useEntitlements(enabled: boolean) {
     queryFn: ({ signal }) => subscriptionService.entitlements(signal),
     enabled,
     refetchInterval: 60_000,
+    retry: (failures, error) => failures < 2 && !/\(4\d\d\)/.test(error.message),
   });
 }

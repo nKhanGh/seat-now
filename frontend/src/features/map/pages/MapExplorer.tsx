@@ -68,7 +68,7 @@ export function MapExplorer() {
   const auth = useCurrentUser();
   const entitlements = useEntitlements(Boolean(auth.data));
   const adsHidden = entitlements.data?.entitlements['ads.hidden'] ?? false;
-  const mapReady = !auth.isPending && (!auth.data || !entitlements.isPending);
+  const mapReady = !auth.isPending;
   const favorites = useFavorites(auth.data?.id ?? null);
   const logout = useLogout();
   useEffect(() => {
@@ -555,12 +555,6 @@ export function MapExplorer() {
       {locationMessage && (
         <p role="status" className="location-message">
           {locationMessage}
-        </p>
-      )}
-      {auth.data && entitlements.isError && (
-        <p role="alert" className="location-message">
-          Không kiểm tra được quyền Premium; đang hiển thị bản đồ thông thường.{' '}
-          <button onClick={() => void entitlements.refetch()}>Thử lại</button>
         </p>
       )}
       <div className={`explorer-body${sidebarVisible ? '' : ' sidebar-collapsed'}`}>
