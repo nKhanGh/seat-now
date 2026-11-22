@@ -47,6 +47,12 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.enableCors({ origin: process.env.PUBLIC_ORIGIN, credentials: true });
+  const allowedMutationOrigins = new Set([process.env.PUBLIC_ORIGIN]);
+  if (process.env.NODE_ENV !== 'production') {
+    const port = Number(process.env.PORT ?? 3000);
+    allowedMutationOrigins.add(`http://localhost:${port}`);
+    allowedMutationOrigins.add(`http://127.0.0.1:${port}`);
+  }
   app.use(
     (
       request: { method: string; path: string; headers: Record<string, string | undefined> },
@@ -56,7 +62,7 @@ async function bootstrap() {
       if (
         ['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method) &&
         !request.path.startsWith('/api/v1/internal/') &&
-        request.headers.origin !== process.env.PUBLIC_ORIGIN
+        !allowedMutationOrigins.has(request.headers.origin ?? '')
       ) {
         response.status(403).json({ statusCode: 403, code: 'INVALID_ORIGIN', message: ['Invalid origin'] });
         return;
