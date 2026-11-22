@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { PanelLeft, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
 import { AuthLink } from '../../auth/components/AuthLink';
@@ -43,6 +43,12 @@ const cuisineLabels = {
 
 export function MapExplorer() {
   const [params, setParams] = useSearchParams();
+  const [filtersVisible, setFiltersVisible] = useState(
+    () => !window.matchMedia('(max-width: 760px)').matches,
+  );
+  const [sidebarVisible, setSidebarVisible] = useState(
+    () => !window.matchMedia('(max-width: 760px)').matches,
+  );
   const [selectionSerial, setSelectionSerial] = useState(0);
   const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
   const [parkingFilters, setParkingFilters] = useState<ParkingFilterValues>({
@@ -64,6 +70,15 @@ export function MapExplorer() {
   const mapReady = !auth.isPending && (!auth.data || !entitlements.isPending);
   const favorites = useFavorites(auth.data?.id ?? null);
   const logout = useLogout();
+  useEffect(() => {
+    const narrowScreen = window.matchMedia('(max-width: 760px)');
+    const onBreakpointChange = (event: MediaQueryListEvent) => {
+      setFiltersVisible(!event.matches);
+      setSidebarVisible(!event.matches);
+    };
+    narrowScreen.addEventListener('change', onBreakpointChange);
+    return () => narrowScreen.removeEventListener('change', onBreakpointChange);
+  }, []);
   const filters = useMemo<MapFilters>(
     () => ({
       lat: readNumber(params.get('lat'), DEFAULT_LAT),
@@ -353,7 +368,27 @@ export function MapExplorer() {
           </button>
         </div>
       </dialog>
-      <section className="filterbar" aria-label="Bộ lọc địa điểm">
+      <div className="explorer-controls" aria-label="Điều khiển bố cục bản đồ">
+        <button
+          type="button"
+          aria-controls="venue-sidebar"
+          aria-expanded={sidebarVisible}
+          onClick={() => setSidebarVisible((visible) => !visible)}
+        >
+          <PanelLeft size={18} aria-hidden="true" />
+          {sidebarVisible ? 'Thu gọn danh sách' : 'Hiện danh sách'}
+        </button>
+        <button
+          type="button"
+          aria-controls="map-filters"
+          aria-expanded={filtersVisible}
+          onClick={() => setFiltersVisible((visible) => !visible)}
+        >
+          <SlidersHorizontal size={18} aria-hidden="true" />
+          {filtersVisible ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
+        </button>
+      </div>
+      <section id="map-filters" className="filterbar" aria-label="Bộ lọc địa điểm" hidden={!filtersVisible}>
         <label className="venue-search">
           <Search size={18} aria-hidden="true" />
           <input
@@ -497,8 +532,13 @@ export function MapExplorer() {
           <button onClick={() => void entitlements.refetch()}>Thử lại</button>
         </p>
       )}
-      <div className="explorer-body">
-        <section className="venue-list" aria-label="Danh sách địa điểm">
+      <div className={`explorer-body${sidebarVisible ? '' : ' sidebar-collapsed'}`}>
+        <section
+          id="venue-sidebar"
+          className="venue-list"
+          aria-label="Danh sách địa điểm"
+          hidden={!sidebarVisible}
+        >
           <h1>Khám phá quanh bạn</h1>
           <p className="small">
             Dữ liệu mẫu hư cấu tại nhiều khu vực TP.HCM. Tình trạng chỗ ngồi chưa kết nối nguồn trực tiếp.
