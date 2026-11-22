@@ -11,6 +11,19 @@ const MapExplorer = lazy(() =>
 const PlansPage = lazy(() =>
   import('../features/subscription/pages/PlansPage').then((module) => ({ default: module.PlansPage })),
 );
+const RecommendationsPage = lazy(() =>
+  import('../features/subscription/pages/RecommendationsPage').then((module) => ({
+    default: module.RecommendationsPage,
+  })),
+);
+const VouchersPage = lazy(() =>
+  import('../features/subscription/pages/VouchersPage').then((module) => ({ default: module.VouchersPage })),
+);
+const MyParkingReservationsPage = lazy(() =>
+  import('../features/parking/pages/MyParkingReservationsPage').then((module) => ({
+    default: module.MyParkingReservationsPage,
+  })),
+);
 const FavoritesPage = lazy(() =>
   import('../features/community/pages/FavoritesPage').then((module) => ({ default: module.FavoritesPage })),
 );
@@ -197,6 +210,9 @@ export function App() {
         <Route path="/login" element={<AuthForm mode="login" />} />
         <Route path="/register" element={<AuthForm mode="register" />} />
         <Route path="/plans" element={<PlansPage />} />
+        <Route path="/recommendations" element={<RecommendationsPage />} />
+        <Route path="/vouchers" element={<VouchersPage />} />
+        <Route path="/parking-reservations" element={<MyParkingReservationsPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/following" element={<FollowingPage />} />
         <Route path="/users/:id" element={<PublicProfilePage />} />

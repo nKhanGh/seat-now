@@ -320,6 +320,9 @@ export function MapExplorer() {
                 : 'Đang kết nối'}
           </span>
           <Link to="/plans">Gói người dùng</Link>
+          <Link to={`/recommendations?lat=${filters.lat}&lng=${filters.lng}`}>Dành cho bạn</Link>
+          <Link to="/vouchers">Voucher</Link>
+          <Link to="/parking-reservations">Chỗ xe của tôi</Link>
           <Link to={`/proposals?lat=${filters.lat}&lng=${filters.lng}`}>Đề xuất quán</Link>
           {auth.data ? (
             <>
@@ -763,6 +766,9 @@ export function MapExplorer() {
                     selectedSlug={selectedParkingSlug}
                     onSelect={setSelectedParkingSlug}
                     userCoordinates={userCoordinates}
+                    venueSlug={selected.slug}
+                    signedIn={Boolean(auth.data)}
+                    premium={entitlements.data?.entitlements['parking.reserve'] === true}
                   />
                   {parking.hasNextPage && parkingItems.length < 100 && (
                     <button

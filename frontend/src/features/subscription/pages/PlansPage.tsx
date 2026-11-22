@@ -10,8 +10,19 @@ const features = [
   { name: 'Gửi yêu cầu đặt bàn tại quán đối tác', free: true, premium: true, available: true },
   { name: 'Ưu tiên xử lý yêu cầu đặt bàn', free: false, premium: true, available: true },
   { name: 'Không quảng cáo trên bản đồ', free: false, premium: true, available: true },
-  { name: 'Giữ chỗ xe trước', free: false, premium: true, available: false },
-  { name: 'Voucher độc quyền và gợi ý AI nâng cao', free: false, premium: true, available: false },
+  {
+    name: 'Yêu cầu giữ chỗ xe tại bãi của quán (chủ quán xác nhận)',
+    free: false,
+    premium: true,
+    available: true,
+  },
+  { name: 'Voucher demo có mã dùng một lần', free: false, premium: true, available: true },
+  {
+    name: 'Gợi ý cá nhân hóa theo khẩu vị, ngân sách và lịch sử',
+    free: false,
+    premium: true,
+    available: true,
+  },
 ] as const;
 
 export function PlansPage() {
@@ -32,7 +43,8 @@ export function PlansPage() {
         <h1>Chọn cách khám phá phù hợp</h1>
         <p>
           Bản đồ, cộng đồng và yêu cầu đặt bàn tại quán đối tác dùng miễn phí. Premium demo được ưu tiên trong
-          hàng chờ và xem bản đồ không có quảng cáo; chưa mở thanh toán.
+          hàng chờ, xem bản đồ không quảng cáo và nhận gợi ý theo sở thích. Chưa mở thanh toán; admin có thể
+          cấp Premium demo.
         </p>
       </section>
       {enabled ? (
@@ -99,6 +111,13 @@ export function PlansPage() {
                 </li>
               ))}
           </ul>
+          <Link to="/recommendations">Thử gợi ý cá nhân hóa</Link>
+          <p>
+            <Link to="/vouchers">Xem voucher Premium</Link>
+          </p>
+          <p>
+            <Link to="/parking-reservations">Xem yêu cầu giữ xe</Link>
+          </p>
         </section>
       </div>
     </main>

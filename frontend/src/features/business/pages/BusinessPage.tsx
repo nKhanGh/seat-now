@@ -35,7 +35,7 @@ export function BusinessPage() {
     if (!venue) return;
     const nextSection =
       section &&
-      (['profile', 'community'].includes(section) ||
+      (['profile', 'community', 'vouchers', 'parking'].includes(section) ||
         (section === 'bookings' && venue.category !== 'CINEMA') ||
         (['availability', 'dashboard', 'offers'].includes(section) && venue.plan === 'PREMIUM'))
         ? section
@@ -52,6 +52,8 @@ export function BusinessPage() {
           ...(selectedVenue.category === 'CINEMA' ? [] : [{ to: `${venuePath}/bookings`, label: 'Đặt bàn' }]),
           { to: `${venuePath}/community`, label: 'Tương tác' },
           { to: `${venuePath}/profile`, label: 'Hồ sơ' },
+          { to: `${venuePath}/vouchers`, label: 'Voucher' },
+          { to: `${venuePath}/parking`, label: 'Giữ xe' },
           ...(selectedVenue.plan === 'PREMIUM'
             ? [
                 { to: `${venuePath}/availability`, label: 'Chỗ trống' },

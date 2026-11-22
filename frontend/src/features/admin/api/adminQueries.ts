@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { decideClaim, decideProposal, getPendingClaims, getReadyProposals } from '../services/admin.service';
+import {
+  decideClaim,
+  decideProposal,
+  getPendingClaims,
+  getReadyProposals,
+  setDemoPremium,
+} from '../services/admin.service';
 
 const pendingClaimsKey = ['admin', 'business-claims'] as const;
 const readyProposalsKey = ['admin', 'proposals'] as const;
@@ -42,5 +48,12 @@ export function useDecideProposal() {
         client.invalidateQueries({ queryKey: ['community', 'proposals'] }),
         client.invalidateQueries({ queryKey: ['map'] }),
       ]),
+  });
+}
+
+export function useSetDemoPremium() {
+  return useMutation({
+    mutationFn: ({ email, action, days }: { email: string; action: 'grant' | 'revoke'; days?: number }) =>
+      setDemoPremium(email, action, days),
   });
 }

@@ -4,6 +4,8 @@ import { useCurrentUser } from '../../auth/api/authQueries';
 import { AuthLink } from '../../auth/components/AuthLink';
 import { useDecideBusinessClaim, usePendingBusinessClaims, useReadyProposals } from '../api/adminQueries';
 import { AdminProposalsPanel } from '../components/AdminProposalsPanel';
+import { AdminPremiumPanel } from '../components/AdminPremiumPanel';
+import { AdminVouchersPanel } from '../components/AdminVouchersPanel';
 
 type Decision = { id: string; action: 'approve' | 'reject' };
 
@@ -13,7 +15,7 @@ export function AdminPage() {
   const claims = usePendingBusinessClaims(isAdmin);
   const proposals = useReadyProposals(isAdmin);
   const decide = useDecideBusinessClaim();
-  const [tab, setTab] = useState<'claims' | 'proposals'>('claims');
+  const [tab, setTab] = useState<'claims' | 'proposals' | 'premium' | 'vouchers'>('claims');
   const [decision, setDecision] = useState<Decision | null>(null);
   const [notice, setNotice] = useState('');
 
@@ -74,8 +76,28 @@ export function AdminPage() {
             >
               Quán cộng đồng ({proposals.data?.data.length ?? 0})
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'premium'}
+              onClick={() => setTab('premium')}
+            >
+              Premium demo
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'vouchers'}
+              onClick={() => setTab('vouchers')}
+            >
+              Voucher
+            </button>
           </div>
-          {tab === 'proposals' ? (
+          {tab === 'vouchers' ? (
+            <AdminVouchersPanel />
+          ) : tab === 'premium' ? (
+            <AdminPremiumPanel />
+          ) : tab === 'proposals' ? (
             <AdminProposalsPanel queue={proposals} />
           ) : (
             <section aria-label="Xét duyệt chủ quán">

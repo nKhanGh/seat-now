@@ -3,6 +3,9 @@ import { BookingQueue } from '../../booking/components/BookingQueue';
 import { BusinessCommunityPanel } from '../components/BusinessCommunityPanel';
 import { AvailabilityEditor, CampaignEditor, Dashboard, ProfileEditor } from '../components/BusinessEditors';
 import { useBusinessContext } from './BusinessPage';
+import { VoucherRedeemPanel } from '../components/VoucherRedeemPanel';
+import { ParkingReservationQueue } from '../../parking/components/ParkingReservationQueue';
+import { ParkingAvailabilityEditor } from '../../parking/components/ParkingAvailabilityEditor';
 
 const titles: Record<string, string> = {
   bookings: 'Đặt bàn',
@@ -11,6 +14,8 @@ const titles: Record<string, string> = {
   availability: 'Cập nhật chỗ trống',
   dashboard: 'Thống kê',
   offers: 'Ưu đãi',
+  vouchers: 'Xác nhận voucher',
+  parking: 'Giữ chỗ xe',
 };
 
 export function BusinessVenuePage() {
@@ -58,6 +63,13 @@ export function BusinessVenuePage() {
       {section === 'availability' && <AvailabilityEditor key={venue.slug} venue={venue} />}
       {section === 'dashboard' && <Dashboard venue={venue} userId={userId} />}
       {section === 'offers' && <CampaignEditor key={venue.slug} venue={venue} userId={userId} />}
+      {section === 'vouchers' && <VoucherRedeemPanel key={venue.slug} slug={venue.slug} />}
+      {section === 'parking' && (
+        <>
+          <ParkingAvailabilityEditor key={`availability-${venue.slug}`} slug={venue.slug} />
+          <ParkingReservationQueue key={`requests-${venue.slug}`} slug={venue.slug} />
+        </>
+      )}
     </section>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ParkingFacilityItem } from '../services/parking.service';
 import { directionsUrl } from '../../map/services/directions';
 import { Coordinates } from '../../map/services/geo';
+import { ParkingReservationPanel } from './ParkingReservationPanel';
 
 const relationLabels: Record<ParkingFacilityItem['relation'], string> = {
   VENUE: 'Bãi của địa điểm',
@@ -32,11 +33,17 @@ export function ParkingList({
   selectedSlug,
   onSelect,
   userCoordinates,
+  venueSlug,
+  signedIn,
+  premium,
 }: {
   facilities: ParkingFacilityItem[];
   selectedSlug: string | null;
   onSelect: (slug: string) => void;
   userCoordinates?: Coordinates;
+  venueSlug: string;
+  signedIn: boolean;
+  premium: boolean;
 }) {
   const [showAll, setShowAll] = useState(false);
   if (facilities.length === 0)
@@ -90,6 +97,15 @@ export function ParkingList({
               >
                 Chỉ đường đến bãi xe ↗
               </a>
+            )}
+            {selectedSlug === facility.slug && facility.relation === 'VENUE' && facility.linkedToVenue && (
+              <ParkingReservationPanel
+                key={facility.slug}
+                facility={facility}
+                venueSlug={venueSlug}
+                signedIn={signedIn}
+                premium={premium}
+              />
             )}
           </div>
         );

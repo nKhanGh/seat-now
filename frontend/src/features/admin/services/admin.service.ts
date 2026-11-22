@@ -64,3 +64,21 @@ export async function decideProposal(id: string, action: 'approve' | 'reject'): 
     }),
   );
 }
+
+export async function setDemoPremium(email: string, action: 'grant' | 'revoke', days = 7) {
+  const response = await fetch(`/api/v1/admin/subscriptions/demo/${action}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(action === 'grant' ? { email, days } : { email }),
+  });
+  if (response.status === 401) throw new Error('Phiên đăng nhập đã hết hạn.');
+  if (response.status === 403) throw new Error('Bạn không có quyền quản trị.');
+  if (response.status === 404) throw new Error('Không tìm thấy tài khoản hoặc gói Premium đang hoạt động.');
+  if (!response.ok) throw new Error(`Không cập nhật được Premium demo (${response.status}).`);
+  return (
+    (await response.json()) as {
+      data: { email: string; plan: 'FREE' | 'PREMIUM'; currentPeriodEnd?: string };
+    }
+  ).data;
+}
