@@ -1,6 +1,6 @@
 # F04 — Gói Free/Premium dành cho người dùng
 
-Ưu tiên: **P2 foundation**. Trạng thái: **PARTIAL — resolver, API, guard, trang gói, ưu tiên yêu cầu đặt bàn F07 và bản đồ không quảng cáo đã chạy; payment và các quyền Premium khác chưa triển khai**.
+Ưu tiên: **P2 foundation**. Trạng thái: **DEMO — resolver, API, guard, trang gói, ưu tiên đặt bàn, bản đồ không quảng cáo, gợi ý theo quy tắc, voucher demo và yêu cầu giữ xe tại bãi của quán. Chưa có thanh toán hay tích hợp dịch vụ thật**.
 
 [← Lộ trình](../README.md) · [Quy chuẩn chung](../COMMON.md)
 
@@ -21,9 +21,9 @@ MVP F04:
 Ngoài scope:
 
 - checkout/payment/webhook thực;
-- giữ chỗ xe;
-- voucher;
-- AI nâng cao;
+- giữ xe tại bãi công cộng/đối tác độc lập;
+- voucher áp dụng ngoài đời;
+- mô hình AI bên ngoài;
 - ad network.
 
 ## 2. Ma trận gói
@@ -37,11 +37,11 @@ Ngoài scope:
 | Gửi yêu cầu đặt bàn tại quán đối tác | Có | Có | F07 demo, chờ chủ quán xác nhận |
 | Không quảng cáo | Không | Có | Bản đồ bỏ thứ tự tài trợ, nhãn ghim và nội dung quảng cáo; server kiểm tra entitlement |
 | Ưu tiên hàng chờ yêu cầu đặt bàn | Không | Có | F07 demo, không bảo đảm có bàn |
-| Giữ chỗ xe | Không | Có | Later |
-| Voucher độc quyền | Không | Có | Later |
-| AI gợi ý nâng cao | Không | Có | Later |
+| Yêu cầu giữ xe tại bãi của quán | Không | Có | Demo, chủ quán xác nhận và đối chiếu chỗ trống |
+| Voucher độc quyền | Không | Có | Demo, admin tạo, người dùng nhận, chủ quán xác nhận mã dùng một lần |
+| Gợi ý theo sở thích | Không | Có | Demo xếp hạng theo quy tắc; chưa có mô hình AI |
 
-UI phải dùng nhãn “Sắp ra mắt” cho capability Later, không dùng CTA thanh toán thật.
+UI ghi rõ tính chất demo; không dùng CTA thanh toán thật hoặc khẳng định có dữ liệu bãi xe ngoài đời.
 
 ## 3. State machine
 
@@ -56,7 +56,7 @@ FREE (không có subscription record active)
 - Plan hiệu lực được resolve từ status + period + server time, không tin field UI.
 - `cancelAtPeriodEnd=true` vẫn có quyền đến hết kỳ nếu status active và period hợp lệ.
 - Webhook/payment tương lai phải idempotent, verify signature và chống event out-of-order.
-- MVP seed/admin fixture chỉ bật trong local/test profile.
+- Admin có thể cấp/thu hồi Premium demo cho tài khoản người dùng qua `/admin`; script fixture chỉ bật trong local/test.
 
 ## 4. API logical contract
 
@@ -88,7 +88,7 @@ Response entitlement:
 
 Future mutation/payment API không được thiết kế giả trước khi chọn provider. Internal local seed không đưa vào public production route.
 
-Hiện tại `backend/src/seed-premium.ts` là CLI fixture local/test theo `SEED_PREMIUM_EMAIL`, bị khóa trong production. Trang `/plans` không có nút thanh toán hoặc nâng cấp giả.
+`backend/src/seed-premium.ts` vẫn là CLI fixture local/test theo `SEED_PREMIUM_EMAIL`, bị khóa trong production. Admin có thể cấp/thu hồi gói demo qua giao diện; không có cổng thanh toán. Các API Premium mới kiểm tra entitlement phía server: `GET /me/recommendations`, `GET/POST /premium/vouchers`, `POST /venues/:slug/parking/:facilitySlug/reservations`. Chủ quán xác nhận yêu cầu giữ xe và mã voucher qua API riêng.
 
 ## 5. Backend/frontend convention
 

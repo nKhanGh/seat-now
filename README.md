@@ -9,7 +9,7 @@ Repository hiện có **đăng nhập, bản đồ và tìm quán theo tên/đ�
 1. Bản đồ địa điểm thời gian thực và bộ lọc cơ bản.
 2. Tình trạng bàn/chỗ ngồi và thời gian chờ dự kiến.
 3. Bãi đỗ xe gần địa điểm và tình trạng chỗ trống.
-4. Nền tảng gói Free/Premium dành cho người dùng; ưu tiên xử lý yêu cầu đặt bàn đã có ở bản demo, các quyền Premium khác thuộc release sau.
+4. Gói Free/Premium demo dành cho người dùng: ưu tiên yêu cầu đặt bàn, ẩn quảng cáo, gợi ý theo sở thích, voucher mẫu và yêu cầu giữ xe tại bãi của quán.
 
 Sau MVP, nhóm cộng đồng có check-in gần quán, lưu quán, review kèm ảnh và báo cáo, theo dõi thành viên, chia sẻ địa điểm, đề xuất quán với ba lượt xác nhận và trang admin xét duyệt. Nhóm chủ quán có yêu cầu nhận quản lý, hồ sơ/logo và mục tương tác khách hàng miễn phí; gói Premium demo gồm chỗ trống thủ công, dashboard, ảnh bìa, ưu đãi hẹn giờ và vị trí tài trợ. Kết nối dữ liệu thực và thanh toán vẫn thuộc release sau.
 
@@ -73,7 +73,7 @@ $env:SEED_PREMIUM_EMAIL='email-cua-tai-khoan-demo@example.com'
 npm run seed:premium
 ```
 
-Script này bị khóa trong `NODE_ENV=production`. Trang `/plans` phân biệt chức năng hiện có với chức năng **Sắp ra mắt**; chưa mở bán Premium.
+Script này bị khóa trong `NODE_ENV=production`. Admin cũng có thể cấp/thu hồi Premium demo tại `/admin` → **Premium demo**, rồi tạo ưu đãi tại tab **Voucher**. Người dùng mở `/recommendations` để nhận gợi ý theo quy tắc, `/vouchers` để lấy mã, hoặc gửi yêu cầu giữ xe tại bãi của quán. Chủ quán cập nhật chỗ xe và xác nhận yêu cầu tại `/business` → **Giữ xe**. Trang `/plans` nêu rõ phạm vi demo; chưa mở bán Premium hoặc có mô hình AI.
 
 Kiểm tra nhanh: tại thư mục gốc chạy `npm ci; npm run format:check; npm run lint`. Backend: `cd backend; npm test; npm run typecheck; npm run build`. Integration test cần MongoDB: đặt `MONGODB_TEST_URI=mongodb://127.0.0.1:27017/seatnow` rồi chạy `npm run test:integration`. Test tạo và xóa database tạm `seatnow_test_*`. Frontend: `cd frontend; npm test; npm run build`. CI tại `.github/workflows/ci.yml` chạy các bước này với MongoDB 8.0. Nếu projection bị ngắt giữa chừng, chạy `npm run rebuild:projections` trong `backend`.
 

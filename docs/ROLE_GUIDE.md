@@ -1,6 +1,6 @@
 # Hướng dẫn sử dụng SeatNow theo 3 vai trò
 
-Tài liệu cho bản demo học tập - cập nhật 21/11/2026. Các nút và đường dẫn được đối chiếu với giao diện hiện tại. Bản web dùng [https://seat-now.onrender.com](https://seat-now.onrender.com) sau khi cấu hình Render đúng; khi chạy local bằng Vite, mở `http://localhost:5173`, hoặc `http://localhost:3000` nếu backend phục vụ cả frontend.
+Tài liệu cho bản demo học tập - cập nhật 22/11/2026. Các nút và đường dẫn được đối chiếu với giao diện hiện tại. Bản web dùng [https://seat-now.onrender.com](https://seat-now.onrender.com) sau khi cấu hình Render đúng; khi chạy local bằng Vite, mở `http://localhost:5173`, hoặc `http://localhost:3000` nếu backend phục vụ cả frontend.
 
 ## Trước khi thử ba vai trò
 
@@ -23,13 +23,13 @@ Tài liệu cho bản demo học tập - cập nhật 21/11/2026. Các nút và 
 1. Trên trang chủ, bấm **Đăng ký** để nhập tên hiển thị, email, mật khẩu ít nhất 12 ký tự và xác nhận mật khẩu. Biểu tượng mắt cho phép hiện/ẩn mật khẩu.
 2. Bấm **Đăng nhập** để vào bằng email/mật khẩu. Nếu vừa mở một quán rồi được yêu cầu đăng nhập, app có thể đưa bạn quay lại vị trí trước đó.
 3. Bấm **Đăng xuất** trên header bản đồ. Hộp thoại có **Ở lại** và **Xác nhận đăng xuất**; chọn xác nhận để kết thúc phiên.
-4. Thanh header có **Gói người dùng**, **Đề xuất quán**, **Quản lý quán**; sau khi đăng nhập có thêm các lối vào **Quán đã lưu**, **Đặt bàn của tôi**, **Đang theo dõi**. Admin thấy **Xét duyệt**. Trên màn hình nhỏ, có thể cuộn ngang thanh liên kết.
+4. Thanh header có **Gói người dùng**, **Dành cho bạn**, **Voucher**, **Chỗ xe của tôi**, **Đề xuất quán**, **Quản lý quán**; sau khi đăng nhập có thêm các lối vào **Quán đã lưu**, **Đặt bàn của tôi**, **Đang theo dõi**. Admin thấy **Xét duyệt**. Trên màn hình nhỏ, có thể cuộn ngang thanh liên kết.
 
 ## 3. Vai trò người dùng
 
 ### 3.1. Tìm địa điểm trên bản đồ
 
-1. Mở `/`. Bản đồ và danh sách quán mặc định quanh trung tâm TP.HCM. Bấm thẻ quán hoặc ghim để mở chi tiết; bấm **Đóng** để đóng.
+1. Mở `/`. Bản đồ và danh sách quán mặc định quanh trung tâm TP.HCM. Bấm **Thu gọn danh sách** hoặc **Ẩn bộ lọc** để mở rộng bản đồ; các nút **Hiện danh sách** và **Hiện bộ lọc** mở lại. Trên điện thoại, hai phần này mặc định thu gọn. Bấm thẻ quán hoặc ghim để mở chi tiết; bấm **Đóng** để đóng.
 2. Dùng ô tìm tên/địa chỉ; chọn bộ lọc loại địa điểm, loại món, bán kính, mức giá, đánh giá, độ đông và **Còn bàn**. Tăng bán kính hoặc bỏ bớt lọc nếu không thấy quán.
 3. Bấm **Vị trí của tôi**, cho phép trình duyệt dùng vị trí để xem chấm xanh và chuyển khu vực tìm kiếm. Kéo bản đồ để khám phá vùng khác; ghim quán đã tải vẫn ở trên bản đồ.
 4. Trong chi tiết, đọc số bàn/ghế còn trống, thời điểm cập nhật, độ tin cậy, thời gian chờ và lịch sử 24 giờ. Dữ liệu cũ hoặc không rõ được ghi nhãn; đây là số liệu quan sát, không bảo đảm còn bàn khi đến nơi.
@@ -53,7 +53,7 @@ Tài liệu cho bản demo học tập - cập nhật 21/11/2026. Các nút và 
 
 1. Mở `/proposals`, chọn **Đề xuất quán**, điền loại địa điểm, tên, địa chỉ, tọa độ, loại món, mức giá và mô tả. Có thể dùng **Dùng vị trí của tôi** nếu đang ở tại quán.
 2. Đề xuất cần **ba tài khoản khác** xác nhận trước khi admin xem xét. Theo dõi trạng thái trong **Đề xuất của tôi**; quán chỉ xuất hiện trên bản đồ sau khi admin duyệt.
-3. Mở `/plans` để xem Free và Premium. Bản demo chưa có thanh toán. Premium user do người vận hành cấp thử: yêu cầu đặt bàn có nhãn ưu tiên và bản đồ ẩn quảng cáo; giữ chỗ xe, voucher thật và AI cá nhân hóa vẫn chưa mở.
+3. Mở `/plans` để xem Free và Premium. Bản demo chưa có thanh toán. Admin cấp Premium cho email người dùng tại `/admin` → **Premium demo**. Người dùng Premium được ưu tiên yêu cầu đặt bàn, ẩn quảng cáo, mở `/recommendations` để xem gợi ý theo quy tắc, `/vouchers` để nhận mã dùng một lần, và gửi yêu cầu giữ xe tại bãi của quán. Các tính năng này chỉ để thử; chưa có AI hoặc voucher có giá trị ngoài đời.
 
 ## 4. Vai trò chủ quán
 
@@ -66,13 +66,15 @@ Tài liệu cho bản demo học tập - cập nhật 21/11/2026. Các nút và 
 
 ### 4.2. Làm việc trên các trang riêng
 
-Header quản lý có **Tổng quan**, **Yêu cầu quyền** và, khi đã có quán, các mục **Đặt bàn**, **Tương tác**, **Hồ sơ**. Nếu quản lý nhiều quán, chọn **Chi nhánh** trước khi thao tác. Nút **Về trang chính** trở lại bản đồ.
+Header quản lý có **Tổng quan**, **Yêu cầu quyền** và, khi đã có quán, các mục **Đặt bàn**, **Tương tác**, **Hồ sơ**, **Voucher**, **Giữ xe**. Nếu quản lý nhiều quán, chọn **Chi nhánh** trước khi thao tác. Nút **Về trang chính** trở lại bản đồ.
 
 | Trang | Thao tác |
 | --- | --- |
 | **Đặt bàn** | Bật **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**. Xem khung giờ đến-rời, số khách, tên người gửi; bấm **Xác nhận** hoặc **Từ chối**. Sau khi đón khách, bấm **Đánh dấu đã đón khách** và xác nhận lần nữa. |
 | **Tương tác** | Xem lượt check-in gần đây và review công khai kèm ảnh; bấm **Làm mới** để lấy dữ liệu mới. |
 | **Hồ sơ** | Chỉnh tên, địa chỉ, mô tả, giờ mở cửa, menu tóm tắt, mức giá rồi **Lưu hồ sơ**. Tải logo tối đa 2 MB bằng **Cập nhật logo**. |
+| **Voucher** | Nhập mã `SN-...` khách cung cấp và bấm **Xác nhận sử dụng**; mỗi mã chỉ dùng một lần tại đúng quán. |
+| **Giữ xe** | Chọn bãi của quán, nhập tổng số chỗ và chỗ đang trống rồi **Lưu chỗ xe**. Snapshot mới có hiệu lực 10 phút. Xem yêu cầu Premium, **Xác nhận**, **Từ chối** hoặc **Đã nhận xe**. |
 
 Nếu các lượt đã xác nhận chồng giờ dùng hết tổng bàn/ghế được ghi nhận, thao tác **Xác nhận** sẽ báo hết chỗ ngay ở yêu cầu đó. Hãy kiểm tra khả năng phục vụ thực tế và từ chối hoặc trao đổi giờ khác. Yêu cầu **Chờ xác nhận** chưa tự trừ số bàn trống trên bản đồ.
 
@@ -98,7 +100,7 @@ Admin được người vận hành tạo riêng bằng `npm run admin:create` v
 2. Đọc tên, địa chỉ, loại quán, người đề xuất, mô tả và tọa độ. Bấm **Kiểm tra vị trí** để đối chiếu trên Google Maps.
 3. Chọn **Duyệt** hoặc **Từ chối** rồi **Xác nhận**. Sau khi duyệt, quán xuất hiện trên bản đồ; người đề xuất xem trạng thái trong `/proposals`.
 
-Trang admin có nút **Về bản đồ**. Hàng chờ báo cáo review hiện chưa có trên giao diện admin; người vận hành xử lý qua API nội bộ.
+Tab **Premium demo** cấp hoặc thu hồi quyền Premium user bằng email, hiệu lực 1–30 ngày. Tab **Voucher** tạo ưu đãi mẫu cho slug quán, đặt số lượt/hạn dùng và tắt ưu đãi. Trang admin có nút **Về bản đồ**. Hàng chờ báo cáo review hiện chưa có trên giao diện admin; người vận hành xử lý qua API nội bộ.
 
 ## 6. Kịch bản demo nhanh với 3 vai trò
 
