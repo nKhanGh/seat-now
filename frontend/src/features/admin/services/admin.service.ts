@@ -22,6 +22,19 @@ export type ReadyProposalQueue = {
   meta: { truncated: boolean };
 };
 
+export type AdminUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  plan: 'FREE' | 'PREMIUM';
+  currentPeriodEnd: string | null;
+};
+
+export type AdminUsersPage = {
+  data: AdminUser[];
+  meta: { page: number; total: number; hasNext: boolean };
+};
+
 async function readData<T>(response: Response): Promise<T> {
   if (response.status === 401) throw new Error('Phiên đăng nhập đã hết hạn.');
   if (response.status === 403) throw new Error('Tài khoản này không có quyền xét duyệt.');
@@ -81,4 +94,17 @@ export async function setDemoPremium(email: string, action: 'grant' | 'revoke', 
       data: { email: string; plan: 'FREE' | 'PREMIUM'; currentPeriodEnd?: string };
     }
   ).data;
+}
+
+export async function getAdminUsers(q: string, page: number, signal?: AbortSignal): Promise<AdminUsersPage> {
+  const params = new URLSearchParams({ page: String(page) });
+  if (q) params.set('q', q);
+  const response = await fetch(`/api/v1/admin/subscriptions/demo/users?${params}`, {
+    credentials: 'same-origin',
+    signal,
+  });
+  if (response.status === 401) throw new Error('Phiên đăng nhập đã hết hạn.');
+  if (response.status === 403) throw new Error('Bạn không có quyền quản trị.');
+  if (!response.ok) throw new Error(`Không tải được danh sách người dùng (${response.status}).`);
+  return response.json() as Promise<AdminUsersPage>;
 }

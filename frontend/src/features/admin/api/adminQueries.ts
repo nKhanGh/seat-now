@@ -4,6 +4,7 @@ import {
   decideProposal,
   getPendingClaims,
   getReadyProposals,
+  getAdminUsers,
   setDemoPremium,
 } from '../services/admin.service';
 
@@ -52,8 +53,19 @@ export function useDecideProposal() {
 }
 
 export function useSetDemoPremium() {
+  const client = useQueryClient();
   return useMutation({
     mutationFn: ({ email, action, days }: { email: string; action: 'grant' | 'revoke'; days?: number }) =>
       setDemoPremium(email, action, days),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['admin', 'premium-users'] }),
+  });
+}
+
+export function useAdminUsers(q: string, page: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['admin', 'premium-users', q, page],
+    queryFn: ({ signal }) => getAdminUsers(q, page, signal),
+    enabled,
+    staleTime: 10_000,
   });
 }

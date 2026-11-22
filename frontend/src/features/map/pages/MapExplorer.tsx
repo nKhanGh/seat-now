@@ -320,6 +320,11 @@ export function MapExplorer() {
                 : 'Đang kết nối'}
           </span>
           <Link to="/plans">Gói người dùng</Link>
+          {entitlements.data?.plan === 'PREMIUM' && (
+            <Link to="/plans" className="header-premium-link">
+              ✦ Premium của tôi
+            </Link>
+          )}
           <Link to={`/recommendations?lat=${filters.lat}&lng=${filters.lng}`}>Dành cho bạn</Link>
           <Link to="/vouchers">Voucher</Link>
           <Link to="/parking-reservations">Chỗ xe của tôi</Link>
