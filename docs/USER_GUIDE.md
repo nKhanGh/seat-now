@@ -1,389 +1,162 @@
 # Hướng dẫn sử dụng SeatNow
 
-Tài liệu cho **bản demo phục vụ học tập**, cập nhật ngày 22/11/2026. [Danh sách tính năng và giới hạn](FEATURES.md) · [README kỹ thuật](../README.md) · [runbook vận hành](runbooks/local-demo.md).
+Bản cập nhật **22/11/2026** cho dự án học tập SeatNow. App đang dùng dữ liệu mẫu ở TP.HCM; tên quán, tọa độ, tình trạng bàn và chỗ xe có thể là hư cấu. Không dùng dữ liệu demo để quyết định đi lại hoặc đặt chỗ ngoài đời.
 
-> **Dữ liệu mẫu:** Khoảng 100 địa điểm và 4 bãi xe được tạo để thử giao diện, tập trung ở TP.HCM. Tên, địa chỉ, tọa độ và số chỗ có thể là hư cấu. Đừng dùng chúng để quyết định đi đến địa điểm thật.
+**Mở app:** [https://seat-now.onrender.com](https://seat-now.onrender.com). Khi chạy local, dùng `http://localhost:5173` với Vite hoặc `http://localhost:3000` khi backend phục vụ bản đã build. Bản Render Free có thể khởi động chậm ở lần mở đầu.
 
-## Bắt đầu nhanh trên bản web
-
-1. Mở [SeatNow](https://seat-now.onrender.com). Lần mở đầu trên Render Free có thể cần chờ service khởi động. Nếu trang không có quán, mở `/api/v1/health` để xem API và database, rồi kiểm tra `/api/v1/map/venues?lat=10.7769&lng=106.7009&radiusM=20000&limit=20`. Health `database: ok` chỉ chứng minh kết nối, **không chứng minh đã chọn đúng database có dữ liệu**.
-2. Trên bản đồ, chọn quán và đọc tình trạng chỗ ngồi, bãi xe, review. Không cần đăng nhập cho bước khám phá.
-3. Để thử quyền người dùng, chọn **Đăng ký** hoặc **Đăng nhập**. Các bước check-in, review, lưu quán và yêu cầu đặt bàn nằm ở mục 6–9.
-4. Để thử chủ quán, dùng tài khoản đã được admin duyệt quyền quản lý quán và mở `/business`. Để thử admin, dùng tài khoản admin riêng rồi mở `/admin`. Không dùng tài khoản người dùng thường để thử quyền admin.
-5. Khi bản web rỗng dù MongoDB Atlas đã có quán, kiểm tra biến `MONGODB_URI` trong Render **có tên database `/seatnow` sau `.mongodb.net`**, rồi chọn **Save and deploy**. File env trên máy không tự đồng bộ lên Render. Kiểm tra thêm branch Render: dùng `develop` cho bản mới nhất hoặc `main` sau khi merge PR.
-
-## Mục lục
-
-0. [Bắt đầu nhanh trên bản web](#bắt-đầu-nhanh-trên-bản-web)
-1. [Mở app và vai trò tài khoản](#1-mở-app-và-vai-trò-tài-khoản)
-2. [Đăng ký, đăng nhập, đăng xuất](#2-đăng-ký-đăng-nhập-đăng-xuất)
-3. [Bản đồ, tìm kiếm và bộ lọc](#3-bản-đồ-tìm-kiếm-và-bộ-lọc)
-4. [Đọc tình trạng bàn, ghế và lịch sử](#4-đọc-tình-trạng-bàn-ghế-và-lịch-sử)
-5. [Tìm bãi đỗ xe](#5-tìm-bãi-đỗ-xe)
-6. [Check-in và tín hiệu cộng đồng](#6-check-in-và-tín-hiệu-cộng-đồng)
-7. [Review, ảnh, lưu quán và theo dõi](#7-review-ảnh-lưu-quán-và-theo-dõi)
-8. [Đề xuất địa điểm mới](#8-đề-xuất-địa-điểm-mới)
-9. [Gửi và theo dõi yêu cầu đặt bàn](#9-gửi-và-theo-dõi-yêu-cầu-đặt-bàn)
-10. [Trang dành cho chủ quán](#10-trang-dành-cho-chủ-quán)
-11. [Trang xét duyệt admin](#11-trang-xét-duyệt-admin)
-12. [Gói người dùng và quyền Premium demo](#12-gói-người-dùng-và-quyền-premium-demo)
-13. [Kịch bản demo từ đầu đến cuối](#13-kịch-bản-demo-từ-đầu-đến-cuối)
-14. [Xử lý lỗi thường gặp](#14-xử-lý-lỗi-thường-gặp)
-15. [Khởi động và chuẩn bị dữ liệu local](#15-khởi-động-và-chuẩn-bị-dữ-liệu-local)
-16. [Checklist nghiệm thu bản deploy](#16-checklist-nghiệm-thu-bản-deploy)
-
-## 1. Mở app và vai trò tài khoản
-
-Trên bản deploy, mở **https://seat-now.onrender.com** sau khi service đã Live và chọn đúng database. Khi nhóm chạy hai server phát triển, mở **http://localhost:5173**. Nếu đã build frontend và để backend phục vụ cả app, mở **http://localhost:3000**. API nằm dưới `/api/v1`. Trang chính `/` là bản đồ; mọi vai trò đều có thể xem bản đồ, chỗ ngồi và bãi xe mà không cần đăng nhập.
-
-| Vai trò                 | Có thể làm gì                                                                                                                      |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Khách chưa đăng nhập    | Xem bản đồ, tìm/lọc quán, tình trạng chỗ ngồi, bãi xe, review công khai và trang gói.                                              |
-| Người dùng Free         | Check-in khi thực sự ở gần quán, review/ảnh, lưu và chia sẻ quán, theo dõi, đề xuất địa điểm, gửi yêu cầu đặt bàn tại quán hỗ trợ. |
-| Người dùng Premium demo | Có toàn bộ quyền Free; ưu tiên yêu cầu đặt bàn, ẩn quảng cáo, nhận voucher demo, gợi ý cá nhân hóa và gửi yêu cầu giữ xe. Chưa thể tự mua gói. |
-| Chủ quán đã được duyệt  | Quản lý quán được cấp quyền tại `/business`; quyền Basic và Premium doanh nghiệp ở mục 10.                                         |
-| Admin                   | Xét duyệt quyền quản lý quán và đề xuất địa điểm tại `/admin`. Tài khoản này do người vận hành tạo bằng script.                    |
-
-Thanh đầu trang bản đồ có **Gói người dùng**, **Dành cho bạn**, **Voucher**, **Chỗ xe của tôi**, **Đề xuất quán**, **Quản lý quán**. Khi đăng nhập còn có **Quán đã lưu**, **Đặt bàn của tôi**, **Đang theo dõi**; admin thấy thêm **Xét duyệt**. Trên điện thoại, các liên kết có thể cuộn ngang.
-
-## 2. Đăng ký, đăng nhập, đăng xuất
-
-### Tạo tài khoản
-
-1. Chọn **Đăng ký** trên thanh đầu trang hoặc mở `/register`.
-2. Nhập **Tên hiển thị** (sẽ xuất hiện cạnh review), **Email**, **Mật khẩu** dài ít nhất 12 ký tự và **Xác nhận mật khẩu** giống hệt.
-3. Chọn biểu tượng mắt trong ô mật khẩu để hiện/ẩn ký tự ở cả ô mật khẩu và xác nhận.
-4. Chọn **Tạo tài khoản**. Nếu hai mật khẩu khác nhau, form báo lỗi trước khi gửi. Email đã dùng hoặc dữ liệu sai sẽ hiện lỗi dưới form.
-
-### Đăng nhập và chuyển trang
-
-1. Chọn **Đăng nhập**, nhập email/mật khẩu rồi bấm **Đăng nhập**.
-2. Nếu vào form từ một quán hay thao tác cần tài khoản, app quay lại trang đó. Khi đăng nhập trực tiếp, admin đi tới `/admin`; người quản lý ít nhất một quán đi tới `/business`; tài khoản thường về bản đồ.
-3. Nếu chủ quán vừa được duyệt nhưng vẫn ở trang cũ, mở **Quản lý quán**, chọn **Cập nhật trạng thái** và kiểm tra email đang đăng nhập.
-
-### Đăng xuất
-
-Chọn **Đăng xuất** ở đầu trang bản đồ. Hộp thoại hỏi lại: **Ở lại** để hủy, **Xác nhận đăng xuất** để kết thúc phiên. Backend thu hồi phiên khi đăng xuất. Hiện chưa có xác minh email hoặc quên/đặt lại mật khẩu.
-
-## 3. Bản đồ, tìm kiếm và bộ lọc
-
-### Di chuyển và mở quán
-
-1. Tại `/`, danh sách bên trái và bản đồ bên phải mặc định hiển thị quanh trung tâm Quận 1, TP.HCM.
-   Bấm **Thu gọn danh sách** để bản đồ chiếm toàn bộ chiều ngang; bấm **Hiện danh sách** để mở lại. Tương tự, **Ẩn bộ lọc** và **Hiện bộ lọc** thu/mở hàng điều kiện. Trên điện thoại, hai phần này mặc định thu gọn để ưu tiên bản đồ.
-2. Bấm thẻ quán hoặc ghim để mở chi tiết: địa chỉ, giá, số bàn/ghế, bãi xe, check-in, review và gợi ý lân cận. Bấm **Đóng** một lần để đóng.
-3. Kéo bản đồ để chuyển khu vực. Địa điểm đã tải vẫn giữ ghim; bấm **Xem thêm địa điểm** để lấy trang kế tiếp. Khi thu nhỏ, nhiều ghim gom vào vòng tròn; bấm vòng tròn để phóng gần.
-4. Bấm **Vị trí của tôi** để xin quyền GPS, đánh dấu vị trí bằng chấm xanh và chuyển tâm tìm kiếm. Nếu từ chối quyền, bản đồ vẫn dùng được. Nút này **không** tự check-in.
-5. **Chỉ đường đến địa điểm** mở Google Maps ở tab khác. Nếu đã lấy vị trí của mình, tọa độ đó được dùng làm điểm bắt đầu; nếu chưa, Google Maps hỏi điểm bắt đầu.
-6. **Gợi ý quanh đây** hiện tối đa bốn địa điểm trong phạm vi 2 km theo đường chim bay; bấm để mở quán khác. Đây chưa phải AI cá nhân hóa.
-
-### Tìm kiếm
-
-Nhập tên hoặc địa chỉ ở ô **Tìm tên quán, địa chỉ…**. App lọc quán đã tải và tìm thêm trong toàn hệ thống ở **Quán khác trên hệ thống**. Tìm không phân biệt hoa/thường và dấu tiếng Việt; ví dụ nhập `ben thanh`. Bấm một kết quả để mở quán trên bản đồ.
-
-### Bộ lọc và sắp xếp
-
-| Điều khiển            | Tác dụng                                                                              |
-| --------------------- | ------------------------------------------------------------------------------------- |
-| **Tất cả loại**       | Nhà hàng, cà phê, rạp phim.                                                           |
-| **Tất cả món**        | Món Việt, món Âu, cà phê, tráng miệng.                                                |
-| **Bán kính**          | 1, 3, 5 hoặc 10 km quanh tâm tìm kiếm.                                                |
-| **Mọi mức giá**       | Mức 1 - Bình dân đến mức 4 - Rất cao; đây là phân loại tương đối, không phải giá món cụ thể. |
-| **Mọi đánh giá**      | Không lọc, từ 4 sao hoặc từ 4,5 sao. Điểm 0 hiện **Chưa có đánh giá**.                |
-| **Mọi độ đông**       | Vắng, vừa, đông hoặc đầy theo snapshot chỗ ngồi.                                      |
-| **Còn bàn**           | Chỉ quán có bàn/ghế trống, đang nhận khách và snapshot còn hiệu lực.                  |
-| **Sắp xếp danh sách** | Gần nhất, đánh giá cao, giá thấp; khi tìm từ khóa, thứ tự khớp tìm kiếm được ưu tiên. |
-| **Chỉ quán đã lưu**   | Chỉ hiện quán yêu thích trong dữ liệu bản đồ đã tải; cần đăng nhập.                   |
-
-Chọn **Xóa bộ lọc** để xóa từ khóa và điều kiện mà vẫn giữ khu vực bản đồ. Nếu không thấy quán, bỏ bớt điều kiện, tăng bán kính hoặc chuyển về TP.HCM. Quán tài trợ có nhãn **Được tài trợ** và có thể được xếp trước trong chế độ mặc định; bản đồ Premium demo ẩn nội dung tài trợ.
-
-## 4. Đọc tình trạng bàn, ghế và lịch sử
-
-1. Mở quán và đọc **Độ đông**, **bàn/ghế còn trống**, **Thời gian chờ ước tính**. Rạp phim chỉ có ghế.
-2. Đọc dòng nguồn: **Dữ liệu mô phỏng**, **Chủ địa điểm cập nhật** hoặc **Hệ thống quản lý cập nhật**, thời điểm và độ tin cậy nếu có.
-3. **Dữ liệu chỗ ngồi đã cũ** nghĩa là snapshot hết hạn; số bên cạnh là lần ghi nhận trước. **Chưa có dữ liệu chỗ ngồi** nghĩa là app chưa biết. **Hiện chưa nhận thêm khách** nghĩa là quán tắt nhận khách trong snapshot.
-4. Chọn **Xem lịch sử chỗ ngồi 24 giờ** để mở tối đa 10 bản ghi gần nhất, mỗi dòng có thời điểm, độ đông, số chỗ và nguồn; chọn **Ẩn lịch sử chỗ ngồi** để thu gọn. Lịch sử không dự báo tương lai.
-
-Snapshot chủ quán nhập thủ công hết hiệu lực sau 10 phút. Snapshot demo có hạn dài hơn để thử bộ lọc. Số bàn/ghế không tự bị trừ khi khách đặt bàn hoặc check-in.
-
-## 5. Tìm bãi đỗ xe
-
-1. Mở chi tiết quán và kéo đến **Bãi đỗ xe gần đây**. App tìm bãi trong phạm vi 1,5 km; nếu không có kết quả sẽ hiện thông báo.
-2. Mỗi thẻ ghi bãi của địa điểm/đối tác/công cộng, khoảng cách, xe máy/ô tô, giá theo giờ/lượt hoặc miễn phí, số chỗ và độ mới dữ liệu.
-3. Dùng **Mọi loại xe**, **Còn chỗ mới**, **Mở 24 giờ**, **Miễn phí**. **Còn chỗ mới** loại bản ghi cũ hoặc không rõ số chỗ.
-4. Bấm một bãi để xem ghi chú lối vào và thời điểm cập nhật. Nếu có nhiều bãi, bấm **Xem tất cả** hoặc **Thu gọn**.
-5. Chọn **Chỉ đường đến bãi xe** để mở Google Maps. Khoảng cách trong SeatNow là đường chim bay, không phải quãng đường lái xe.
-
-App chưa nhận đặt/giữ chỗ gửi xe. Bãi seed cũng là dữ liệu mô phỏng.
-
-## 6. Check-in và tín hiệu cộng đồng
-
-Check-in xác nhận **bạn đang gần tọa độ quán**. Nó khác nút **Vị trí của tôi**, và khác dữ liệu bàn/ghế do quán cung cấp.
-
-1. Đăng nhập, mở chi tiết địa điểm và kéo đến **Check-in cộng đồng**.
-2. Bấm **Check-in tại đây**, cho phép trình duyệt truy cập vị trí và chờ GPS. App không lưu tọa độ bạn gửi trong bản ghi check-in.
-3. Backend chỉ chấp nhận khi độ chính xác GPS **không quá 100 m** và vị trí cách tọa độ quán **không quá 150 m**. Thành công sẽ hiện **Đã ghi nhận check-in của bạn**; số tài khoản trong giờ qua được tải lại.
-4. Mỗi tài khoản chỉ được ghi một lần tại cùng quán trong một cửa sổ ba giờ. Bấm lại có thể được xem là ghi trùng, nên số người không tăng.
-5. Tín hiệu từ số tài khoản duy nhất trong giờ qua: **chưa có dữ liệu** (0), **ít** (1–2), **vừa** (3–5), **nhiều** (từ 6). Đây là tự báo cáo, không đại diện chắc chắn cho tổng số khách và **không sửa số bàn trống**.
-
-**Nếu bấm rồi thấy “Bạn cần ở gần địa điểm để check-in”:** thao tác đã gửi lên API nhưng bị từ chối vì GPS cách tọa độ quán quá 150 m; số check-in không đổi. Với phần lớn quán seed hư cấu ở TP.HCM, bạn sẽ gặp tình huống này dù đang ở một quán thật có tên tương tự. Hiện app **chưa có chế độ check-in mô phỏng không cần GPS**. Để kiểm thử thành công, dùng địa điểm có tọa độ thật gần thiết bị và đã được admin duyệt, hoặc chạy integration test check-in trên cơ sở dữ liệu test riêng. Không nhập/chỉnh GPS giả rồi trình bày như check-in thật.
-
-Nếu trình duyệt báo không lấy được vị trí, kiểm tra quyền Location cho trang, dùng `localhost` hoặc HTTPS và thử ở nơi GPS ổn định. Nếu báo vị trí chưa đủ chính xác, đợi GPS ổn định hơn rồi thử lại.
-
-## 7. Review, ảnh, lưu quán và theo dõi
-
-### Viết, sửa, xóa review
-
-1. Đăng nhập, mở quán và kéo đến **Review cộng đồng**.
-2. Chọn **Đánh giá** từ 1 đến 5 sao. **Nhận xét** có thể bỏ trống, tối đa 500 ký tự.
-3. Có thể chọn **Ảnh thực tế** JPEG, PNG hoặc WebP, tối đa 2 MB. Bấm **Gửi đánh giá**. Điểm quán cập nhật từ review công khai.
-4. Mỗi tài khoản có một review tại mỗi quán. Khi mở lại, form điền điểm và nội dung cũ; chỉnh rồi bấm **Cập nhật đánh giá**. Chọn ảnh mới để thay ảnh cũ; nếu không chọn, ảnh cũ giữ nguyên.
-5. Để xóa, bấm **Xóa đánh giá của tôi** rồi **Xác nhận xóa**. **Giữ đánh giá** hủy thao tác. Xóa review cũng xóa ảnh.
-6. Review công khai ở dưới form có tác giả, sao, nội dung, ảnh và ngày đăng. Bấm **Xem thêm review** để tải tiếp. Bấm **Báo cáo review** của người khác để gửi báo cáo; báo cáo không tự ẩn review.
-
-Nếu review lưu thành công nhưng tải ảnh lỗi, app hiện thông báo riêng. Khi đó review chữ/sao đã tồn tại; chọn ảnh hợp lệ và cập nhật lại, không tạo review thứ hai.
-
-### Ảnh được lưu ở đâu?
-
-Ảnh tải lên được backend chuyển thành **WebP** và lưu trực tiếp trong **MongoDB**, không ghi vào `frontend/public` hay thư mục upload trên máy. Ảnh review ở collection `review_photos` (gắn với review), logo ở `venue_logos`, ảnh bìa ở `venue_covers`. Ảnh chứng minh quyền quản lý nằm tạm trong `business_claims`, chỉ admin đọc được và bị xóa sau khi duyệt hoặc từ chối. Khi trình duyệt cần ảnh, backend trả qua URL API `/api/v1/reviews/:id/photo`, `/api/v1/venues/:slug/logo` hoặc `/api/v1/venues/:slug/cover`. Bản đồ nền lấy tile từ dịch vụ bản đồ cấu hình riêng; seed 100 quán không tự tạo ảnh quán.
-
-### Lưu, chia sẻ, theo dõi
-
-- Trong chi tiết quán, chọn **Lưu quán** hoặc **Bỏ lưu**. Mở **Quán đã lưu** ở header để xem mọi quán đã lưu, kể cả ngoài khu vực bản đồ đang tải; từ đây có thể **Xem trên bản đồ** hoặc **Bỏ lưu**.
-- Chọn **Chia sẻ địa điểm** để sao chép liên kết mở đúng quán/tọa độ. Dán liên kết vào trình duyệt khác để thử. Trình duyệt cần cho phép Clipboard; nếu không app báo lỗi.
-- Bấm tên tác giả review để mở hồ sơ công khai `/users/:id`; hồ sơ có tên, số người theo dõi và review công khai, không hiện email. Bấm **Theo dõi** hoặc **Bỏ theo dõi** khi đã đăng nhập.
-- Trang **Đang theo dõi** hiện danh sách tài khoản và tối đa 20 review công khai mới nhất từ tối đa 100 tài khoản được theo dõi gần đây. Bấm **Xem quán trên bản đồ** ở thẻ review để trở lại quán.
-
-## 8. Đề xuất địa điểm mới
-
-Luồng này dành cho **quán chưa có trên hệ thống**. Nếu quán đã có và bạn muốn sửa hồ sơ, xem mục 10 để gửi yêu cầu nhận quản lý.
-
-1. Đăng nhập và chọn **Đề xuất quán** trên header hoặc mở `/proposals`.
-2. Trong **Thêm địa điểm**, nhập tên (3–100 ký tự), loại nhà hàng/cà phê/rạp phim, loại món nếu phù hợp, địa chỉ (5–200 ký tự), mô tả (10–500 ký tự), mức giá tương đối từ mức 1 đến mức 4.
-3. Chọn tọa độ bằng cách bấm bản đồ nhỏ, kéo ghim, bấm **Dùng vị trí của tôi** hoặc nhập **Vĩ độ/Kinh độ**. Kiểm tra ghim trước khi gửi; tọa độ được dùng để hiển thị và kiểm tra check-in.
-4. Chọn **Gửi đề xuất**. Thành công nghĩa là đề xuất đã lưu, **chưa xuất hiện trên bản đồ**. Một tài khoản gửi tối đa năm đề xuất trong 24 giờ.
-5. Xem **Đề xuất của tôi**: **Chờ cộng đồng xác nhận (0/3, 1/3, 2/3)** → **Đủ xác nhận, chờ người vận hành duyệt** → **Đã duyệt và lên bản đồ** hoặc **Đã bị từ chối**.
-6. Ba tài khoản **khác người đề xuất** mở **Đang chờ xác nhận** và bấm **Xác nhận địa điểm này**. Mỗi tài khoản chỉ được tính một lượt. Sau lượt thứ ba, đề xuất vào tab **Quán cộng đồng** của admin.
-7. Admin kiểm tra và duyệt; người gửi quay lại **Đề xuất của tôi**, rồi bấm **Xem trên bản đồ**. Nếu admin từ chối, quán không xuất hiện trên bản đồ.
-
-Ba lượt xác nhận là tín hiệu cộng đồng, chưa chứng minh địa chỉ đúng hoặc quán đang hoạt động. Người vận hành cần kiểm tra thông tin trước khi duyệt.
-
-## 9. Gửi và theo dõi yêu cầu đặt bàn
-
-### Người dùng gửi yêu cầu
-
-1. Đăng nhập, mở **nhà hàng hoặc quán cà phê** rồi kéo trong chi tiết xuống **Yêu cầu đặt bàn**, ngay sau phần tình trạng/lịch sử chỗ ngồi và trước check-in. Chỉ quán đã được chủ quán bật **Nhận yêu cầu đặt bàn** mới hiện form và nút **Gửi yêu cầu**; rạp phim không có form. Nếu quán chưa bật, phần này giải thích rõ **Quán này chưa mở nhận yêu cầu đặt bàn** và dẫn chủ quán đến trang quản lý.
-2. Chọn **Bắt đầu (giờ đến)** từ ít nhất một giờ tới và không quá 14 ngày. Ô **Kết thúc (giờ rời quán)** được gợi ý sau 2 giờ; có thể chỉnh để lượt kéo dài 30 phút đến 4 giờ. Chọn **Số khách** 1–12 và **Ghi chú** nếu cần (tối đa 500 ký tự).
-3. Chọn **Gửi yêu cầu**. Trạng thái đầu tiên là **Chờ xác nhận**. Đây **chưa phải bàn đã giữ**; chủ quán xác nhận hoặc từ chối thủ công. Một tài khoản không gửi trùng giờ bắt đầu tại cùng quán. Tình trạng chỗ ngồi phía trên là số liệu hiện tại, không dự báo chỗ trống ở giờ bạn xin đặt.
-4. Mở **Đặt bàn của tôi** hoặc `/bookings` để xem giờ bắt đầu–kết thúc, tên quán, số khách, ghi chú, nhãn **Ưu tiên Premium** nếu có. Dùng **Tất cả**, **Chờ xác nhận**, **Đã xác nhận**, **Đã kết thúc** để lọc. Chọn **Xem quán trên bản đồ** để trở lại quán.
-5. Nếu yêu cầu đang chờ hoặc đã xác nhận và cần hủy, bấm **Hủy yêu cầu** → **Xác nhận hủy**. **Giữ yêu cầu** quay lại. Yêu cầu đã đón khách/từ chối/đã hủy không thể hủy tiếp.
-
-| Trạng thái       | Ý nghĩa                                              |
-| ---------------- | ---------------------------------------------------- |
-| **Chờ xác nhận** | Quán chưa quyết định, chưa giữ bàn.                  |
-| **Đã xác nhận**  | Chủ quán chấp nhận; app chặn vượt tổng bàn/ghế đã biết do các lượt đặt trùng giờ trong app, nhưng chưa đồng bộ số bàn thực tế. |
-| **Quán từ chối** | Quán không nhận yêu cầu.                             |
-| **Đã hủy**       | Người dùng đã xác nhận hủy.                          |
-| **Đã đón khách** | Chủ quán đã ghi nhận khách đến; không thể hủy.       |
-
-Premium demo chỉ giúp yêu cầu xếp trước trong hàng chờ, không bảo đảm quán nhận. App chưa gửi email/SMS/push khi trạng thái đổi, nên mở **Đặt bàn của tôi** để kiểm tra.
-
-## 10. Trang dành cho chủ quán
-
-### Xin quyền quản lý quán có sẵn
-
-1. Đăng nhập bằng tài khoản sẽ dùng để quản lý. Mở quán trên bản đồ và bấm **Bạn là chủ quán này?**; app tới `/business/claims` và điền sẵn **Slug địa điểm**. Bạn cũng có thể mở **Quản lý quán** trên header, rồi chọn **Yêu cầu quyền**.
-2. Trong **Yêu cầu quản lý quán**, viết **Thông tin chứng minh quyền quản lý** từ 20–300 ký tự: cách người vận hành đối chiếu bạn với quán, giấy tờ hoặc thông tin liên hệ.
-3. Có thể chọn **Ảnh giấy tờ hoặc hình chứng minh** JPEG/PNG/WebP tối đa 3 MB. Ảnh chỉ dành cho người vận hành, không hiện công khai; sau khi duyệt/từ chối sẽ bị xóa khỏi yêu cầu.
-4. Bấm **Gửi yêu cầu**. Xem **Yêu cầu của tôi**: **Chờ duyệt**, **Đã duyệt** hoặc **Từ chối**. Chỉ biết slug không đủ để sửa quán.
-5. Sau khi admin duyệt, vào lại `/business`, bấm **Cập nhật trạng thái** nếu cần. Kiểm tra dòng **Đang đăng nhập**: quyền gắn với **đúng email đã gửi yêu cầu**. Quán được duyệt ở **Địa điểm đang quản lý**; chọn **Đặt bàn**, **Tương tác** hoặc **Hồ sơ** để mở trang tương ứng.
-
-### Điều hướng khu vực chủ quán
-
-- Header của `/business` có **Tổng quan** và **Yêu cầu quyền**. Khi tài khoản đã được duyệt, header thêm các nút theo quán đang chọn: **Đặt bàn**, **Tương tác**, **Hồ sơ**, **Voucher**, **Giữ xe**. Gói Premium Business có thêm **Chỗ trống**, **Thống kê**, **Ưu đãi**. Mỗi nút mở một trang riêng; có thể lưu URL hoặc tải lại trang.
-- Nếu quản lý nhiều quán, dùng **Chi nhánh** trên header để đổi quán. App giữ cùng mục đang xem nếu quán mới hỗ trợ mục đó. Trang **Tổng quan** liệt kê các quán và có nút đi thẳng đến từng công việc.
-- **Về trang chính** quay lại bản đồ. Yêu cầu nhận quyền mới luôn nằm ở **Yêu cầu quyền**, không nằm cuối trang quản lý quán.
-
-### Công cụ gói Cơ bản (Free Business)
-
-- **Tương tác khách hàng:** số tài khoản check-in trong giờ qua, tín hiệu tự báo cáo, năm review công khai gần nhất và ảnh. Chọn **Làm mới**; bấm **Xem trang quán và tất cả đánh giá** để xem hết.
-- **Hồ sơ quán:** sửa tên, địa chỉ, mô tả, giờ mở cửa, menu tóm tắt, mức giá; bấm **Lưu hồ sơ**. Thông tin mới hiện công khai sau khi tải lại.
-- **Logo:** chọn JPEG/PNG/WebP tối đa 2 MB rồi bấm **Cập nhật logo**. Logo hiện ở thẻ quán, chi tiết và ghim khi dữ liệu cập nhật.
-- **Yêu cầu đặt bàn:** mở **Đặt bàn** của nhà hàng/cà phê trên header. Chọn **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**; đổi checkbox mà chưa lưu thì khách vẫn chưa thấy form gửi. Hàng chờ hiện giờ đến–rời; bấm **Xác nhận** hoặc **Từ chối**. Nếu các lượt đã xác nhận chồng giờ dùng hết tổng bàn/ghế được ghi nhận, nút xác nhận báo hết chỗ; hãy từ chối hoặc trao đổi giờ khác. Khi khách thực sự tới, bấm **Đánh dấu đã đón khách** → **Xác nhận đã đón**; **Chưa đón khách** hủy bước này. Kiểm tra khả năng phục vụ thực tế vì snapshot bàn trống chưa phải inventory đặt bàn.
-- **Giữ xe và Voucher demo:** chọn **Giữ xe**, chọn bãi thuộc quán, nhập tổng số chỗ và chỗ đang trống rồi bấm **Lưu chỗ xe**. Snapshot này có hiệu lực 10 phút. Sau đó chủ quán có thể xác nhận/từ chối yêu cầu hoặc đánh dấu đã nhận xe. Chọn **Voucher** để nhập mã khách đưa và xác nhận sử dụng một lần. Hai trang này dành cho chủ quán đã được duyệt, không đòi Premium Business.
-- Một tài khoản có thể quản lý nhiều quán đã được duyệt, chọn **Chi nhánh** để chuyển quán.
-
-### Công cụ Premium Business trong bản demo
-
-Người vận hành cấp gói cho từng quán bằng API nội bộ, có ngày hết hạn; chưa có nút mua gói. Khi còn Premium, header quản lý hiện thêm các trang:
-
-1. **Cập nhật chỗ trống:** nhập tổng/còn trống bàn và ghế, độ đông, thời gian chờ 0–240 phút, trạng thái **Đang nhận khách**, rồi bấm **Cập nhật chỗ trống**. Rạp phim chỉ nhập ghế. Số liệu có nguồn **Chủ địa điểm cập nhật** và tự cũ sau 10 phút.
-2. **Thống kê:** lượt mở trang chi tiết 7 ngày, tỷ lệ lấp đầy trung bình và khung giờ lấp đầy cao. Lượt mở không phải số người duy nhất; tỷ lệ lấy từ snapshot, có thể gồm dữ liệu mẫu.
-3. **Ảnh bìa:** chọn JPEG/PNG/WebP tối đa 2 MB rồi bấm **Cập nhật ảnh bìa**.
-4. **Ưu đãi giờ vắng:** nhập nội dung ít nhất 10 ký tự, giờ bắt đầu/kết thúc, tùy chọn **Đẩy lên đầu danh sách được tài trợ**, rồi bấm **Lên lịch ưu đãi**. Nội dung hiện trong app đúng lịch và có nhãn **Được tài trợ** nếu đẩy vị trí. Bấm **Tắt ưu đãi hiện tại** để gỡ.
-5. **Huy hiệu xác thực:** xuất hiện với quán có quyền quản lý đã duyệt và gói Premium còn hiệu lực.
-
-App chưa tự phát push “còn nhiều bàn trống”, chưa có mã voucher thật, tích hợp POS hoặc hệ thống nhân viên/chuỗi nhiều vai trò. Dòng **Còn nhiều bàn trống** trên thẻ quán chỉ hiện khi snapshot phù hợp và còn mới.
-
-## 11. Trang xét duyệt admin
-
-Tài khoản admin được tạo riêng bằng lệnh ở mục 15. Sau khi đăng nhập trực tiếp, app đưa đến `/admin`; hoặc chọn **Xét duyệt** ở header. Người dùng thường mở đường dẫn này sẽ thấy không có quyền.
-
-### Tab Chủ quán
-
-1. Mở tab **Chủ quán**, bấm **Làm mới** nếu người gửi vừa tạo yêu cầu.
-2. Đọc tên/slug quán, tên và email người gửi, nội dung chứng minh, ảnh đính kèm riêng tư nếu có. Đối chiếu ngoài hệ thống trước khi cấp quyền.
-3. Bấm **Duyệt** hoặc **Từ chối**. Đọc câu xác nhận rồi bấm **Xác nhận**; **Hủy** trở về thẻ mà không quyết định.
-4. Yêu cầu rời hàng chờ. Chủ quán đăng nhập lại bằng email đã gửi, vào `/business` và bấm **Cập nhật trạng thái** nếu trang đã mở sẵn.
-
-### Tab Quán cộng đồng
-
-1. Chỉ đề xuất **đã đủ ba tài khoản khác xác nhận** xuất hiện ở tab này. Nếu trống, kiểm tra **Đang chờ xác nhận** trên `/proposals`; admin không thể duyệt đề xuất chưa đủ lượt qua giao diện.
-2. Đọc loại quán, tên, địa chỉ, người gửi, email, loại món, mức giá, mô tả và số lượt xác nhận. Bấm **Kiểm tra vị trí** để mở tọa độ trên Google Maps.
-3. Sau khi đối chiếu, bấm **Duyệt** hoặc **Từ chối** rồi **Xác nhận**. Quán được duyệt lên bản đồ; người gửi thấy trạng thái ở **Đề xuất của tôi**.
-
-### Tab Premium demo và Voucher
-
-1. Mở **Premium demo** để xem danh sách tài khoản người dùng (20 người mỗi trang). Có thể tìm theo tên/email và chuyển trang. Chọn thời hạn 1–30 ngày rồi bấm **Cấp Premium** trên dòng tài khoản Free. Với tài khoản Premium, bấm **Thu hồi** rồi xác nhận. Danh sách cập nhật trạng thái sau thao tác; người dùng tải lại bản đồ để thấy quyền mới. Đây là gói thử nghiệm, không thu tiền.
-2. Mở **Voucher**, nhập slug quán đã có, tên ưu đãi, nội dung giảm giá, số lượt và số ngày hiệu lực; bấm **Tạo voucher**. Danh sách phía dưới cho phép tắt voucher. Nên dùng quán có tài khoản chủ quán đã được duyệt để thử xác nhận mã.
-
-Nút **Về bản đồ** ở đầu trang đưa về trang chính. Trang admin hiện chưa có hàng chờ báo cáo review; phần đó xử lý qua API nội bộ theo [runbook](runbooks/local-demo.md).
-
-## 12. Gói người dùng và quyền Premium demo
-
-Chọn **Gói người dùng** hoặc mở `/plans`. Trang so sánh Free và Premium, và khi đã đăng nhập hiện **Gói hiện tại**.
-Khi tài khoản đang có Premium, header bản đồ hiện nút vàng **Premium của tôi** dẫn tới trang gói hiện tại và các lối vào tính năng Premium.
-
-- **Free đang dùng được:** bản đồ/lọc, tình trạng chỗ ngồi, bãi xe, check-in, review, lưu quán và gửi yêu cầu đặt bàn ở quán hỗ trợ.
-- **Premium demo đang dùng được:** ưu tiên yêu cầu đặt bàn, bản đồ ẩn nội dung tài trợ, gợi ý theo sở thích, voucher có mã dùng một lần và yêu cầu giữ xe tại bãi của quán có dữ liệu chỗ trống mới.
-- **Chưa dùng được:** thanh toán/mua gói, giữ xe tại bãi công cộng hoặc bãi đối tác độc lập, voucher áp dụng ngoài đời và mô hình AI. Premium **chưa mở bán**.
-
-### Gợi ý cá nhân hóa
-
-Mở **Dành cho bạn** hoặc `/recommendations`, chọn loại món, mức giá tối đa và số người. Trang dùng khu vực đang xem trên bản đồ; có thể bấm **Dùng vị trí của tôi**. Kết quả tối đa sáu quán trong 20 km, kèm lý do như hợp khẩu vị, gần, trong ngân sách hoặc còn chỗ theo snapshot mới. Quán đã lưu và review 4–5 sao giúp gợi ý sở thích; quán bạn chấm 1–2 sao bị loại. Đây là xếp hạng theo quy tắc, **chưa phải AI**.
-
-### Voucher Premium demo
-
-Mở **Voucher** hoặc `/vouchers`. Khi admin đã tạo voucher còn lượt, bấm **Nhận voucher**; mã `SN-...` xuất hiện trong **Voucher của tôi**. Mỗi tài khoản nhận một lần mỗi ưu đãi; chủ quán mở `/business`, chọn quán rồi chọn **Voucher**, nhập mã và bấm **Xác nhận sử dụng**. Mã đã dùng hoặc quá hạn không dùng lại. Voucher chỉ để thử quy trình, **không có giá trị tại quán thật**.
-
-### Yêu cầu giữ chỗ xe
-
-Mở một quán có **bãi của quán** và bấm bãi xe đó trong chi tiết. Nếu dữ liệu bãi đã cũ, chủ quán vào `/business` → **Giữ xe** để cập nhật số chỗ trước. Người dùng Premium chọn xe, giờ đến trong 15 phút–2 giờ tới và giờ rời sau đó 30 phút–3 giờ; bấm **Gửi yêu cầu giữ xe**. Bãi cần snapshot mới còn chỗ. Yêu cầu ban đầu là **Chờ chủ quán xác nhận**, chưa giữ chỗ. Chủ quán mở `/business` → **Giữ xe** để xác nhận/từ chối; hệ thống đối chiếu số chỗ và yêu cầu trùng giờ. Người dùng theo dõi hoặc hủy trước giờ đến tại **Chỗ xe của tôi** (`/parking-reservations`). Không dùng xác nhận demo để đi gửi xe thật.
-
-Người vận hành có thể cấp Premium cho **tài khoản người dùng** bằng script local `seed:premium` và cho **quán** bằng API nội bộ; đây là hai gói khác nhau. Cấp Premium user không tự nâng gói quán, và ngược lại.
-
-## 13. Kịch bản demo từ đầu đến cuối
-
-### A. Khám phá và đánh giá (một tài khoản)
-
-1. Mở bản đồ, chọn quán tại TP.HCM. Thử lọc **Cà phê**, **3 km**, **Còn bàn**; xem nguồn và thời điểm snapshot.
-2. Mở bãi xe, lọc **Xe máy**, bấm một bãi để xem giá và số chỗ.
-3. Đăng ký tài khoản thử, chọn **Lưu quán**, viết review 4–5 sao và ảnh nhỏ hơn 2 MB. Mở **Quán đã lưu** để kiểm tra.
-4. Bấm tên người viết review khác, **Theo dõi** và kiểm tra **Đang theo dõi**.
-
-### B. Chủ quán nhận quyền và đặt bàn (tài khoản khách, chủ quán, admin)
-
-1. Chủ quán đăng nhập, mở quán ăn/cà phê trên bản đồ, bấm **Bạn là chủ quán này?**, gửi yêu cầu kèm thông tin chứng minh.
-2. Admin vào `/admin` → **Chủ quán**, kiểm tra rồi duyệt. Chủ quán mở `/business`, bấm **Cập nhật trạng thái**, chọn **Đặt bàn** trên header, bật **Nhận yêu cầu đặt bàn** rồi bấm **Lưu cài đặt**; chọn **Hồ sơ** để sửa thông tin/logo.
-3. Khách đăng nhập tài khoản khác, mở quán đó, chọn giờ và số khách, bấm **Gửi yêu cầu**. Kiểm tra **Đặt bàn của tôi** đang **Chờ xác nhận**.
-4. Chủ quán vào hàng chờ, bấm **Xác nhận**. Khách tải lại danh sách để thấy **Đã xác nhận**. Chủ quán chỉ ghi nhận **Đã đón khách** sau khi khách tới.
-
-### C. Đề xuất quán mới (ít nhất bốn tài khoản thường và admin)
-
-1. Tài khoản A gửi địa điểm tại `/proposals`, xác nhận tọa độ và xem trạng thái 0/3.
-2. Tài khoản B, C, D lần lượt bấm **Xác nhận địa điểm này**. A không thể tự xác nhận; mỗi người chỉ được tính một lượt.
-3. Admin mở `/admin` → **Quán cộng đồng**, kiểm tra nội dung/vị trí rồi duyệt.
-4. A mở **Đề xuất của tôi** → **Xem trên bản đồ**. Quán mới lên bản đồ, nhưng chỗ ngồi/bãi xe có thể chưa có dữ liệu.
-
-### D. Kiểm thử check-in
-
-Chỉ demo check-in thành công với địa điểm thật có tọa độ đã lưu trong SeatNow và thiết bị đang ở gần. 100 quán seed dùng thử bản đồ/bộ lọc/review/đặt bàn, **không phải địa điểm để đi tới check-in**. Với demo kỹ thuật không cần GPS thật, chạy integration test trên database test riêng; đừng trình bày lượt check-in giả là tín hiệu ngoài đời.
-
-## 14. Xử lý lỗi thường gặp
-
-| Hiện tượng                                                | Cách kiểm tra và xử lý                                                                                                                                                                                                                             |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bản đồ chỉ có màu nền, danh sách quán vẫn hiện            | Tải lại trang. Kiểm tra mạng/tile style (`VITE_MAP_STYLE_URL`) và `MAP_ASSET_ORIGINS`; nếu tile không truy cập được, vẫn dùng danh sách quán.                                                                                                      |
-| Không có quán sau khi bật **Còn bàn**                     | Bỏ bộ lọc khác, tăng bán kính, chuyển tâm về TP.HCM. Bộ lọc chỉ nhận snapshot còn hiệu lực và đang nhận khách; nếu demo cũ, chạy lại `seed:demo`.                                                                                                  |
-| Bấm **Vị trí của tôi** không có chấm xanh                 | Cấp quyền Location cho `localhost`/HTTPS, kiểm tra GPS, rồi bấm lại. Thông báo dưới bộ lọc cho biết lỗi quyền hoặc timeout.                                                                                                                        |
-| Bấm **Check-in tại đây** rồi báo “Bạn cần ở gần địa điểm” | API từ chối vì cách tọa độ quán hơn 150 m. Số check-in không đổi. Quán seed thường hư cấu; đọc mục 6.                                                                                                                                              |
-| Check-in báo GPS chưa đủ chính xác                        | Độ chính xác trình duyệt báo lớn hơn 100 m. Đợi GPS ổn định rồi thử.                                                                                                                                                                               |
-| Chủ quán đã được duyệt nhưng chưa thấy quán               | Mở `/business`, bấm **Cập nhật trạng thái**, kiểm tra email đang đăng nhập có đúng email gửi yêu cầu không; tải lại trang nếu cần.                                                                                                                 |
-| Không thấy nút **Gửi yêu cầu** trong chi tiết quán        | Rạp phim không hỗ trợ đặt bàn. Với nhà hàng/cà phê, phần **Yêu cầu đặt bàn** sẽ báo nếu chủ quán chưa bật **Nhận yêu cầu đặt bàn**. Chủ quán đã được admin duyệt mở `/business`, chọn **Đặt bàn** trên header, bật ô này và bấm **Lưu cài đặt**; sau đó khách tải lại chi tiết. |
-| Gửi yêu cầu đặt bàn rồi chưa có bàn                       | **Chờ xác nhận** là yêu cầu, chưa giữ inventory. Chờ chủ quán xác nhận trên `/business`.                                                                                                                                                           |
-| Tab admin **Quán cộng đồng** trống                        | Chưa có đề xuất đủ ba lượt xác nhận của ba tài khoản khác người gửi.                                                                                                                                                                               |
-| Review có sao/chữ nhưng chưa có ảnh                       | Ảnh tải riêng sau review; nếu bước ảnh lỗi, chọn lại JPEG/PNG/WebP dưới 2 MB và cập nhật đánh giá.                                                                                                                                                 |
-| Phiên đăng nhập mất sau khi khởi động lại API             | Đăng nhập lại; giữ `JWT_SECRET` cố định trong `backend/.env` khi chạy local.                                                                                                                                                                       |
-| Có thông báo không tải được dữ liệu                       | Bấm **Thử lại** nếu có; kiểm tra `/api/v1/health` trên đúng origin đang mở, MongoDB và tab Network của trình duyệt.                                                                                                                                |
-| Bản Render health OK nhưng không có quán; tài khoản cũ đăng nhập 401 | So `MONGODB_URI` trên Render với URI Atlas chứa `/seatnow`. URI kết thúc ở `.mongodb.net/` thường chọn database mặc định khác. Lưu biến bằng **Save and deploy**; kiểm tra lại API `/api/v1/map/venues` và đăng nhập. |
-| Trên Render thiếu nút/trang mới dù local có                 | Kiểm tra branch trong Settings của Web Service. Bản mới nằm trên `develop` cho tới khi PR được merge vào `main`; deploy lại sau khi đổi branch.                                                                                                    |
-
-## 15. Khởi động và chuẩn bị dữ liệu local
-
-Yêu cầu **Node.js 20.19+**, npm và Docker Desktop. Chạy từ thư mục gốc của repository trong PowerShell. Chỉ sao chép `.env.example` **lần đầu**; nếu đã có `backend/.env` thì giữ cấu hình hiện tại, đặc biệt `JWT_SECRET`.
-
-```powershell
-docker compose -f infra/compose.yaml up -d
-if (-not (Test-Path backend/.env)) { Copy-Item backend/.env.example backend/.env }
-# Chỉnh JWT_SECRET trong backend/.env thành chuỗi ngẫu nhiên dài ít nhất 32 ký tự.
-cd backend
-npm ci
-npm run build
-npm run seed:demo
-npm run start:dev
-```
-
-Mở terminal thứ hai ở thư mục gốc:
-
-```powershell
-cd frontend
-npm ci
-npm run dev
-```
-
-Mở **http://localhost:5173**. Nếu muốn dùng một cổng sau khi build frontend, chạy `npm run build` ở `frontend`, rồi `npm start` ở `backend`; mở **http://localhost:3000**. Đừng chạy hai backend cùng chiếm cổng 3000.
-
-### Tạo tài khoản admin cho demo
-
-Trong `backend/.env.admin` (được Git bỏ qua), đặt `ADMIN_EMAIL` và `ADMIN_PASSWORD` ngẫu nhiên dài ít nhất 20 ký tự. Từ thư mục `backend`, chạy `npm run build` rồi `npm run admin:create`. Đăng nhập bằng email/mật khẩu đó. Script không biến tài khoản thường đã tồn tại thành admin; dùng email riêng. Không chép mật khẩu vào README, ảnh chụp màn hình hoặc commit.
-
-### Cấp Premium demo
-
-Trên bản web, admin mở `/admin` → **Premium demo**, nhập email người dùng và cấp 1–30 ngày. Người dùng tải lại trang. Khi chạy local, cũng có thể dùng script sau:
-
-```powershell
-cd backend
-$env:SEED_PREMIUM_EMAIL='email-tai-khoan-thu@example.com'
-npm run seed:premium
-```
-
-Cho **quán đã được admin duyệt quyền quản lý**, cấu hình `BUSINESS_ADMIN_TOKEN` ở backend và dùng endpoint nội bộ như [runbook](runbooks/local-demo.md#business-owner-demo). Script `seed:premium` chỉ dành cho local/test và bị khóa ở production.
-
-### Kiểm tra nhanh sau khi chạy
-
-1. Mở `http://localhost:3000/api/v1/health` để kiểm tra API/MongoDB; mở trang chủ để thấy bản đồ và danh sách quán.
-2. Chọn quán, xem tình trạng chỗ ngồi, bãi xe và review.
-3. Đăng ký tài khoản thử, lưu quán và viết review. Kiểm tra review xuất hiện sau khi gửi.
-4. Nếu cần test tự động, xem lệnh trong [README](../README.md#chạy-demo-local). Integration test dùng database `seatnow_test_*` và xóa database tạm sau khi chạy.
-
-Phần vận hành nâng cao như dựng lại projection, ingest snapshot, backup/restore và kiểm duyệt báo cáo review nằm trong [runbook local](runbooks/local-demo.md).
-
-<!-- PAGEBREAK -->
-
-## 16. Checklist nghiệm thu bản deploy
-
-Dùng checklist này sau mỗi lần đổi cấu hình Render hoặc merge PR. Ưu tiên tài khoản và địa điểm thử nghiệm; xóa review/đề xuất thử nếu không còn cần. Không dùng tọa độ quán hư cấu để thử check-in ngoài đời.
-
-| Vai trò/bước | Thao tác | Kết quả mong đợi |
+| Vai trò | Trang chính | Việc có thể thử |
 | --- | --- | --- |
-| Hệ thống | Mở `/api/v1/health`, sau đó mở API `/api/v1/map/venues?lat=10.7769&lng=106.7009&radiusM=20000&limit=20`. | Health `status: ok`, `database: ok`; API bản đồ có `data` chứa quán nếu Atlas `seatnow` đã có dữ liệu. |
-| Khách | Mở `/`, chọn quán và xem **Độ đông**, bãi xe, review. Bật/tắt **Còn bàn**. | Ghim và thẻ quán hiển thị; chi tiết có tình trạng và bãi xe nếu có; bộ lọc thay đổi danh sách. |
-| Người dùng | Đăng nhập, lưu một quán, mở **Quán đã lưu**, viết review thử rồi tải lại trang. | Quán vẫn được lưu; review xuất hiện đúng sao/nội dung. Có thể xóa review thử ở chính tài khoản đó. |
-| Người đặt bàn | Chọn nhà hàng/cà phê đã bật nhận yêu cầu, chọn giờ đến–rời và gửi. | `/bookings` hiện **Chờ xác nhận**; sau khi chủ quán xác nhận mới hiện **Đã xác nhận**. |
-| Chủ quán | Đăng nhập tài khoản đã được duyệt, mở `/business`, chọn **Đặt bàn** hoặc **Hồ sơ**. | Thấy đúng quán được cấp quyền, đổi cài đặt rồi **Lưu cài đặt** hoặc **Lưu hồ sơ**; tải lại vẫn thấy giá trị mới. |
-| Admin | Đăng nhập tài khoản admin riêng, mở `/admin` và xem bốn tab. | Có hàng chờ chủ quán, quán cộng đồng, cấp Premium demo và tạo voucher. |
-| Premium | Admin cấp gói cho tài khoản thử, tạo voucher; người dùng mở `/recommendations` và `/vouchers`. | Trang gợi ý nêu lý do xếp hạng; người dùng nhận mã voucher duy nhất và thấy trong danh sách của mình. |
-| Giữ xe | Chủ quán cập nhật chỗ xe, người dùng Premium gửi yêu cầu, chủ quán xác nhận. | Yêu cầu đổi từ **Chờ xác nhận** sang **Đã xác nhận**; người dùng thấy trong `/parking-reservations`. |
-| Điều hướng | Tải lại trực tiếp `/login`, `/bookings`, `/business` và `/admin`. | React vẫn mở đúng trang; trang cần quyền hiển thị thông báo/điều hướng phù hợp khi chưa đăng nhập. |
+| Khách chưa đăng nhập | `/` | Xem bản đồ, lọc địa điểm, chỗ ngồi, bãi xe và review công khai. |
+| Người dùng Free | `/`, `/bookings`, `/proposals` | Check-in đúng vị trí, review/ảnh, lưu quán, theo dõi, đề xuất quán và gửi yêu cầu đặt bàn. |
+| Người dùng Premium demo | Các trang Free, `/recommendations`, `/vouchers`, `/parking-reservations` | Yêu cầu đặt bàn ưu tiên, ẩn nội dung tài trợ, gợi ý theo sở thích, voucher demo và yêu cầu giữ xe. Admin cấp gói; chưa có thanh toán. |
+| Chủ quán được duyệt | `/business` | Quản lý hồ sơ, logo, tương tác, yêu cầu đặt bàn, bãi xe và voucher. Công cụ Premium Business phụ thuộc gói của từng quán. |
+| Admin | `/admin` | Duyệt yêu cầu nhận quán/đề xuất, cấp hoặc thu hồi Premium demo và quản lý voucher. |
 
-Nếu chỉ thấy `database: ok` nhưng bản đồ không có quán và tài khoản cũ không đăng nhập được, dừng thử luồng vai trò. Kiểm tra Render `MONGODB_URI` có đường dẫn `/seatnow`, lưu **Save and deploy**, rồi chạy lại hai bước đầu. Nếu giao diện thiếu tính năng trong hướng dẫn, kiểm tra branch Render đã có commit mới.
+## 1. Tài khoản và điều hướng
+
+### Đăng ký, đăng nhập
+
+1. Trên bản đồ, chọn **Đăng ký** hoặc **Đăng nhập**. Trên màn hình hẹp, bấm nút **menu** cạnh logo để mở các đường dẫn.
+2. Đăng ký bằng tên hiển thị, email, mật khẩu từ 12 ký tự và ô xác nhận mật khẩu. Biểu tượng mắt hiện/ẩn mật khẩu.
+3. Đăng nhập bằng email và mật khẩu. Nếu bạn đến form từ một thao tác đang làm, app quay về thao tác đó. Nếu đăng nhập trực tiếp, admin đến `/admin`, chủ quán có quyền quản lý đến `/business`, tài khoản thường về bản đồ.
+4. Chọn **Đăng xuất** và xác nhận trong hộp thoại. Nếu muốn giữ phiên, bấm **Ở lại**.
+
+Tài khoản admin được tạo bởi người vận hành, không đăng ký qua form công khai. App hiện chưa có xác minh email và khôi phục mật khẩu.
+
+### Thanh điều hướng
+
+Header có **Gói người dùng**, **Dành cho bạn**, **Voucher**, **Chỗ xe của tôi**, **Đề xuất quán**, **Quản lý quán**. Sau đăng nhập còn có **Quán đã lưu**, **Đặt bàn của tôi**, **Đang theo dõi**; admin có **Xét duyệt**. Trên điện thoại, các mục này nằm trong menu; bấm một mục để mở trang và đóng menu.
+
+## 2. Khám phá bản đồ
+
+1. Mở trang chủ `/`. Trên máy tính, danh sách ở trái và bản đồ ở phải. Trên điện thoại, bản đồ nằm ngay dưới hai nút **Hiện danh sách** và **Hiện bộ lọc**.
+2. Bấm **Hiện danh sách / Thu gọn danh sách** để dành thêm chỗ cho bản đồ. Bấm **Hiện bộ lọc / Ẩn bộ lọc** để mở hoặc gập điều kiện tìm kiếm.
+3. Kéo bản đồ để đổi **tâm tìm kiếm**. Bấm ghim hoặc thẻ quán để mở chi tiết; bấm **Đóng** để tắt. Nhiều quán gần nhau được gom thành vòng tròn; bấm vòng tròn để phóng gần.
+4. Bấm **Vị trí của tôi**, cho phép trình duyệt dùng vị trí để thấy chấm xanh và chuyển tâm bản đồ. Thao tác này không phải check-in. Trình duyệt cần `localhost` hoặc HTTPS để cấp quyền vị trí.
+5. Trong chi tiết, **Chỉ đường** mở Google Maps; tọa độ demo có thể không trùng quán thật.
+
+### Tìm và lọc
+
+Nhập tên hoặc địa chỉ vào ô tìm kiếm; có thể gõ tiếng Việt không dấu. Các bộ lọc gồm loại địa điểm, loại món, **bán kính 1/3/5/10 km**, mức giá, điểm đánh giá, độ đông, **Còn bàn**, sắp xếp và **Chỉ quán đã lưu**.
+
+**Bán kính tính từ tâm bản đồ đang xem, không mặc định tính từ vị trí GPS của bạn.** Ghim và danh sách đều dùng phạm vi này; nhãn trên bản đồ cho biết bán kính hiện tại. Đổi bán kính hoặc kéo bản đồ sẽ cập nhật địa điểm phù hợp. Nếu muốn lọc quanh nơi bạn đứng, bấm **Vị trí của tôi** trước. **Xóa bộ lọc** bỏ các điều kiện nhưng giữ khu vực đang xem.
+
+**Còn bàn** chỉ nhận quán có snapshot còn hiệu lực, đang nhận khách và còn bàn hoặc ghế. Nếu kết quả trống, tăng bán kính, bỏ bớt điều kiện hoặc thử khu vực khác. Dữ liệu chỗ ngồi demo không phải dữ liệu trực tiếp từ quán.
+
+### Chỗ ngồi và bãi xe
+
+- Chi tiết quán ghi **mức đông**, số bàn/ghế còn trống, thời gian chờ ước tính, nguồn và thời điểm cập nhật. Bấm **Xem lịch sử chỗ ngồi 24 giờ** để xem các bản ghi gần đây. Snapshot cũ hoặc thiếu dữ liệu được gắn nhãn riêng.
+- Trong **Bãi đỗ xe gần đây**, xem loại bãi, khoảng cách, giá, loại xe, số chỗ và thời điểm cập nhật. Lọc theo loại xe, còn chỗ mới, mở 24 giờ hoặc miễn phí; bấm **Chỉ đường** khi cần.
+- Khoảng cách trong app là đường chim bay. Check-in và yêu cầu đặt bàn không tự trừ số bàn/ghế của snapshot.
+
+## 3. Tính năng người dùng Free
+
+### Check-in
+
+1. Đăng nhập, mở một quán rồi đến mục **Check-in cộng đồng**.
+2. Bấm **Check-in tại đây** và cho phép truy cập vị trí. Thành công sẽ báo đã ghi nhận và cập nhật tín hiệu cộng đồng.
+3. Backend chỉ nhận khi GPS chính xác không quá **100 m** và thiết bị ở trong **150 m** từ tọa độ quán. Mỗi tài khoản chỉ được tính một lần cho cùng quán trong ba giờ.
+
+Nếu app báo **Bạn cần ở gần địa điểm**, lượt check-in chưa được ghi. Quán seed thường dùng tọa độ mô phỏng nên khó thử check-in thật. Tín hiệu cộng đồng không thay số bàn trống.
+
+### Review, ảnh và cộng đồng
+
+1. Mở **Review cộng đồng**, chọn 1–5 sao, viết nhận xét ngắn và tùy chọn một ảnh JPEG/PNG/WebP tối đa 2 MB. Bấm **Gửi đánh giá**.
+2. Mỗi tài khoản có một review cho mỗi quán. Mở lại để sửa; chọn ảnh mới để thay ảnh cũ, hoặc xóa review bằng hộp xác nhận. Nếu tải ảnh lỗi sau khi lưu chữ/sao, chọn ảnh hợp lệ và cập nhật review cũ.
+3. **Lưu quán** để thêm vào `/favorites`; **Chia sẻ địa điểm** để sao chép liên kết. Bấm tên tác giả review để mở hồ sơ, **Theo dõi** rồi xem hoạt động ở `/following`.
+
+Ảnh review, logo, ảnh bìa và ảnh chứng minh quyền quản lý được backend chuyển thành WebP và lưu trong MongoDB; ảnh chứng minh chỉ admin xem được và bị xóa sau khi xét duyệt. Ảnh không nằm trong `frontend/public`.
+
+### Đề xuất địa điểm mới
+
+1. Mở **Đề xuất quán** (`/proposals`), nhập tên, loại, địa chỉ, mô tả, mức giá và chọn tọa độ trên bản đồ nhỏ.
+2. Bấm **Gửi đề xuất**. Đề xuất mới chưa hiện trên bản đồ.
+3. Ba tài khoản **khác người gửi** xác nhận. Khi đủ ba lượt, admin kiểm tra và duyệt/từ chối tại `/admin`.
+4. Người gửi theo dõi trạng thái trong **Đề xuất của tôi**; sau khi duyệt có thể mở quán trên bản đồ.
+
+Nếu quán đã tồn tại và bạn muốn quản lý hồ sơ, dùng **Bạn là chủ quán này?** thay vì đề xuất quán trùng.
+
+### Yêu cầu đặt bàn
+
+1. Mở nhà hàng hoặc cà phê đã bật nhận yêu cầu. Trong chi tiết, tìm **Yêu cầu đặt bàn**. Rạp phim và quán chưa bật nhận không có form gửi.
+2. Chọn **giờ bắt đầu** (ít nhất 1 giờ tới, tối đa 14 ngày), **giờ kết thúc** (lượt dài 30 phút–4 giờ), số khách 1–12 và ghi chú nếu cần. Bấm **Gửi yêu cầu**.
+3. Yêu cầu ban đầu là **Chờ xác nhận**, chưa phải bàn đã giữ. Mở **Đặt bàn của tôi** (`/bookings`) để theo dõi hoặc hủy có xác nhận.
+4. Chủ quán xác nhận hoặc từ chối. Khi đã xác nhận, app kiểm tra các lượt đặt trùng giờ so với tổng bàn/ghế đã ghi nhận; chủ quán vẫn phải kiểm tra khả năng phục vụ thực tế.
+
+Premium demo được xếp ưu tiên trong hàng chờ nhưng không bảo đảm quán xác nhận. App chưa gửi email/SMS khi trạng thái đổi.
+
+## 4. Premium dành cho người dùng
+
+Mở **Gói người dùng** (`/plans`) để xem gói hiện tại. Admin cấp hoặc thu hồi Premium demo tại `/admin`; app chưa thu tiền và chưa cho tự mua gói. Khi quyền Premium được tải thành công, header có **Premium của tôi**.
+
+- **Dành cho bạn:** chọn khẩu vị, mức giá và số người tại `/recommendations`. Kết quả dựa trên quy tắc và lịch sử lưu/review, chưa phải AI.
+- **Voucher:** vào `/vouchers`, bấm **Nhận voucher** khi còn lượt. Mã dùng một lần được liệt kê trong **Voucher của tôi**; chủ quán xác nhận mã ở trang quản lý. Voucher demo không có giá trị tại quán thật.
+- **Giữ xe:** mở bãi **thuộc quán** có snapshot mới còn chỗ, chọn loại xe và giờ đến/rời, rồi gửi yêu cầu. Chủ quán phải xác nhận. Theo dõi/hủy tại **Chỗ xe của tôi** (`/parking-reservations`). Chưa hỗ trợ bãi công cộng độc lập.
+- **Bản đồ không quảng cáo và ưu tiên đặt bàn:** nội dung tài trợ được ẩn khi quyền được xác minh; yêu cầu đặt bàn Premium xếp trước.
+
+Nếu trang **Gói người dùng** báo không kiểm tra được quyền, bấm **Thử lại**. Bản đồ Free vẫn dùng được trong lúc API gói gặp lỗi; quyền Premium chỉ áp dụng khi được xác minh.
+
+## 5. Chủ quán
+
+### Xin quyền quản lý
+
+1. Đăng nhập bằng tài khoản sẽ quản lý quán. Trong chi tiết, bấm **Bạn là chủ quán này?** hoặc mở `/business/claims`.
+2. Điền slug quán, mô tả cách chứng minh quyền quản lý (20–300 ký tự) và có thể tải ảnh JPEG/PNG/WebP tối đa 3 MB.
+3. Bấm **Gửi yêu cầu**. Admin kiểm tra nội dung và ảnh, rồi duyệt hoặc từ chối. Chỉ sau khi duyệt, quán mới hiện ở **Địa điểm đang quản lý** trong `/business`.
+4. Nếu vừa được duyệt mà chưa thấy quán, bấm **Cập nhật trạng thái**, kiểm tra đúng email đã gửi yêu cầu rồi tải lại trang.
+
+### Các trang quản lý
+
+Header khu vực `/business` tách thành các trang. Dùng **Chi nhánh** để chuyển quán và **Về trang chính** để quay về bản đồ.
+
+| Trang | Tác vụ |
+| --- | --- |
+| **Tổng quan** | Xem các quán được cấp quyền và đi đến công việc cần làm. |
+| **Hồ sơ** | Sửa tên, địa chỉ, mô tả, giờ mở, menu, giá; bấm **Lưu hồ sơ**. Tải và cập nhật logo. |
+| **Tương tác** | Xem check-in gần đây, review và ảnh công khai; bấm **Làm mới** khi cần. |
+| **Đặt bàn** | Bật **Nhận yêu cầu đặt bàn** rồi **Lưu cài đặt**; xác nhận/từ chối yêu cầu, đánh dấu đã đón khách. |
+| **Giữ xe** | Cập nhật chỗ xe của bãi thuộc quán, xác nhận/từ chối yêu cầu giữ xe. |
+| **Voucher** | Nhập mã khách đưa để xác nhận sử dụng một lần. |
+
+Gói **Premium Business demo** của từng quán có thêm cập nhật chỗ trống thủ công, thống kê 7 ngày, ảnh bìa, ưu đãi theo lịch và vị trí tài trợ có nhãn. Snapshot chủ quán nhập tự cũ sau 10 phút. Chưa tích hợp POS, thông báo đẩy hoặc quản lý nhân viên chuỗi nhiều vai trò.
+
+## 6. Admin
+
+Đăng nhập tài khoản admin do người vận hành tạo; app đưa thẳng đến `/admin`. Dùng các tab:
+
+1. **Chủ quán:** kiểm tra slug, người gửi, nội dung và ảnh chứng minh riêng tư; chọn **Duyệt** hoặc **Từ chối**, sau đó xác nhận thao tác.
+2. **Quán cộng đồng:** chỉ thấy đề xuất đủ ba xác nhận. Kiểm tra thông tin và vị trí rồi duyệt/từ chối. Quán được duyệt mới lên bản đồ.
+3. **Premium demo:** xem danh sách người dùng, tìm theo tên/email, cấp 1–30 ngày hoặc thu hồi. Người dùng tải lại trang để nhận trạng thái mới.
+4. **Voucher:** tạo ưu đãi demo cho slug quán, số lượt và hạn dùng; tắt voucher khi cần.
+
+Không dùng tài khoản admin thường để thử luồng khách/chủ quán; nên tạo tài khoản riêng cho từng vai trò.
+
+## 7. Chạy local và xử lý lỗi
+
+### Chạy app
+
+Xem [README](../README.md) để cài Node.js, MongoDB và seed dữ liệu. Khi phát triển hai server, mở frontend ở `http://localhost:5173`. Nếu muốn cả app trên cổng 3000, từ thư mục gốc chạy:
+
+```powershell
+npm run preview:local
+```
+
+Lệnh này build lại React và NestJS rồi chạy backend. Dừng backend cũ đang chiếm cổng 3000 trước; sau đó tải lại trang bằng **Ctrl+F5**. Trên mobile, header bản mới có nút menu cạnh logo. Nếu vẫn thấy dải trắng phía trên bản đồ và header cuộn ngang, bạn đang xem frontend build cũ hoặc server chạy ở thư mục khác.
+
+### Kiểm tra nhanh
+
+| Hiện tượng | Cách xử lý |
+| --- | --- |
+| Bản đồ nền trống nhưng danh sách vẫn có quán | Kiểm tra mạng và tile style; tải lại trang. Danh sách vẫn dùng được khi tile lỗi. |
+| Không có quán | Bỏ bộ lọc, tăng bán kính, chuyển tâm về TP.HCM. Kiểm tra `/api/v1/health` và MongoDB đúng database `seatnow`. |
+| **Còn bàn** không trả kết quả | Chỉ snapshot còn hiệu lực, đang nhận khách và còn chỗ mới được tính; thử bỏ điều kiện khác. |
+| Không thấy chấm vị trí hoặc check-in thất bại | Cấp Location trên `localhost`/HTTPS, kiểm tra GPS và khoảng cách tới tọa độ quán. |
+| Không thấy form đặt bàn | Chỉ nhà hàng/cà phê đã được chủ quán bật **Nhận yêu cầu đặt bàn** và bấm **Lưu cài đặt** mới có form. |
+| Yêu cầu đặt bàn đã gửi nhưng chưa có bàn | Trạng thái **Chờ xác nhận** cần chủ quán xử lý. |
+| Quyền Premium báo lỗi | Vào `/plans`, đọc mã lỗi và bấm **Thử lại**; kiểm tra phiên đăng nhập và API nếu lỗi lặp lại. |
+| Admin hoặc chủ quán không thấy trang của mình | Kiểm tra email, quyền đã được duyệt và đăng nhập lại. |
+| Bản deploy thiếu tính năng mới | Kiểm tra commit/branch service Render và deploy mới nhất; frontend local không tự cập nhật bản Render. |
+
+Mẫu thu ý kiến người thử nằm trong [file Excel phản hồi](../outputs/01a1efba-d6bc-7490-9bea-097fc453b639/SeatNow_Feedback.xlsx): mỗi dòng là một lượt thử tính năng, có vai trò, thiết bị, kết quả, điểm 1–5, vấn đề và góp ý.
+
+Hướng dẫn triển khai nằm tại [DEPLOY_GUIDE.md](DEPLOY_GUIDE.md); phạm vi tính năng và giới hạn nằm tại [FEATURES.md](FEATURES.md).
