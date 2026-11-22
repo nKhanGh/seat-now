@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { PanelLeft, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Menu, PanelLeft, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, useLogout } from '../../auth/api/authQueries';
 import { AuthLink } from '../../auth/components/AuthLink';
@@ -49,6 +49,7 @@ export function MapExplorer() {
   const [sidebarVisible, setSidebarVisible] = useState(
     () => !window.matchMedia('(max-width: 760px)').matches,
   );
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectionSerial, setSelectionSerial] = useState(0);
   const [selectedParkingSlug, setSelectedParkingSlug] = useState<string | null>(null);
   const [parkingFilters, setParkingFilters] = useState<ParkingFilterValues>({
@@ -75,6 +76,7 @@ export function MapExplorer() {
     const onBreakpointChange = (event: MediaQueryListEvent) => {
       setFiltersVisible(!event.matches);
       setSidebarVisible(!event.matches);
+      setMobileMenuOpen(false);
     };
     narrowScreen.addEventListener('change', onBreakpointChange);
     return () => narrowScreen.removeEventListener('change', onBreakpointChange);
@@ -310,8 +312,24 @@ export function MapExplorer() {
           <Link to="/business" className="header-business-link">
             Quản lý quán
           </Link>
+          <button
+            type="button"
+            className="mobile-menu-toggle"
+            aria-controls="explorer-navigation"
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
+          </button>
         </div>
-        <nav>
+        <nav
+          id="explorer-navigation"
+          className={mobileMenuOpen ? 'mobile-open' : ''}
+          onClick={(event) => {
+            if ((event.target as HTMLElement).closest('a')) setMobileMenuOpen(false);
+          }}
+        >
           <span className="sync-status" role="status">
             {liveStatus === 'connected'
               ? 'Cập nhật trực tiếp'
@@ -319,6 +337,7 @@ export function MapExplorer() {
                 ? 'Đồng bộ định kỳ'
                 : 'Đang kết nối'}
           </span>
+          <Link to="/business" className="mobile-business-link">Quản lý quán</Link>
           <Link to="/plans">Gói người dùng</Link>
           {entitlements.data?.plan === 'PREMIUM' && (
             <Link to="/plans" className="header-premium-link">
