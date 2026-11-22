@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { ChevronLeft, ChevronRight, Crown, Search, ShieldX } from 'lucide-react';
 import { useAdminUsers, useSetDemoPremium } from '../api/adminQueries';
 import type { AdminUser } from '../services/admin.service';
 
@@ -49,7 +50,9 @@ export function AdminPremiumPanel() {
               placeholder="Tên hoặc email người dùng"
             />
           </label>
-          <button type="submit">Tìm</button>
+          <button type="submit" className="premium-button premium-button-search">
+            <Search size={17} aria-hidden="true" /> Tìm người dùng
+          </button>
         </form>
         <label>
           Số ngày khi cấp (1–30)
@@ -76,7 +79,7 @@ export function AdminPremiumPanel() {
       {users.isError && (
         <p role="alert" className="error">
           {users.error.message}{' '}
-          <button type="button" onClick={() => void users.refetch()}>
+          <button type="button" className="premium-button" onClick={() => void users.refetch()}>
             Thử lại
           </button>
         </p>
@@ -102,37 +105,45 @@ export function AdminPremiumPanel() {
                 {user.plan === 'PREMIUM' ? (
                   <button
                     type="button"
-                    className="admin-reject"
+                    className="premium-button premium-button-danger"
                     disabled={mutation.isPending}
                     onClick={() => setRevokeUser(user)}
                   >
-                    Thu hồi
+                    <ShieldX size={17} aria-hidden="true" /> Thu hồi
                   </button>
                 ) : (
                   <button
                     type="button"
-                    className="primary"
+                    className="premium-button premium-button-primary"
                     disabled={mutation.isPending || days < 1 || days > 30}
                     onClick={() => void changePlan(user, 'grant')}
                   >
-                    Cấp Premium
+                    <Crown size={17} aria-hidden="true" /> Cấp Premium
                   </button>
                 )}
               </article>
             ))}
           </div>
-          <div className="admin-premium-pages">
-            <button type="button" disabled={page <= 1 || users.isFetching} onClick={() => setPage(page - 1)}>
-              Trang trước
-            </button>
-            <button
-              type="button"
-              disabled={!users.data.meta.hasNext || users.isFetching}
-              onClick={() => setPage(page + 1)}
-            >
-              Trang sau
-            </button>
-          </div>
+          {(page > 1 || users.data.meta.hasNext) && (
+            <div className="admin-premium-pages">
+              <button
+                type="button"
+                className="premium-button"
+                disabled={page <= 1 || users.isFetching}
+                onClick={() => setPage(page - 1)}
+              >
+                <ChevronLeft size={17} aria-hidden="true" /> Trang trước
+              </button>
+              <button
+                type="button"
+                className="premium-button"
+                disabled={!users.data.meta.hasNext || users.isFetching}
+                onClick={() => setPage(page + 1)}
+              >
+                Trang sau <ChevronRight size={17} aria-hidden="true" />
+              </button>
+            </div>
+          )}
         </>
       )}
       {revokeUser && (
@@ -141,16 +152,21 @@ export function AdminPremiumPanel() {
             Thu hồi Premium demo của <strong>{revokeUser.displayName}</strong> ({revokeUser.email})?
           </p>
           <div className="admin-actions">
-            <button type="button" onClick={() => setRevokeUser(null)} disabled={mutation.isPending}>
+            <button
+              type="button"
+              className="premium-button"
+              onClick={() => setRevokeUser(null)}
+              disabled={mutation.isPending}
+            >
               Giữ nguyên
             </button>
             <button
               type="button"
-              className="admin-reject"
+              className="premium-button premium-button-danger"
               onClick={() => void changePlan(revokeUser, 'revoke')}
               disabled={mutation.isPending}
             >
-              Xác nhận thu hồi
+              <ShieldX size={17} aria-hidden="true" /> Xác nhận thu hồi
             </button>
           </div>
         </div>
