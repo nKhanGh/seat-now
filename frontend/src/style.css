@@ -4,6 +4,14 @@ body { margin: 0; }
 a { color: #17654d; }
 button, input { font: inherit; }
 button { cursor: pointer; }
+::selection { background: #ccefd6; color: #103e2e; }
+/* Native selects keep the platform picker while sharing one visual style across forms. */
+select { appearance: none; width: 100%; max-width: 100%; min-width: 0; min-height: 48px; padding: 10px 42px 10px 14px; border: 1px solid #b8cfc2; border-radius: 10px; background-color: #fff; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%2317654d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-position: right 13px center; background-repeat: no-repeat; background-size: 18px; box-shadow: 0 2px 6px #173b2a0a; color: #152520; font: inherit; line-height: 1.4; text-overflow: ellipsis; transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease; cursor: pointer; }
+select:hover:not(:disabled) { border-color: #5f9c79; background-color: #f9fdf9; box-shadow: 0 3px 10px #173b2a14; }
+select:focus { border-color: #17654d; box-shadow: 0 0 0 3px #17654d20; outline: 0; }
+select:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
+select:disabled { background-color: #f2f5f2; color: #6b7970; cursor: not-allowed; opacity: .7; }
+select option { color: #152520; background: #fff; }
 .shell { max-width: 1080px; margin: 0 auto; padding: 28px; }
 header { display: flex; justify-content: space-between; align-items: center; }
 header strong, .brand { font-size: 1.35rem; font-weight: 800; text-decoration: none; color: #17654d; }
@@ -65,9 +73,9 @@ p { line-height: 1.55; }
 .explorer-controls button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .filterbar { position: relative; z-index: 5; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 24px; background: #fffdf9; border-bottom: 1px solid #deebe1; }
 .filterbar[hidden], .venue-list[hidden] { display: none; }
-.filterbar select, .filterbar button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 9px 12px; color: #152520; }
-.filterbar select:hover, .filterbar button:hover { border-color: #5f9c79; }
-.filterbar select:focus-visible, .filterbar button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
+.filterbar button { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 9px 12px; color: #152520; }
+.filterbar button:hover { border-color: #5f9c79; }
+.filterbar button:focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
 .filter-select { position: relative; flex: 0 0 auto; min-width: 124px; }
 .filterbar .filter-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 42px; border-radius: 10px; background: white; box-shadow: 0 2px 5px #173b2a08; text-align: left; white-space: nowrap; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
 .filter-select-trigger span { overflow: hidden; text-overflow: ellipsis; }
@@ -83,7 +91,6 @@ p { line-height: 1.55; }
 .filterbar .filter-select-option[aria-selected="true"] { background: #e6f4e9; color: #12533e; font-weight: 750; }
 .filter-select-option svg { color: #17654d; flex: 0 0 auto; }
 .filterbar .price-filter { min-width: 165px; }
-.filterbar select:disabled { opacity: .55; cursor: not-allowed; }
 .filterbar .filter-reset { border-color: #17654d; color: #17654d; font-weight: 700; }
 .filterbar .filter-reset:hover { background: #e3f6e8; }
 .venue-search { display: inline-flex; align-items: center; gap: 8px; min-width: min(240px, 100%); border: 1px solid #b8cfc2; border-radius: 8px; background: white; color: #17654d; padding: 0 10px; }
@@ -156,6 +163,10 @@ p { line-height: 1.55; }
 .proposal-form { max-width: 700px; display: grid; gap: 12px; margin: 20px 0; }
 .proposal-form label { display: grid; gap: 5px; }
 .proposal-form textarea { min-height: 86px; resize: vertical; }
+.card.proposal-form label, .card.business-form label { margin: 0; }
+.card.proposal-form input, .card.business-form input { margin-top: 0; }
+.card.proposal-form textarea, .card.business-form textarea { width: 100%; padding: 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: #fff; color: #152520; font: inherit; }
+.card.proposal-form textarea:focus, .card.business-form textarea:focus { outline: 2px solid #2b8e68; }
 .proposal-coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .proposal-card { max-width: 700px; margin: 12px 0; }
 .proposal-card h3 { margin: 0 0 8px; }
@@ -220,7 +231,7 @@ p { line-height: 1.55; }
 .review-panel form, .review-panel label { display: flex; flex-direction: column; gap: 6px; }
 .review-panel form { margin-bottom: 12px; }
 .review-panel textarea { min-height: 78px; resize: vertical; }
-.review-panel textarea, .review-panel select { width: 100%; border: 1px solid #b8cfc2; border-radius: 8px; padding: 9px; background: white; }
+.review-panel textarea { width: 100%; border: 1px solid #b8cfc2; border-radius: 8px; padding: 9px; background: white; }
 .review-panel .primary { width: 100%; }
 .review-delete-confirm { border: 1px solid #e4b9ae; border-radius: 10px; background: #fff6f3; padding: 12px; }
 .review-delete-confirm p { margin: 0 0 10px; }
@@ -253,9 +264,9 @@ p { line-height: 1.55; }
 .parking-reservation-panel h3 { margin: 0 0 6px; font-size: 1rem; }
 .parking-reservation-panel form, .parking-reservation-panel label { display: grid; gap: 6px; }
 .parking-reservation-panel form { gap: 10px; }
-.parking-reservation-panel input, .parking-reservation-panel select { width: 100%; padding: 9px; border: 1px solid #b8cfc2; border-radius: 8px; background: white; }
+.parking-reservation-panel input { width: 100%; padding: 9px; border: 1px solid #b8cfc2; border-radius: 8px; background: white; }
 .parking-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid #deebe1; }
-.parking-filters select { border: 1px solid #b8cfc2; border-radius: 8px; background: white; padding: 6px; }
+.parking-filters select { width: auto; min-height: 40px; }
 .parking-filters label { display: inline-flex; gap: 4px; align-items: center; white-space: nowrap; font-size: .8rem; }
 .proposal-map-wrap { margin: 20px 0 8px; }
 .proposals-page .proposal-form { width: min(100%, 640px); }
@@ -344,7 +355,7 @@ p { line-height: 1.55; }
 .business-workspace-title h1 { margin: 4px 0 0; font-size: clamp(2rem, 5vw, 3rem); }
 .business-workspace-title .eyebrow { margin: 0; }
 .business-workspace-title label { display: grid; gap: 5px; min-width: min(100%, 280px); font-weight: 700; }
-.business-workspace-title select { width: 100%; padding: 10px 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #162c24; font: inherit; }
+.business-workspace-title select { width: 100%; }
 .business-workspace-nav { display: flex; gap: 8px; overflow-x: auto; margin-top: 22px; padding-bottom: 12px; scrollbar-width: thin; }
 .business-workspace-nav a { flex: 0 0 auto; padding: 10px 14px; border: 1px solid #cfe1d4; border-radius: 9px; background: #f7faf7; color: #17654d; text-decoration: none; font-weight: 700; white-space: nowrap; }
 .business-workspace-nav a:hover { background: #e3f6e8; }
@@ -379,7 +390,8 @@ p { line-height: 1.55; }
 .coming-soon { display: inline-block; margin-left: 8px; font-size: .75rem; color: #6a746c; }
 .recommendation-preferences { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 24px 0; padding: 18px; border: 1px solid #deebe1; border-radius: 16px; background: white; }
 .recommendation-preferences label { display: grid; gap: 6px; flex: 1 1 160px; font-weight: 700; }
-.recommendation-preferences select, .recommendation-preferences input, .recommendation-preferences button { min-height: 42px; padding: 9px 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #152520; font: inherit; }
+.recommendation-preferences input, .recommendation-preferences button { min-height: 42px; padding: 9px 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #152520; font: inherit; }
+.recommendation-preferences select { width: 100%; }
 .recommendation-preferences input { width: 100%; }
 .recommendation-preferences button { color: #17654d; font-weight: 700; }
 .recommendation-preferences :focus-visible { outline: 3px solid #d99b28; outline-offset: 2px; }
