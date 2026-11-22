@@ -13,6 +13,7 @@ import {
 } from './availability/schemas/availability-snapshot.schema';
 import { ParkingFacility, ParkingFacilitySchema } from './parking/schemas/parking-facility.schema';
 import { ParkingSnapshot, ParkingSnapshotSchema } from './parking/schemas/parking-snapshot.schema';
+import { ParkingReservation, ParkingReservationSchema } from './parking/schemas/parking-reservation.schema';
 import { UserSubscription, UserSubscriptionSchema } from './subscription/schemas/user-subscription.schema';
 import { CheckIn, CheckInSchema } from './community/schemas/check-in.schema';
 import { Favorite, FavoriteSchema } from './community/schemas/favorite.schema';
@@ -31,6 +32,8 @@ import { VenueLogo, VenueLogoSchema } from './venues/schemas/venue-logo.schema';
 import { VenuePageView, VenuePageViewSchema } from './venues/schemas/venue-page-view.schema';
 import { VenueCover, VenueCoverSchema } from './venues/schemas/venue-cover.schema';
 import { Booking, BookingSchema } from './booking/schemas/booking.schema';
+import { VoucherOffer, VoucherOfferSchema } from './voucher/schemas/voucher-offer.schema';
+import { VoucherClaim, VoucherClaimSchema } from './voucher/schemas/voucher-claim.schema';
 
 async function createIndexes() {
   await ConfigModule.forRoot();
@@ -46,6 +49,7 @@ async function createIndexes() {
     await mongoose.model(AvailabilityLatest.name, AvailabilityLatestSchema).createIndexes();
     await mongoose.model(ParkingFacility.name, ParkingFacilitySchema).createIndexes();
     await mongoose.model(ParkingSnapshot.name, ParkingSnapshotSchema).createIndexes();
+    await mongoose.model(ParkingReservation.name, ParkingReservationSchema).createIndexes();
     await mongoose.model(UserSubscription.name, UserSubscriptionSchema).createIndexes();
     await mongoose.model(CheckIn.name, CheckInSchema).createIndexes();
     await mongoose.model(Favorite.name, FavoriteSchema).createIndexes();
@@ -61,6 +65,8 @@ async function createIndexes() {
     await mongoose.model(VenuePageView.name, VenuePageViewSchema).createIndexes();
     await mongoose.model(VenueCover.name, VenueCoverSchema).createIndexes();
     await mongoose.model(Booking.name, BookingSchema).createIndexes();
+    await mongoose.model(VoucherOffer.name, VoucherOfferSchema).createIndexes();
+    await mongoose.model(VoucherClaim.name, VoucherClaimSchema).createIndexes();
   } finally {
     await mongoose.disconnect();
   }
