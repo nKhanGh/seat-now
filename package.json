@@ -2,6 +2,7 @@
   "name": "seat-now-workspace",
   "private": true,
   "scripts": {
+    "preview:local": "npm --prefix frontend run build && npm --prefix backend run build && npm --prefix backend start",
     "lint": "eslint backend/src frontend/src",
     "format": "prettier --write \"backend/src/**/*.{ts,tsx}\" \"frontend/src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"backend/src/**/*.{ts,tsx}\" \"frontend/src/**/*.{ts,tsx}\""
