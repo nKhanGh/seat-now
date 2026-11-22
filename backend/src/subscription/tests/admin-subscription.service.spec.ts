@@ -42,7 +42,7 @@ describe('Admin Premium demo grants', () => {
 
   it('lists only active users with effective Premium state and no password fields', async () => {
     const result = await service.listUsers({ q: 'demo@example.com', page: 1 });
-    expect(users.find).toHaveBeenCalledWith(expect.objectContaining({ role: 'USER', status: 'ACTIVE' }), {
+    expect(users.find).toHaveBeenCalledWith(expect.objectContaining({ role: { $in: ['USER', null] }, status: 'ACTIVE' }), {
       emailNormalized: 1,
       displayName: 1,
     });
@@ -60,6 +60,15 @@ describe('Admin Premium demo grants', () => {
       { upsert: true },
     );
     expect(result.data.plan).toBe('PREMIUM');
+  });
+
+  it('allows legacy user records without a role while rejecting admins', async () => {
+    users.findOne.mockResolvedValueOnce({ ...user, role: undefined });
+    await expect(service.grant('demo@example.com', 7)).resolves.toEqual({
+      data: expect.objectContaining({ plan: 'PREMIUM' }),
+    });
+    users.findOne.mockResolvedValueOnce({ ...user, role: 'ADMIN' });
+    await expect(service.grant('admin@example.com', 7)).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('rejects admin accounts and missing users', async () => {

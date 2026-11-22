@@ -17,7 +17,7 @@ export class AdminSubscriptionService {
     const search = q?.trim();
     const escaped = search?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const filter = {
-      role: 'USER',
+      role: { $in: ['USER', null] },
       status: 'ACTIVE',
       ...(escaped
         ? {
@@ -64,7 +64,8 @@ export class AdminSubscriptionService {
   private async target(email: string) {
     const user = await this.users.findOne({ emailNormalized: email.trim().toLowerCase(), status: 'ACTIVE' });
     if (!user) throw new NotFoundException('Không tìm thấy tài khoản đang hoạt động.');
-    if (user.role !== 'USER') throw new BadRequestException('Chỉ cấp Premium demo cho tài khoản người dùng.');
+    if (user.role && user.role !== 'USER')
+      throw new BadRequestException('Chỉ cấp Premium demo cho tài khoản người dùng.');
     return user;
   }
 
