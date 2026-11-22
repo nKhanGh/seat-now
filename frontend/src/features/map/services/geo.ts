@@ -11,3 +11,11 @@ export function distanceMeters(a: Coordinates, b: Coordinates) {
     Math.cos(latA * toRadians) * Math.cos(latB * toRadians) * Math.sin(longitudeDelta / 2) ** 2;
   return Math.round(6_371_000 * 2 * Math.atan2(Math.sqrt(arc), Math.sqrt(1 - arc)));
 }
+
+export function venuesWithinRadius<T extends { location: { coordinates: Coordinates } }>(
+  venues: T[],
+  center: Coordinates,
+  radiusM: number,
+): T[] {
+  return venues.filter((venue) => distanceMeters(center, venue.location.coordinates) <= radiusM);
+}

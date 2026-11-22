@@ -108,6 +108,7 @@ p { line-height: 1.55; }
 .load-more { display: block; width: 100%; padding: 12px; border: 1px solid #b8cfc2; border-radius: 9px; background: white; color: #17654d; font-weight: 700; }
 .map-pane { position: relative; min-height: 0; }
 .map-pane > .venue-map { position: absolute; inset: 0; }
+.map-radius-badge { position: absolute; z-index: 1; top: 12px; left: 12px; padding: 7px 11px; border: 1px solid #cce0d2; border-radius: 999px; background: #fffef9ed; color: #17654d; box-shadow: 0 3px 10px #173b2a1c; font-size: .75rem; font-weight: 750; pointer-events: none; }
 .venue-pin { border: 2px solid #fff; background: #17654d; color: white; border-radius: 50%; width: 42px; height: 42px; box-shadow: 0 3px 10px #0004; font-size: 1.1rem; }
 .venue-pin.selected { background: #d35c31; width: 49px; height: 49px; }
 .user-location-dot { width: 20px; height: 20px; border: 4px solid white; border-radius: 50%; background: #2878d5; box-shadow: 0 0 0 8px #2878d544, 0 2px 10px #173b2a66; }

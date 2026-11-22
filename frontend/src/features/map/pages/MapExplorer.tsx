@@ -24,7 +24,7 @@ import { NearbySuggestions } from '../components/NearbySuggestions';
 import { nearbySuggestions } from '../services/nearbySuggestions';
 import { searchVenues } from '../services/venueSearch';
 import { directionsUrl } from '../services/directions';
-import { distanceMeters } from '../services/geo';
+import { distanceMeters, venuesWithinRadius } from '../services/geo';
 import { sortVenues, VenueSort } from '../services/sortVenues';
 import { ratingLabel } from '../services/ratingLabel';
 import { useEntitlements } from '../../subscription/api/subscriptionQueries';
@@ -99,6 +99,10 @@ export function MapExplorer() {
   const venues = useNearbyVenues(filters, mapReady);
   const catalog = useHcmVenuePins(filters, mapReady);
   const venueItems = useMemo(() => venues.data?.pages.flatMap((page) => page.data) ?? [], [venues.data]);
+  const venuesInRadius = useMemo(
+    () => venuesWithinRadius(seenVenues, [filters.lng, filters.lat], filters.radiusM),
+    [seenVenues, filters.lng, filters.lat, filters.radiusM],
+  );
   const filterSignature = JSON.stringify([
     filters.category,
     filters.cuisine,
@@ -147,15 +151,12 @@ export function MapExplorer() {
   const displayedVenues = useMemo(() => {
     const nearbyItems =
       venues.isError && venueItems.length === 0
-        ? seenVenues.filter(
-            (venue) =>
-              distanceMeters([filters.lng, filters.lat], venue.location.coordinates) <= filters.radiusM,
-          )
+        ? venuesInRadius
         : venueItems;
     const candidates = searching
-      ? searchVenues(seenVenues, searchText)
+      ? searchVenues(venuesInRadius, searchText)
       : savedOnly
-        ? seenVenues
+        ? venuesInRadius
         : nearbyItems;
     const filtered = savedOnly ? candidates.filter((venue) => favoriteSlugs.has(venue.slug)) : candidates;
     return searching ? filtered : sortVenues(filtered, sortOrder, [filters.lng, filters.lat]);
@@ -163,7 +164,7 @@ export function MapExplorer() {
     searching,
     searchText,
     savedOnly,
-    seenVenues,
+    venuesInRadius,
     venueItems,
     venues.isError,
     favoriteSlugs,
@@ -175,19 +176,22 @@ export function MapExplorer() {
   const mapVenues = useMemo(
     () =>
       savedOnly
-        ? seenVenues.filter((venue) => favoriteSlugs.has(venue.slug) || venue.slug === params.get('venue'))
-        : seenVenues,
-    [savedOnly, seenVenues, favoriteSlugs, params],
+        ? venuesInRadius.filter((venue) => favoriteSlugs.has(venue.slug) || venue.slug === params.get('venue'))
+        : venuesInRadius,
+    [savedOnly, venuesInRadius, favoriteSlugs, params],
   );
   const publishedOnly = useMemo(() => {
     if (!remoteReady) return [];
     const knownSlugs = new Set(displayedVenues.map((venue) => venue.slug));
     return (
       publishedSearch.data?.data.filter(
-        (venue) => !knownSlugs.has(venue.slug) && (!savedOnly || favoriteSlugs.has(venue.slug)),
+        (venue) =>
+          !knownSlugs.has(venue.slug) &&
+          (!savedOnly || favoriteSlugs.has(venue.slug)) &&
+          distanceMeters([filters.lng, filters.lat], venue.location.coordinates) <= filters.radiusM,
       ) ?? []
     );
-  }, [displayedVenues, publishedSearch.data, remoteReady, savedOnly, favoriteSlugs]);
+  }, [displayedVenues, publishedSearch.data, remoteReady, savedOnly, favoriteSlugs, filters.lng, filters.lat, filters.radiusM]);
   const selected = seenVenues.find((item) => item.slug === params.get('venue'));
   const selectedId = selected?.id ?? null;
   useEffect(() => {
@@ -452,7 +456,7 @@ export function MapExplorer() {
         <FilterSelect
           label="Bán kính"
           value={String(filters.radiusM)}
-          onChange={(radiusM) => update({ radiusM })}
+          onChange={(radiusM) => update({ radiusM, venue: null })}
           options={[
             { value: '1000', label: '1 km' },
             { value: '3000', label: '3 km' },
@@ -692,6 +696,7 @@ export function MapExplorer() {
           )}
         </section>
         <div className="map-pane">
+          <span className="map-radius-badge">Trong {filters.radiusM / 1000} km từ tâm bản đồ</span>
           <VenueMap
             lat={filters.lat}
             lng={filters.lng}
