@@ -100,7 +100,7 @@ Admin được người vận hành tạo riêng bằng `npm run admin:create` v
 2. Đọc tên, địa chỉ, loại quán, người đề xuất, mô tả và tọa độ. Bấm **Kiểm tra vị trí** để đối chiếu trên Google Maps.
 3. Chọn **Duyệt** hoặc **Từ chối** rồi **Xác nhận**. Sau khi duyệt, quán xuất hiện trên bản đồ; người đề xuất xem trạng thái trong `/proposals`.
 
-Tab **Premium demo** cấp hoặc thu hồi quyền Premium user bằng email, hiệu lực 1–30 ngày. Tab **Voucher** tạo ưu đãi mẫu cho slug quán, đặt số lượt/hạn dùng và tắt ưu đãi. Trang admin có nút **Về bản đồ**. Hàng chờ báo cáo review hiện chưa có trên giao diện admin; người vận hành xử lý qua API nội bộ.
+Tab **Premium demo** liệt kê người dùng, cho tìm theo tên/email, chuyển trang, cấp gói 1–30 ngày hoặc thu hồi ngay trên từng dòng. Tài khoản Premium thấy nút **Premium của tôi** trên header bản đồ sau khi tải lại. Tab **Voucher** tạo ưu đãi mẫu cho slug quán, đặt số lượt/hạn dùng và tắt ưu đãi. Trang admin có nút **Về bản đồ**. Hàng chờ báo cáo review hiện chưa có trên giao diện admin; người vận hành xử lý qua API nội bộ.
 
 ## 6. Kịch bản demo nhanh với 3 vai trò
 

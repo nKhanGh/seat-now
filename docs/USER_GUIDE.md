@@ -244,7 +244,7 @@ Tài khoản admin được tạo riêng bằng lệnh ở mục 15. Sau khi đ�
 
 ### Tab Premium demo và Voucher
 
-1. Mở **Premium demo**, nhập email người dùng đã đăng ký và thời hạn 1–30 ngày, rồi bấm **Cấp Premium**. Người dùng tải lại trang để nhận quyền. Bấm **Thu hồi**, đọc bước xác nhận rồi thu hồi nếu cần. Đây là gói thử nghiệm, không thu tiền.
+1. Mở **Premium demo** để xem danh sách tài khoản người dùng (20 người mỗi trang). Có thể tìm theo tên/email và chuyển trang. Chọn thời hạn 1–30 ngày rồi bấm **Cấp Premium** trên dòng tài khoản Free. Với tài khoản Premium, bấm **Thu hồi** rồi xác nhận. Danh sách cập nhật trạng thái sau thao tác; người dùng tải lại bản đồ để thấy quyền mới. Đây là gói thử nghiệm, không thu tiền.
 2. Mở **Voucher**, nhập slug quán đã có, tên ưu đãi, nội dung giảm giá, số lượt và số ngày hiệu lực; bấm **Tạo voucher**. Danh sách phía dưới cho phép tắt voucher. Nên dùng quán có tài khoản chủ quán đã được duyệt để thử xác nhận mã.
 
 Nút **Về bản đồ** ở đầu trang đưa về trang chính. Trang admin hiện chưa có hàng chờ báo cáo review; phần đó xử lý qua API nội bộ theo [runbook](runbooks/local-demo.md).
@@ -252,6 +252,7 @@ Nút **Về bản đồ** ở đầu trang đưa về trang chính. Trang admin 
 ## 12. Gói người dùng và quyền Premium demo
 
 Chọn **Gói người dùng** hoặc mở `/plans`. Trang so sánh Free và Premium, và khi đã đăng nhập hiện **Gói hiện tại**.
+Khi tài khoản đang có Premium, header bản đồ hiện nút vàng **Premium của tôi** dẫn tới trang gói hiện tại và các lối vào tính năng Premium.
 
 - **Free đang dùng được:** bản đồ/lọc, tình trạng chỗ ngồi, bãi xe, check-in, review, lưu quán và gửi yêu cầu đặt bàn ở quán hỗ trợ.
 - **Premium demo đang dùng được:** ưu tiên yêu cầu đặt bàn, bản đồ ẩn nội dung tài trợ, gợi ý theo sở thích, voucher có mã dùng một lần và yêu cầu giữ xe tại bãi của quán có dữ liệu chỗ trống mới.
