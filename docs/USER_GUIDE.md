@@ -39,6 +39,8 @@ Header có **Gói người dùng**, **Dành cho bạn**, **Voucher**, **Chỗ xe
 
 Nhập tên hoặc địa chỉ vào ô tìm kiếm; có thể gõ tiếng Việt không dấu. Các bộ lọc gồm loại địa điểm, loại món, **bán kính 1/3/5/10 km**, mức giá, điểm đánh giá, độ đông, **Còn bàn**, sắp xếp và **Chỉ quán đã lưu**.
 
+Mức giá 1–4 là nhóm giá tương đối (từ bình dân đến rất cao), không phải giá của một món cụ thể.
+
 **Bán kính tính từ tâm bản đồ đang xem, không mặc định tính từ vị trí GPS của bạn.** Ghim và danh sách đều dùng phạm vi này; nhãn trên bản đồ cho biết bán kính hiện tại. Đổi bán kính hoặc kéo bản đồ sẽ cập nhật địa điểm phù hợp. Nếu muốn lọc quanh nơi bạn đứng, bấm **Vị trí của tôi** trước. **Xóa bộ lọc** bỏ các điều kiện nhưng giữ khu vực đang xem.
 
 **Còn bàn** chỉ nhận quán có snapshot còn hiệu lực, đang nhận khách và còn bàn hoặc ghế. Nếu kết quả trống, tăng bán kính, bỏ bớt điều kiện hoặc thử khu vực khác. Dữ liệu chỗ ngồi demo không phải dữ liệu trực tiếp từ quán.
